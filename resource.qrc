@@ -1,0 +1,10 @@
+<RCC>
+    <qresource>
+    <file>img/folder.png</file>
+    <file>img/save.png</file>
+    <file>img/add.png</file>
+    <file>img/close.png</file>
+    <file>img/info.png</file>
+    <file>img/exit.png</file>
+    </qresource>
+</RCC>
