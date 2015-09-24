@@ -24,6 +24,10 @@
   <property name="windowTitle">
    <string>L5MapEditor</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resource.qrc">
+    <normaloff>:/img/map.png</normaloff>:/img/map.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0" rowspan="3">

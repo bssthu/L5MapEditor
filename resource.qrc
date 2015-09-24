@@ -6,5 +6,6 @@
     <file>img/close.png</file>
     <file>img/info.png</file>
     <file>img/exit.png</file>
+    <file>img/map.png</file>
     </qresource>
 </RCC>
