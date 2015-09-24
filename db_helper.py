@@ -1,4 +1,4 @@
-#! D:/Python33/ python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Module        : db_helper.py
 # Author        : bssthu
@@ -11,16 +11,16 @@
 import sqlite3
 
 
-class dbHelper():
+class DbHelper():
     def getTables(filepath):
         conn = sqlite3.connect(filepath)
         cur = conn.cursor()
-        polygon = cur.execute('SELECT * FROM POLYGON').fetchall()
+        polygons = cur.execute('SELECT * FROM POLYGON').fetchall()
         l0 = cur.execute('SELECT * FROM L0').fetchall()
         l1 = cur.execute('SELECT * FROM L1').fetchall()
         l2 = cur.execute('SELECT * FROM L2').fetchall()
         l3 = cur.execute('SELECT * FROM L3').fetchall()
         l4 = cur.execute('SELECT * FROM L4').fetchall()
         conn.close()
-        return (polygon, l0, l1, l2, l3, l4)
+        return (polygons, l0, l1, l2, l3, l4)
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>709</width>
-    <height>458</height>
+    <width>1020</width>
+    <height>683</height>
    </rect>
   </property>
   <property name="font">
@@ -40,7 +40,7 @@
      <widget class="QGraphicsView" name="graphicsView">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>3</horstretch>
+        <horstretch>4</horstretch>
         <verstretch>3</verstretch>
        </sizepolicy>
       </property>
@@ -89,7 +89,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>709</width>
+     <width>1020</width>
      <height>23</height>
     </rect>
    </property>

@@ -1,4 +1,4 @@
-#! D:/Python33/ python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Module        : mainWindow.py
 # Author        : bssthu
@@ -12,19 +12,27 @@ import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtWidgets import QGraphicsScene
+from PyQt5.QtWidgets import QGraphicsScene, QTableWidgetItem
 from PyQt5.QtWidgets import QFileDialog, QInputDialog
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from ui_Form import Ui_MainWindow
-from db_helper import dbHelper
+from db_helper import DbHelper
+from map_data import MapData
 
 
 class MainWindow(QMainWindow):
     def __init__(self, parent = None):
         QMainWindow.__init__(self)
+        # ui
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.graphicsView.setScene(QGraphicsScene())
+        self.ui.tableWidget.setColumnCount(2)
+        self.ui.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.ui.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        # data
+        self.mapData = MapData()
+        self.mapData.updatePolygonList.connect(self.updatePolygonList);
         self.open('default.sqlite')   # open default database
 
 # slots
@@ -68,10 +76,22 @@ class MainWindow(QMainWindow):
         self.ui.toolBar.setEnabled(True)
         self.ui.graphicsView.scene().update()
 
+    @pyqtSlot(list)
+    def updatePolygonList(self, polygons):
+        self.ui.tableWidget.clear()
+        self.ui.tableWidget.setHorizontalHeaderLabels(('id', 'type'))
+        for rowPos in range(0, len(polygons)):
+            self.ui.tableWidget.insertRow(rowPos)
+            self.ui.tableWidget.setItem(rowPos, 0, QTableWidgetItem(str(polygons[rowPos][0]))) # id
+            TYPE_NAME = ('L0', 'L1', 'L2', 'L3', 'L4')
+            self.ui.tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAME[polygons[rowPos][1]])) # type
+        self.ui.tableWidget.resizeColumnsToContents()
+
     def open(self, path):
         if os.path.exists(path):
             try:
-                (polygon, l0, l1, l2, l3, l4) = dbHelper.getTables(path)
+                (polygons, l0, l1, l2, l3, l4) = DbHelper.getTables(path)
+                self.mapData.set(polygons, l0, l1, l2, l3, l4)
             except Exception as e:
                 self.showMessage(str(e))
         else:
