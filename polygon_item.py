@@ -14,6 +14,8 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtCore import QRectF, QPointF, QPoint
 
 
+MAR = 50
+
 class PolygonItem(QGraphicsWidget):
     def __init__(self, type, verticesString):
         QGraphicsWidget.__init__(self)
@@ -28,7 +30,11 @@ class PolygonItem(QGraphicsWidget):
                 self.vertices.append(QPoint(vertexF[0], vertexF[1]))
                 xlist.append(vertexF[0])
                 ylist.append(vertexF[1])
-        self.rect = QRectF(min(xlist), min(ylist), max(xlist) - min(xlist), max(ylist) - min(ylist))
+        minX = min(xlist)
+        minY = min(ylist)
+        maxX = max(xlist)
+        maxY = min(ylist)
+        self.rect = QRectF(minX - MAR, minY - MAR, maxX - minX + 2 * MAR, maxY - minY + 2 * MAR)
 
     def boundingRect(self):
         return self.rect

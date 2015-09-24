@@ -9,6 +9,7 @@
 
 
 import os
+import math
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QMessageBox
@@ -38,6 +39,7 @@ class MainWindow(QMainWindow):
         self.ui.childrenTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.ui.childrenTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.childrenTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.ui.scaleSlider.valueChanged.connect(self.ScaleSliderChanged)
         # data
         self.mapData = MapData()
         self.mapData.updatePolygonList.connect(self.updatePolygonList)
@@ -98,6 +100,13 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def PolygonSelectionChanged(self):
         self.selectPolygon.emit(self.ui.polygonTableWidget.currentRow())
+
+    @pyqtSlot()
+    def ScaleSliderChanged(self):
+        scale = math.exp(self.ui.scaleSlider.value() / 10)
+        self.ui.graphicsView.resetTransform()
+        self.ui.graphicsView.scale(scale, scale)
+        self.ui.graphicsView.scene().update()
 
     def fillTableWithPolygons(self, tableWidget, polygons):
         tableWidget.clear()
