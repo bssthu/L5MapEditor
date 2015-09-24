@@ -12,6 +12,7 @@ import math
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsWidget
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtCore import QRectF, QPointF, QPoint
+from PyQt5.QtGui import QColor, QPolygon
 
 
 MAR = 50
@@ -19,6 +20,7 @@ MAR = 50
 class PolygonItem(QGraphicsWidget):
     def __init__(self, type, verticesString):
         QGraphicsWidget.__init__(self)
+        self.type = type
         self.vertices = []
         xlist = []
         ylist = []
@@ -33,18 +35,19 @@ class PolygonItem(QGraphicsWidget):
         minX = min(xlist)
         minY = min(ylist)
         maxX = max(xlist)
-        maxY = min(ylist)
+        maxY = max(ylist)
         self.rect = QRectF(minX - MAR, minY - MAR, maxX - minX + 2 * MAR, maxY - minY + 2 * MAR)
 
     def boundingRect(self):
         return self.rect
 
     def paint(self, painter, option, widget):
-        if len(self.vertices) > 0:
-            p0 = self.vertices[0]
-            pprev = p0
-            for point in self.vertices[1:]:
-                painter.drawLine(pprev, point)
-                pprev = point
-            painter.drawLine(pprev, p0)
+        if len(self.vertices) > 1:
+            painter.setPen(PolygonItem.COLOR[self.type])
+            painter.drawPolyline(QPolygon(self.vertices))
+            painter.drawLine(self.vertices[-1], self.vertices[0])
+
+
+PolygonItem.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(255, 127, 0),
+        QColor(0, 200, 0), QColor(0, 150, 250))
 
