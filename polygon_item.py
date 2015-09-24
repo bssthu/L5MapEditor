@@ -12,7 +12,7 @@ import math
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsWidget
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtCore import QRectF, QPointF, QPoint
-from PyQt5.QtGui import QColor, QPolygon
+from PyQt5.QtGui import QColor, QPolygon, QPen
 
 
 MAR = 50
@@ -43,11 +43,16 @@ class PolygonItem(QGraphicsWidget):
 
     def paint(self, painter, option, widget):
         if len(self.vertices) > 1:
-            painter.setPen(PolygonItem.COLOR[self.type])
+            pen = QPen(PolygonItem.COLOR[self.type])
+            pen.setWidth(0)
+            painter.setPen(pen)
             painter.drawPolyline(QPolygon(self.vertices))
-            painter.drawLine(self.vertices[-1], self.vertices[0])
+            if PolygonItem.closePolygon:
+                painter.drawLine(self.vertices[-1], self.vertices[0])
 
 
 PolygonItem.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(255, 127, 0),
         QColor(0, 200, 0), QColor(0, 150, 250))
+
+PolygonItem.closePolygon = True
 

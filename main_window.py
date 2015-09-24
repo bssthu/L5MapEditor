@@ -15,7 +15,8 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QGraphicsScene, QTableWidgetItem
 from PyQt5.QtWidgets import QFileDialog, QInputDialog
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5.QtGui import QCursor
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
 from ui_Form import Ui_MainWindow
 from db_helper import DbHelper
 from map_data import MapData
@@ -40,6 +41,8 @@ class MainWindow(QMainWindow):
         self.ui.childrenTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.childrenTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.ui.scaleSlider.valueChanged.connect(self.ScaleSliderChanged)
+        self.ui.closePolygonCheckBox.stateChanged.connect(self.ClosePolygonStateChanged)
+        self.ui.insertTypeComboBox.addItems(('L0', 'L1', 'L2', 'L3', 'L4'))
         # data
         self.mapData = MapData()
         self.mapData.updatePolygonList.connect(self.updatePolygonList)
@@ -64,7 +67,10 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_insertAction_triggered(self):
-        pass
+        if self.ui.insertAction.isChecked():
+            self.ui.graphicsView.setCursor(QCursor(Qt.CrossCursor))
+        else:
+            self.ui.graphicsView.setCursor(QCursor(Qt.ArrowCursor))
 
     @pyqtSlot()
     def on_deleteAction_triggered(self):
@@ -92,6 +98,8 @@ class MainWindow(QMainWindow):
     def updatePolygonList(self, polygons):
         self.fillTableWithPolygons(self.ui.polygonTableWidget, polygons)
         self.drawPolygons(polygons)
+        if len(polygons) > 0:
+            self.ui.polygonTableWidget.setCurrentCell(0, 0)
 
     @pyqtSlot(list)
     def updateChildrenList(self, polygons):
@@ -106,7 +114,11 @@ class MainWindow(QMainWindow):
         scale = math.exp(self.ui.scaleSlider.value() / 10)
         self.ui.graphicsView.resetTransform()
         self.ui.graphicsView.scale(scale, scale)
-        self.ui.graphicsView.scene().update()
+
+    @pyqtSlot(int)
+    def ClosePolygonStateChanged(self, state):
+        PolygonItem.closePolygon = self.ui.closePolygonCheckBox.isChecked()
+        self.ui.graphicsView.scene().invalidate()
 
     def fillTableWithPolygons(self, tableWidget, polygons):
         tableWidget.clear()
