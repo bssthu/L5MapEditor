@@ -9,7 +9,7 @@
 
 
 from PyQt5.QtCore import QObject
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 
 
 class MapData(QObject):
@@ -26,3 +26,8 @@ class MapData(QObject):
         self.l3 = l3
         self.l4 = l4
         self.updatePolygonList.emit(self.polygons)
+
+    @pyqtSlot(int)
+    def selectPolygon(self, id):
+        print(id)
+

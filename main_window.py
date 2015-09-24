@@ -21,6 +21,8 @@ from map_data import MapData
 
 
 class MainWindow(QMainWindow):
+    selectPolygon = pyqtSignal(int)
+
     def __init__(self, parent = None):
         QMainWindow.__init__(self)
         # ui
@@ -30,9 +32,12 @@ class MainWindow(QMainWindow):
         self.ui.tableWidget.setColumnCount(2)
         self.ui.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.ui.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.ui.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.ui.tableWidget.itemSelectionChanged.connect(self.PolygonSelectionChanged)
         # data
         self.mapData = MapData()
-        self.mapData.updatePolygonList.connect(self.updatePolygonList);
+        self.mapData.updatePolygonList.connect(self.updatePolygonList)
+        self.selectPolygon.connect(self.mapData.selectPolygon)
         self.open('default.sqlite')   # open default database
 
 # slots
@@ -86,6 +91,10 @@ class MainWindow(QMainWindow):
             TYPE_NAME = ('L0', 'L1', 'L2', 'L3', 'L4')
             self.ui.tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAME[polygons[rowPos][1]])) # type
         self.ui.tableWidget.resizeColumnsToContents()
+
+    @pyqtSlot()
+    def PolygonSelectionChanged(self):
+        self.selectPolygon.emit(self.ui.tableWidget.currentRow())
 
     def open(self, path):
         if os.path.exists(path):
