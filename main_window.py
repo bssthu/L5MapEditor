@@ -29,14 +29,18 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.graphicsView.setScene(QGraphicsScene())
-        self.ui.tableWidget.setColumnCount(2)
-        self.ui.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.ui.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.ui.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.tableWidget.itemSelectionChanged.connect(self.PolygonSelectionChanged)
+        self.ui.polygonTableWidget.setColumnCount(2)
+        self.ui.polygonTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.ui.polygonTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.ui.polygonTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.ui.polygonTableWidget.itemSelectionChanged.connect(self.PolygonSelectionChanged)
+        self.ui.childrenTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.ui.childrenTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.ui.childrenTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         # data
         self.mapData = MapData()
         self.mapData.updatePolygonList.connect(self.updatePolygonList)
+        self.mapData.updateChildrenList.connect(self.updateChildrenList)
         self.selectPolygon.connect(self.mapData.selectPolygon)
         self.open('default.sqlite')   # open default database
 
@@ -83,18 +87,28 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(list)
     def updatePolygonList(self, polygons):
-        self.ui.tableWidget.clear()
-        self.ui.tableWidget.setHorizontalHeaderLabels(('id', 'type'))
-        for rowPos in range(0, len(polygons)):
-            self.ui.tableWidget.insertRow(rowPos)
-            self.ui.tableWidget.setItem(rowPos, 0, QTableWidgetItem(str(polygons[rowPos][0]))) # id
-            TYPE_NAME = ('L0', 'L1', 'L2', 'L3', 'L4')
-            self.ui.tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAME[polygons[rowPos][1]])) # type
-        self.ui.tableWidget.resizeColumnsToContents()
+        self.fillTableWithPolygons(self.ui.polygonTableWidget, polygons)
+
+    @pyqtSlot(list)
+    def updateChildrenList(self, polygons):
+        self.fillTableWithPolygons(self.ui.childrenTableWidget, polygons)
 
     @pyqtSlot()
     def PolygonSelectionChanged(self):
-        self.selectPolygon.emit(self.ui.tableWidget.currentRow())
+        self.selectPolygon.emit(self.ui.polygonTableWidget.currentRow())
+
+    def fillTableWithPolygons(self, tableWidget, polygons):
+        tableWidget.clear()
+        tableWidget.setRowCount(0)
+        tableWidget.setColumnCount(2)
+        tableWidget.setHorizontalHeaderLabels(('id', 'type'))
+        if len(polygons) > 0:
+            for rowPos in range(0, len(polygons)):
+                tableWidget.insertRow(rowPos)
+                tableWidget.setItem(rowPos, 0, QTableWidgetItem(str(polygons[rowPos][0]))) # id
+                TYPE_NAME = ('L0', 'L1', 'L2', 'L3', 'L4')
+                tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAME[polygons[rowPos][1]])) # type
+        tableWidget.resizeColumnsToContents()
 
     def open(self, path):
         if os.path.exists(path):
