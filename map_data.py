@@ -51,5 +51,4 @@ class MapData(QObject):
             for child_id in self.childrenDict[polygon_id]:
                 children.append(self.polygonsDict[child_id])
         self.updateChildrenList.emit(children)
-                
 

@@ -18,6 +18,7 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from ui_Form import Ui_MainWindow
 from db_helper import DbHelper
 from map_data import MapData
+from polygon_item import PolygonItem
 
 
 class MainWindow(QMainWindow):
@@ -88,6 +89,7 @@ class MainWindow(QMainWindow):
     @pyqtSlot(list)
     def updatePolygonList(self, polygons):
         self.fillTableWithPolygons(self.ui.polygonTableWidget, polygons)
+        self.drawPolygons(polygons)
 
     @pyqtSlot(list)
     def updateChildrenList(self, polygons):
@@ -109,6 +111,11 @@ class MainWindow(QMainWindow):
                 TYPE_NAME = ('L0', 'L1', 'L2', 'L3', 'L4')
                 tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAME[polygons[rowPos][1]])) # type
         tableWidget.resizeColumnsToContents()
+
+    def drawPolygons(self, polygons):
+        self.ui.graphicsView.scene().clear()
+        for polygon in polygons:
+            self.ui.graphicsView.scene().addItem(PolygonItem(polygon[1], polygon[3]))
 
     def open(self, path):
         if os.path.exists(path):
