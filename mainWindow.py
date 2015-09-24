@@ -8,6 +8,7 @@
 #
 
 
+import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QMessageBox
@@ -15,6 +16,7 @@ from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtWidgets import QFileDialog, QInputDialog
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from ui_Form import Ui_MainWindow
+from db_helper import dbHelper
 
 
 class MainWindow(QMainWindow):
@@ -23,6 +25,7 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.graphicsView.setScene(QGraphicsScene())
+        self.open('default.sqlite')   # open default database
 
 # slots
     @pyqtSlot()
@@ -30,14 +33,14 @@ class MainWindow(QMainWindow):
         path = QFileDialog.getOpenFileName(self, '载入数据', '.',
                 '数据库文档(*.sqlite)')[0];
         if path:
-            print(path)
+            self.open(path)
 
     @pyqtSlot()
     def on_saveAction_triggered(self):
         path = QFileDialog.getSaveFileName(self, '保存数据', '.',
                 '数据库文档(*.sqlite)')[0];
         if path:
-            self.skiplist.save(path)
+            pass
 
     @pyqtSlot()
     def on_insertAction_triggered(self):
@@ -64,6 +67,18 @@ class MainWindow(QMainWindow):
     def unlockUI(self):
         self.ui.toolBar.setEnabled(True)
         self.ui.graphicsView.scene().update()
+
+    def open(self, path):
+        if os.path.exists(path):
+            try:
+                (polygon, l0, l1, l2, l3, l4) = dbHelper.getTables(path)
+            except Exception as e:
+                self.showMessage(str(e))
+        else:
+            self.showMessage('File %s not exists.' % path)
+
+    def showMessage(self, msg, title='L5MapEditor'):
+        QMessageBox.information(self, title, msg);
 
 
 if __name__ == '__main__':

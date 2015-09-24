@@ -6,3 +6,6 @@ __pycache__/
 
 resource_rc.py
 ui_Form.py
+
+*.db
+*.sqlite
