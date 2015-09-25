@@ -10,7 +10,8 @@
 
 import os
 import math
-from PyQt5 import QtCore, QtGui, QtWidgets
+import sqlite3
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QGraphicsScene, QTableWidgetItem
@@ -20,13 +21,12 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
 from ui_Form import Ui_MainWindow
 from db_helper import DbHelper
 from map_data import MapData
-from polygon_item import PolygonItem
 
 
 class MainWindow(QMainWindow):
     selectPolygon = pyqtSignal(int)
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         QMainWindow.__init__(self)
         # ui
         self.ui = Ui_MainWindow()
@@ -36,12 +36,12 @@ class MainWindow(QMainWindow):
         self.ui.polygonTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.ui.polygonTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.polygonTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.polygonTableWidget.itemSelectionChanged.connect(self.PolygonSelectionChanged)
+        self.ui.polygonTableWidget.itemSelectionChanged.connect(self.polygonSelectionChanged)
         self.ui.childrenTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.ui.childrenTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.childrenTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.scaleSlider.valueChanged.connect(self.ScaleSliderChanged)
-        self.ui.closePolygonCheckBox.stateChanged.connect(self.ClosePolygonStateChanged)
+        self.ui.scaleSlider.valueChanged.connect(self.scaleSliderChanged)
+        self.ui.closePolygonCheckBox.stateChanged.connect(self.closePolygonStateChanged)
         self.ui.insertTypeComboBox.addItems(('L0', 'L1', 'L2', 'L3', 'L4'))
         # data
         self.mapData = MapData()
@@ -53,15 +53,13 @@ class MainWindow(QMainWindow):
 # slots
     @pyqtSlot()
     def on_openAction_triggered(self):
-        path = QFileDialog.getOpenFileName(self, '载入数据', '.',
-                '数据库文档(*.sqlite)')[0];
+        path = QFileDialog.getOpenFileName(self, '载入数据', '.', '数据库文档(*.sqlite)')[0]
         if path:
             self.open(path)
 
     @pyqtSlot()
     def on_saveAction_triggered(self):
-        path = QFileDialog.getSaveFileName(self, '保存数据', '.',
-                '数据库文档(*.sqlite)')[0];
+        path = QFileDialog.getSaveFileName(self, '保存数据', '.', '数据库文档(*.sqlite)')[0]
         if path:
             pass
 
@@ -106,17 +104,17 @@ class MainWindow(QMainWindow):
         self.fillTableWithPolygons(self.ui.childrenTableWidget, polygons)
 
     @pyqtSlot()
-    def PolygonSelectionChanged(self):
+    def polygonSelectionChanged(self):
         self.selectPolygon.emit(self.ui.polygonTableWidget.currentRow())
 
     @pyqtSlot()
-    def ScaleSliderChanged(self):
+    def scaleSliderChanged(self):
         scale = math.exp(self.ui.scaleSlider.value() / 10)
         self.ui.graphicsView.resetTransform()
         self.ui.graphicsView.scale(scale, scale)
 
     @pyqtSlot(int)
-    def ClosePolygonStateChanged(self, state):
+    def closePolygonStateChanged(self, state):
         self.ui.graphicsView.drawClosePolygon(self.ui.closePolygonCheckBox.isChecked())
 
     def fillTableWithPolygons(self, tableWidget, polygons):
@@ -129,7 +127,8 @@ class MainWindow(QMainWindow):
                 tableWidget.insertRow(rowPos)
                 tableWidget.setItem(rowPos, 0, QTableWidgetItem(str(polygons[rowPos][0]))) # id
                 TYPE_NAME = ('L0', 'L1', 'L2', 'L3', 'L4')
-                tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAME[polygons[rowPos][1]])) # type
+                type_id = polygons[rowPos][1]
+                tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAME[type_id])) # type
         tableWidget.resizeColumnsToContents()
 
     def open(self, path):
@@ -137,8 +136,8 @@ class MainWindow(QMainWindow):
             try:
                 (polygons, l0, l1, l2, l3, l4) = DbHelper.getTables(path)
                 self.mapData.set(polygons, l0, l1, l2, l3, l4)
-            except Exception as e:
-                self.showMessage(str(e))
+            except sqlite3.Error as error:
+                self.showMessage(str(error))
         else:
             self.showMessage('File %s not exists.' % path)
 

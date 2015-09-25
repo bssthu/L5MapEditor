@@ -9,9 +9,8 @@
 
 
 import math
-from PyQt5.QtWidgets import QGraphicsItem, QGraphicsWidget
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from PyQt5.QtCore import QRectF, QPointF, QPoint
+from PyQt5.QtWidgets import QGraphicsWidget
+from PyQt5.QtCore import QRectF, QPoint
 from PyQt5.QtGui import QColor, QPolygon, QPen
 
 
