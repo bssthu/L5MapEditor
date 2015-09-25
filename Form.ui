@@ -30,16 +30,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0" rowspan="9">
-     <widget class="QTableWidget" name="polygonTableWidget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>1</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="4" rowspan="8">
      <widget class="QSlider" name="scaleSlider">
       <property name="minimum">
@@ -50,21 +40,6 @@
       </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="3" rowspan="8">
-     <widget class="QGraphicsView" name="graphicsView">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>4</horstretch>
-        <verstretch>3</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <family>Microsoft YaHei UI</family>
-       </font>
       </property>
      </widget>
     </item>
@@ -99,7 +74,7 @@
       <item>
        <widget class="QCheckBox" name="closePolygonCheckBox">
         <property name="text">
-         <string>封闭多边形</string>
+         <string>绘制封闭多边形</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -117,6 +92,50 @@
        <widget class="QComboBox" name="insertTypeComboBox"/>
       </item>
      </layout>
+    </item>
+    <item row="1" column="3" rowspan="8">
+     <widget class="QMapGraphicsView" name="graphicsView">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>4</horstretch>
+        <verstretch>3</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <family>Microsoft YaHei UI</family>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" rowspan="9">
+     <widget class="QTableWidget" name="polygonTableWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="4">
+     <widget class="QLabel" name="label">
+      <property name="maximumSize">
+       <size>
+        <width>22</width>
+        <height>22</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="resource.qrc">:/img/zoom.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -242,6 +261,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QMapGraphicsView</class>
+   <extends>QGraphicsView</extends>
+   <header>qmapgraphicsview.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resource.qrc"/>
  </resources>

@@ -7,5 +7,6 @@
     <file>img/info.png</file>
     <file>img/exit.png</file>
     <file>img/map.png</file>
+    <file>img/zoom.png</file>
     </qresource>
 </RCC>

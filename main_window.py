@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
     @pyqtSlot(list)
     def updatePolygonList(self, polygons):
         self.fillTableWithPolygons(self.ui.polygonTableWidget, polygons)
-        self.drawPolygons(polygons)
+        self.ui.graphicsView.setPolygons(polygons)
         if len(polygons) > 0:
             self.ui.polygonTableWidget.setCurrentCell(0, 0)
 
@@ -117,8 +117,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(int)
     def ClosePolygonStateChanged(self, state):
-        PolygonItem.closePolygon = self.ui.closePolygonCheckBox.isChecked()
-        self.ui.graphicsView.scene().invalidate()
+        self.ui.graphicsView.drawClosePolygon(self.ui.closePolygonCheckBox.isChecked())
 
     def fillTableWithPolygons(self, tableWidget, polygons):
         tableWidget.clear()
@@ -132,11 +131,6 @@ class MainWindow(QMainWindow):
                 TYPE_NAME = ('L0', 'L1', 'L2', 'L3', 'L4')
                 tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAME[polygons[rowPos][1]])) # type
         tableWidget.resizeColumnsToContents()
-
-    def drawPolygons(self, polygons):
-        self.ui.graphicsView.scene().clear()
-        for polygon in polygons:
-            self.ui.graphicsView.scene().addItem(PolygonItem(polygon[1], polygon[3]))
 
     def open(self, path):
         if os.path.exists(path):
