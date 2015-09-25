@@ -16,8 +16,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QGraphicsScene, QTableWidgetItem
 from PyQt5.QtWidgets import QFileDialog, QInputDialog
-from PyQt5.QtGui import QCursor
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from ui_Form import Ui_MainWindow
 from db_helper import DbHelper
 from map_data import MapData
@@ -66,9 +65,9 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def on_insertAction_triggered(self):
         if self.ui.insertAction.isChecked():
-            self.ui.graphicsView.setCursor(QCursor(Qt.CrossCursor))
+            self.ui.graphicsView.beginInsert()
         else:
-            self.ui.graphicsView.setCursor(QCursor(Qt.ArrowCursor))
+            self.ui.graphicsView.endInsert()
 
     @pyqtSlot()
     def on_deleteAction_triggered(self):
