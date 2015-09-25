@@ -11,20 +11,22 @@
 import sqlite3
 from PyQt5.QtWidgets import QGraphicsView
 from PyQt5.QtGui import QCursor
+from PyQt5.QtCore import QPointF
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
 from polygon_item import PolygonItem
 
 
 class QMapGraphicsView(QGraphicsView):
-    leftClick = pyqtSignal()
+    leftClick = pyqtSignal(QPointF)
     rightClick = pyqtSignal()
 
     def __init__(self, centralwidget):
         QGraphicsView.__init__(self, centralwidget)
 
 # slots
-    @pyqtSlot()
-    def addPoint(self):
+    @pyqtSlot(QPointF)
+    def addPoint(self, pt):
+        self.newPolygon.addPoint(pt)
         pass
 
     @pyqtSlot()
@@ -41,19 +43,32 @@ class QMapGraphicsView(QGraphicsView):
         self.scene().invalidate()
 
     def beginInsert(self):
+        # ui
         self.setCursor(QCursor(Qt.CrossCursor))
+        # data
+        self.newPolygon = PolygonItem(0, '')
+        self.scene().addItem(self.newPolygon)
+        # signal
         self.leftClick.connect(self.addPoint)
         self.rightClick.connect(self.removePoint)
 
     def endInsert(self):
+        # ui
         self.setCursor(QCursor(Qt.ArrowCursor))
+        # data
+        self.scene().removeItem(self.newPolygon)
+        self.newPolygon = None
+        #TODO 处理新多边形
+        # signal
         self.leftClick.disconnect(self.addPoint)
         self.rightClick.disconnect(self.removePoint)
 
     def mousePressEvent(self, event):
         button = event.button()
+        pt = self.mapToScene(event.pos())
         if button == Qt.LeftButton:
-            self.leftClick.emit()
+            self.leftClick.emit(pt)
         elif button == Qt.RightButton:
             self.rightClick.emit()
+        self.scene().invalidate()
 

@@ -10,8 +10,8 @@
 
 import math
 from PyQt5.QtWidgets import QGraphicsWidget
-from PyQt5.QtCore import QRectF, QPoint
-from PyQt5.QtGui import QColor, QPolygon, QPen
+from PyQt5.QtCore import QRectF, QPointF
+from PyQt5.QtGui import QColor, QPolygonF, QPen
 
 
 MAR = 50
@@ -28,14 +28,17 @@ class PolygonItem(QGraphicsWidget):
             if vertexString != '':
                 vertex = vertexString.split(',')
                 vertexF = [ float(vertex[0]), float(vertex[1]) ]
-                self.vertices.append(QPoint(vertexF[0], vertexF[1]))
+                self.vertices.append(QPointF(vertexF[0], vertexF[1]))
                 xlist.append(vertexF[0])
                 ylist.append(vertexF[1])
-        minX = min(xlist)
-        minY = min(ylist)
-        maxX = max(xlist)
-        maxY = max(ylist)
-        self.rect = QRectF(minX - MAR, minY - MAR, maxX - minX + 2 * MAR, maxY - minY + 2 * MAR)
+        if len(self.vertices) > 0:
+            self.topLeft = QPointF(min(xlist), min(ylist))
+            self.bottomRight = QPointF(max(xlist), max(ylist))
+            self.rect = QRectF(self.topLeft, self.bottomRight).adjusted(-MAR, -MAR, MAR, MAR)
+        else:
+            self.topLeft = QPointF(float('Inf'), float('Inf'))
+            self.bottomRight = QPointF(-float('Inf'), -float('Inf'))
+            self.rect = QRectF()
 
     def boundingRect(self):
         return self.rect
@@ -45,9 +48,15 @@ class PolygonItem(QGraphicsWidget):
             pen = QPen(PolygonItem.COLOR[self.type])
             pen.setWidth(0)
             painter.setPen(pen)
-            painter.drawPolyline(QPolygon(self.vertices))
+            painter.drawPolyline(QPolygonF(self.vertices))
             if PolygonItem.closePolygon:
                 painter.drawLine(self.vertices[-1], self.vertices[0])
+
+    def addPoint(self, pt):
+        self.vertices.append(QPointF(pt))
+        self.topLeft = QPointF(min(self.topLeft.x(), pt.x()), min(self.topLeft.y(), pt.y()))
+        self.bottomRight = QPointF(max(self.bottomRight.x(), pt.x()), max(self.bottomRight.y(), pt.y()))
+        self.rect = QRectF(self.topLeft, self.bottomRight).adjusted(-MAR, -MAR, MAR, MAR)
 
 
 PolygonItem.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(255, 127, 0),
