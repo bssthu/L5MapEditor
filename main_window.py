@@ -48,8 +48,7 @@ class MainWindow(QMainWindow):
         self.selectPolygon.connect(self.mapData.selectPolygon)
         self.ui.scaleSlider.valueChanged.connect(self.scaleSliderChanged)
         self.ui.closePolygonCheckBox.stateChanged.connect(self.closePolygonStateChanged)
-        self.ui.insertTypeComboBox.currentIndexChanged.connect(self.ui.graphicsView.setNewLevel)
-        self.ui.graphicsView.polygonCreated.connect(self.mapData.addPolygon)
+        self.ui.graphicsView.polygonCreated.connect(self.addPolygon)
         # open default database
         self.open('default.sqlite')
 
@@ -119,6 +118,13 @@ class MainWindow(QMainWindow):
     @pyqtSlot(int)
     def closePolygonStateChanged(self, state):
         self.ui.graphicsView.drawClosePolygon(self.ui.closePolygonCheckBox.isChecked())
+
+    @pyqtSlot(int, str)
+    def addPolygon(self, verticesNum, vertices):
+        item = self.ui.polygonTableWidget.item(self.ui.polygonTableWidget.currentRow(), 0)
+        id = int(item.text())
+        type = self.ui.insertTypeComboBox.currentIndex()
+        self.mapData.addPolygon(id, type, verticesNum, vertices)
 
     def fillTableWithPolygons(self, tableWidget, polygons):
         tableWidget.clear()

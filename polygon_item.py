@@ -69,7 +69,7 @@ class PolygonItem(QGraphicsWidget):
         return (verticesNum, verticesString)
 
 
-PolygonItem.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(255, 127, 0),
+PolygonItem.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(192, 127, 0),
         QColor(0, 200, 0), QColor(0, 150, 250))
 
 PolygonItem.closePolygon = True

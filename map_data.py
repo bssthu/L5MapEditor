@@ -30,7 +30,8 @@ class MapData(QObject):
         # polygon 索引
         self.polygonsDict = {}
         for polygon in self.polygons:
-            self.polygonsDict[polygon[0]] = polygon
+            id = polygon[0]
+            self.polygonsDict[id] = polygon
         # 把 child 单独整理出来
         self.childrenDict = {}
         for level in self.levels[1:]:
@@ -52,7 +53,12 @@ class MapData(QObject):
                 children.append(self.polygonsDict[child_id])
         self.updateChildrenList.emit(children)
 
-    @pyqtSlot(int, int, str)
-    def addPolygon(self, level, verticesNum, vertices):
-        pass
+    def addPolygon(self, id, type, verticesNum, vertices):
+        while id in self.polygonsDict:
+            id += 1
+        polygon = (id, type, verticesNum, vertices)
+        self.polygons.append(polygon)
+        self.polygonsDict[id] = polygon
+        # notify
+        self.updatePolygonList.emit(self.polygons)
 
