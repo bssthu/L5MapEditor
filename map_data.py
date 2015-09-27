@@ -52,3 +52,7 @@ class MapData(QObject):
                 children.append(self.polygonsDict[child_id])
         self.updateChildrenList.emit(children)
 
+    @pyqtSlot(int, int, str)
+    def addPolygon(self, level, verticesNum, vertices):
+        pass
+

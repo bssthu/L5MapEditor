@@ -19,9 +19,11 @@ from polygon_item import PolygonItem
 class QMapGraphicsView(QGraphicsView):
     leftClick = pyqtSignal(QPointF)
     rightClick = pyqtSignal()
+    polygonCreated = pyqtSignal(int, int, str)
 
     def __init__(self, centralwidget):
         QGraphicsView.__init__(self, centralwidget)
+        self.newLevel = 0
 
 # slots
     @pyqtSlot(QPointF)
@@ -32,6 +34,10 @@ class QMapGraphicsView(QGraphicsView):
     @pyqtSlot()
     def removePoint(self):
         pass
+
+    @pyqtSlot(int)
+    def setNewLevel(self, level):
+        self.newLevel = level
 
     def setPolygons(self, polygons):
         self.scene().clear()
@@ -46,7 +52,7 @@ class QMapGraphicsView(QGraphicsView):
         # ui
         self.setCursor(QCursor(Qt.CrossCursor))
         # data
-        self.newPolygon = PolygonItem(0, '')
+        self.newPolygon = PolygonItem(-1, '')
         self.scene().addItem(self.newPolygon)
         # signal
         self.leftClick.connect(self.addPoint)
@@ -55,10 +61,12 @@ class QMapGraphicsView(QGraphicsView):
     def endInsert(self):
         # ui
         self.setCursor(QCursor(Qt.ArrowCursor))
+        # 处理新多边形
+        (verticesNum, verticesString) = self.newPolygon.getVertices()
+        self.polygonCreated.emit(self.newLevel, verticesNum, verticesString)
         # data
         self.scene().removeItem(self.newPolygon)
         self.newPolygon = None
-        #TODO 处理新多边形
         # signal
         self.leftClick.disconnect(self.addPoint)
         self.rightClick.disconnect(self.removePoint)

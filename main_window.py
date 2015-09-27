@@ -35,19 +35,23 @@ class MainWindow(QMainWindow):
         self.ui.polygonTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.ui.polygonTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.polygonTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.polygonTableWidget.itemSelectionChanged.connect(self.polygonSelectionChanged)
         self.ui.childrenTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.ui.childrenTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.childrenTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.scaleSlider.valueChanged.connect(self.scaleSliderChanged)
-        self.ui.closePolygonCheckBox.stateChanged.connect(self.closePolygonStateChanged)
         self.ui.insertTypeComboBox.addItems(('L0', 'L1', 'L2', 'L3', 'L4'))
         # data
         self.mapData = MapData()
         self.mapData.updatePolygonList.connect(self.updatePolygonList)
         self.mapData.updateChildrenList.connect(self.updateChildrenList)
+        # other signals/slots
+        self.ui.polygonTableWidget.itemSelectionChanged.connect(self.polygonSelectionChanged)
         self.selectPolygon.connect(self.mapData.selectPolygon)
-        self.open('default.sqlite')   # open default database
+        self.ui.scaleSlider.valueChanged.connect(self.scaleSliderChanged)
+        self.ui.closePolygonCheckBox.stateChanged.connect(self.closePolygonStateChanged)
+        self.ui.insertTypeComboBox.currentIndexChanged.connect(self.ui.graphicsView.setNewLevel)
+        self.ui.graphicsView.polygonCreated.connect(self.mapData.addPolygon)
+        # open default database
+        self.open('default.sqlite')
 
 # slots
     @pyqtSlot()
