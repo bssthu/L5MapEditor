@@ -23,14 +23,14 @@ from map_data import MapData
 
 
 class MainWindow(QMainWindow):
-    selectPolygon = pyqtSignal(int)
-
     def __init__(self, parent=None):
         QMainWindow.__init__(self)
         # ui
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.graphicsView.setScene(QGraphicsScene())
+        self.view = self.ui.graphicsView
+        self.scene = self.ui.graphicsView.scene()
         self.ui.polygonTableWidget.setColumnCount(2)
         self.ui.polygonTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.ui.polygonTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
@@ -45,7 +45,6 @@ class MainWindow(QMainWindow):
         self.mapData.updateChildrenList.connect(self.updateChildrenList)
         # other signals/slots
         self.ui.polygonTableWidget.itemSelectionChanged.connect(self.polygonSelectionChanged)
-        self.selectPolygon.connect(self.mapData.selectPolygon)
         self.ui.scaleSlider.valueChanged.connect(self.scaleSliderChanged)
         self.ui.closePolygonCheckBox.stateChanged.connect(self.closePolygonStateChanged)
         self.ui.graphicsView.polygonCreated.connect(self.addPolygon)
@@ -107,7 +106,10 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def polygonSelectionChanged(self):
-        self.selectPolygon.emit(self.ui.polygonTableWidget.currentRow())
+        row = self.ui.polygonTableWidget.currentRow()
+        id = int(self.ui.polygonTableWidget.item(row, 0).text())
+        polygon = self.mapData.selectPolygon(id)
+        self.ui.graphicsView.selectPolygon(polygon)
 
     @pyqtSlot()
     def scaleSliderChanged(self):
@@ -121,8 +123,8 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(int, str)
     def addPolygon(self, verticesNum, vertices):
-        item = self.ui.polygonTableWidget.item(self.ui.polygonTableWidget.currentRow(), 0)
-        id = int(item.text())
+        row = self.ui.polygonTableWidget.currentRow()
+        id = int(self.ui.polygonTableWidget.item(row, 0).text())
         type = self.ui.insertTypeComboBox.currentIndex()
         self.mapData.addPolygon(id, type, verticesNum, vertices)
 

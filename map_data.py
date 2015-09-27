@@ -44,14 +44,13 @@ class MapData(QObject):
         # notify
         self.updatePolygonList.emit(self.polygons)
 
-    @pyqtSlot(int)
-    def selectPolygon(self, row):
-        polygon_id = self.polygons[row][0]
+    def selectPolygon(self, polygon_id):
         children = []
         if polygon_id in self.childrenDict:
             for child_id in self.childrenDict[polygon_id]:
                 children.append(self.polygonsDict[child_id])
         self.updateChildrenList.emit(children)
+        return self.polygonsDict[polygon_id]
 
     def addPolygon(self, id, type, verticesNum, vertices):
         while id in self.polygonsDict:

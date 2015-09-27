@@ -14,6 +14,8 @@ from PyQt5.QtGui import QCursor
 from PyQt5.QtCore import QPointF
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
 from polygon_item import PolygonItem
+from polygon_new import PolygonNew
+from polygon_select import PolygonSelect
 
 
 class QMapGraphicsView(QGraphicsView):
@@ -23,12 +25,12 @@ class QMapGraphicsView(QGraphicsView):
 
     def __init__(self, centralwidget):
         QGraphicsView.__init__(self, centralwidget)
+        self.selectedPolygon = None
 
 # slots
     @pyqtSlot(QPointF)
     def addPoint(self, pt):
         self.newPolygon.addPoint(pt)
-        pass
 
     @pyqtSlot()
     def removePoint(self):
@@ -39,6 +41,14 @@ class QMapGraphicsView(QGraphicsView):
         for polygon in polygons:
             self.scene().addItem(PolygonItem(polygon[1], polygon[3]))
 
+    def selectPolygon(self, polygon):
+        if self.selectedPolygon in self.scene().items():
+            self.scene().removeItem(self.selectedPolygon)
+        polygonItem = PolygonItem(polygon[1], polygon[3])
+        self.selectedPolygon = PolygonSelect(polygonItem.getVertices(), polygonItem.boundingRect())
+        self.scene().addItem(self.selectedPolygon)
+        self.scene().invalidate()
+
     def drawClosePolygon(self, close=True):
         PolygonItem.closePolygon = close
         self.scene().invalidate()
@@ -47,7 +57,7 @@ class QMapGraphicsView(QGraphicsView):
         # ui
         self.setCursor(QCursor(Qt.CrossCursor))
         # data
-        self.newPolygon = PolygonItem(-1, '')
+        self.newPolygon = PolygonNew()
         self.scene().addItem(self.newPolygon)
         # signal
         self.leftClick.connect(self.addPoint)

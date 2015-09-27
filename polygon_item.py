@@ -45,31 +45,19 @@ class PolygonItem(QGraphicsWidget):
 
     def paint(self, painter, option, widget):
         if len(self.vertices) > 1:
-            if self.type >= 0:
-                pen = QPen(PolygonItem.COLOR[self.type])
-                closePolygon = PolygonItem.closePolygon
-            else:
-                pen = QPen(QColor(0, 0, 0))
-                closePolygon = False
+            closePolygon = PolygonItem.closePolygon
+            pen = QPen(PolygonItem.COLOR[self.type])
             pen.setWidth(0)
             painter.setPen(pen)
             painter.drawPolyline(QPolygonF(self.vertices))
             if closePolygon:
                 painter.drawLine(self.vertices[-1], self.vertices[0])
 
-    def addPoint(self, pt):
-        self.vertices.append(QPointF(pt))
-        self.topLeft = QPointF(min(self.topLeft.x(), pt.x()), min(self.topLeft.y(), pt.y()))
-        self.bottomRight = QPointF(max(self.bottomRight.x(), pt.x()), max(self.bottomRight.y(), pt.y()))
-        self.rect = QRectF(self.topLeft, self.bottomRight).adjusted(-MAR, -MAR, MAR, MAR)
-
     def getVertices(self):
-        verticesNum = len(self.vertices)
-        verticesString = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in self.vertices)
-        return (verticesNum, verticesString)
+        return self.vertices
 
 
-PolygonItem.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(192, 127, 0),
+PolygonItem.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(192, 192, 0),
         QColor(0, 200, 0), QColor(0, 150, 250))
 
 PolygonItem.closePolygon = True
