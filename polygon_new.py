@@ -40,6 +40,10 @@ class PolygonNew(QGraphicsWidget):
         self.bottomRight = QPointF(max(self.bottomRight.x(), pt.x()), max(self.bottomRight.y(), pt.y()))
         self.rect = QRectF(self.topLeft, self.bottomRight).adjusted(-MAR, -MAR, MAR, MAR)
 
+    def removePoint(self):
+        if len(self.vertices) > 0:
+            self.vertices = self.vertices[:-1]
+
     def getVertices(self):
         verticesNum = len(self.vertices)
         verticesString = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in self.vertices)

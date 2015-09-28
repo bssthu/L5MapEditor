@@ -34,7 +34,7 @@ class QMapGraphicsView(QGraphicsView):
 
     @pyqtSlot()
     def removePoint(self):
-        pass
+        self.newPolygon.removePoint()
 
     def setPolygons(self, polygons):
         self.scene().clear()
@@ -70,7 +70,8 @@ class QMapGraphicsView(QGraphicsView):
         (verticesNum, verticesString) = self.newPolygon.getVertices()
         self.scene().removeItem(self.newPolygon)
         self.newPolygon = None
-        self.polygonCreated.emit(verticesNum, verticesString)
+        if verticesNum > 0:
+            self.polygonCreated.emit(verticesNum, verticesString)
         # signal
         self.leftClick.disconnect(self.addPoint)
         self.rightClick.disconnect(self.removePoint)

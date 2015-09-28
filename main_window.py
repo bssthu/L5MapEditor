@@ -35,7 +35,6 @@ class MainWindow(QMainWindow):
         self.ui.polygonTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.ui.polygonTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.polygonTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.childrenTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.ui.childrenTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.childrenTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.ui.insertTypeComboBox.addItems(('L0', 'L1', 'L2', 'L3', 'L4'))
@@ -95,10 +94,13 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(list)
     def updatePolygonList(self, polygons):
+        row = self.ui.polygonTableWidget.currentRow()
         self.fillTableWithPolygons(self.ui.polygonTableWidget, polygons)
         self.ui.graphicsView.setPolygons(polygons)
+        if row < 0:
+            row = 0
         if len(polygons) > 0:
-            self.ui.polygonTableWidget.setCurrentCell(0, 0)
+            self.ui.polygonTableWidget.setCurrentCell(row, 0)
 
     @pyqtSlot(list)
     def updateChildrenList(self, polygons):
@@ -106,8 +108,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def polygonSelectionChanged(self):
-        row = self.ui.polygonTableWidget.currentRow()
-        id = int(self.ui.polygonTableWidget.item(row, 0).text())
+        id = self.selectedId()
         polygon = self.mapData.selectPolygon(id)
         self.ui.graphicsView.selectPolygon(polygon)
 
@@ -123,8 +124,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(int, str)
     def addPolygon(self, verticesNum, vertices):
-        row = self.ui.polygonTableWidget.currentRow()
-        id = int(self.ui.polygonTableWidget.item(row, 0).text())
+        id = self.selectedId()
         type = self.ui.insertTypeComboBox.currentIndex()
         self.mapData.addPolygon(id, type, verticesNum, vertices)
 
@@ -159,6 +159,11 @@ class MainWindow(QMainWindow):
             DbHelper.writeTables(path, polygons, levels)
         except sqlite3.Error as error:
             self.showMessage(str(error))
+
+    def selectedId(self):
+        row = self.ui.polygonTableWidget.currentRow()
+        id = int(self.ui.polygonTableWidget.item(row, 0).text())
+        return id
 
     def showMessage(self, msg, title='L5MapEditor'):
         QMessageBox.information(self, title, msg);
