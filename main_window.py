@@ -38,6 +38,7 @@ class MainWindow(QMainWindow):
         self.ui.childrenTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.childrenTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.ui.insertTypeComboBox.addItems(DbHelper.getTypeNames())
+        self.ui.graphicsView.scale(1, -1)   # invert y
         # data
         self.mapData = MapData()
         self.mapData.updatePolygonList.connect(self.updatePolygonList)
@@ -120,7 +121,7 @@ class MainWindow(QMainWindow):
     def scaleSliderChanged(self):
         scale = math.exp(self.ui.scaleSlider.value() / 10)
         self.ui.graphicsView.resetTransform()
-        self.ui.graphicsView.scale(scale, scale)
+        self.ui.graphicsView.scale(scale, -scale)
 
     @pyqtSlot(int)
     def closePolygonStateChanged(self, state):
