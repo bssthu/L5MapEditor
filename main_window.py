@@ -43,6 +43,7 @@ class MainWindow(QMainWindow):
         self.mapData = MapData()
         self.mapData.updatePolygonList.connect(self.updatePolygonList)
         self.mapData.updateChildrenList.connect(self.updateChildrenList)
+        self.path = None
         # other signals/slots
         self.ui.polygonTableWidget.itemSelectionChanged.connect(self.polygonSelectionChanged)
         self.ui.scaleSlider.valueChanged.connect(self.scaleSliderChanged)
@@ -60,9 +61,8 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_saveAction_triggered(self):
-        path = QFileDialog.getSaveFileName(self, '保存数据', '.', '数据库文档(*.sqlite)')[0]
-        if path:
-            pass
+        if self.path is not None:
+            self.save(self.path)
 
     @pyqtSlot()
     def on_insertAction_triggered(self):
@@ -147,10 +147,18 @@ class MainWindow(QMainWindow):
             try:
                 (polygons, l0, l1, l2, l3, l4) = DbHelper.getTables(path)
                 self.mapData.set(polygons, l0, l1, l2, l3, l4)
+                self.path = path
             except sqlite3.Error as error:
                 self.showMessage(str(error))
         else:
             self.showMessage('File %s not exists.' % path)
+
+    def save(self, path):
+        try:
+            (polygons, levels) = self.mapData.get()
+            DbHelper.writeTables(path, polygons, levels)
+        except sqlite3.Error as error:
+            self.showMessage(str(error))
 
     def showMessage(self, msg, title='L5MapEditor'):
         QMessageBox.information(self, title, msg);

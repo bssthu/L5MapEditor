@@ -44,6 +44,9 @@ class MapData(QObject):
         # notify
         self.updatePolygonList.emit(self.polygons)
 
+    def get(self):
+        return (self.polygons, self.levels)
+
     def selectPolygon(self, polygon_id):
         children = []
         if polygon_id in self.childrenDict:
