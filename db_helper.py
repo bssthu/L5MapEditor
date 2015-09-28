@@ -16,15 +16,14 @@ class DbHelper():
         conn = sqlite3.connect(filepath)
         cur = conn.cursor()
         polygons = cur.execute('SELECT * FROM POLYGON').fetchall()
-        l0 = cur.execute('SELECT * FROM L0').fetchall()
-        l1 = cur.execute('SELECT * FROM L1').fetchall()
-        l2 = cur.execute('SELECT * FROM L2').fetchall()
-        l3 = cur.execute('SELECT * FROM L3').fetchall()
-        l4 = cur.execute('SELECT * FROM L4').fetchall()
+        levels = []
+        for NAME in DbHelper.getTypeNames():
+            levels.append(cur.execute('SELECT * FROM %s' % NAME).fetchall())
         conn.close()
-        return (polygons, l0, l1, l2, l3, l4)
+        return (polygons, levels)
 
     def writeTables(filepath, polygons, levels):
+        TYPE_NAMES = DbHelper.getTypeNames()
         conn = sqlite3.connect(filepath)
         cur = conn.cursor()
         # clear
@@ -38,14 +37,19 @@ class DbHelper():
         sql = 'INSERT INTO POLYGON (_id, type, vertex_Num, vertices) VALUES (?,?,?,?)'
         for polygon in polygons:
             cur.execute(sql, polygon)
-        LEVEL_NAME = ('L0', 'L1', 'L2', 'L3', 'L4')
-        sql = 'INSERT INTO %s (_id, polygon_id) VALUES (?,?)' % LEVEL_NAME[0]
+        sql = 'INSERT INTO %s (_id, polygon_id) VALUES (?,?)' % TYPE_NAMES[0]
         for record in levels[0]:
             cur.execute(sql, record)
         for i in range(1, len(levels)):
-            sql = 'INSERT INTO %s (_id, polygon_id, parent_id) VALUES (?,?,?)' % LEVEL_NAME[i]
+            sql = 'INSERT INTO %s (_id, polygon_id, parent_id) VALUES (?,?,?)' % TYPE_NAMES[i]
             for record in levels[i]:
                 cur.execute(sql, record)
         conn.commit()
         conn.close()
+
+    def getTypeNames():
+        return DbHelper.TYPE_NAMES
+
+
+DbHelper.TYPE_NAMES = ('L0', 'L1', 'L2', 'L3', 'L4')
 

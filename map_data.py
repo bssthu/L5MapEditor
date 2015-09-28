@@ -19,14 +19,9 @@ class MapData(QObject):
     def __init__(self):
         QObject.__init__(self)
 
-    def set(self, polygons, l0, l1, l2, l3, l4):
+    def set(self, polygons, levels):
         self.polygons = polygons
-        self.levels = []
-        self.levels.append(l0)
-        self.levels.append(l1)
-        self.levels.append(l2)
-        self.levels.append(l3)
-        self.levels.append(l4)
+        self.levels = levels
         # polygon 索引
         self.polygonsDict = {}
         for polygon in self.polygons:
@@ -96,7 +91,6 @@ class MapData(QObject):
         if id in self.polygonsDict:
             # remove children
             if id in self.childrenDict:
-                #(self.__removePolygon(child_id) for child_id in self.childrenDict[id])
                 for child_id in self.childrenDict[id]:
                     self.__removePolygon(child_id)
             del self.polygonsDict[id]

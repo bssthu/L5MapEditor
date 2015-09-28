@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
         self.ui.polygonTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.ui.childrenTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.childrenTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.insertTypeComboBox.addItems(('L0', 'L1', 'L2', 'L3', 'L4'))
+        self.ui.insertTypeComboBox.addItems(DbHelper.getTypeNames())
         # data
         self.mapData = MapData()
         self.mapData.updatePolygonList.connect(self.updatePolygonList)
@@ -138,19 +138,19 @@ class MainWindow(QMainWindow):
         tableWidget.setColumnCount(2)
         tableWidget.setHorizontalHeaderLabels(('id', 'type'))
         if len(polygons) > 0:
+            TYPE_NAMES = DbHelper.getTypeNames()
             for rowPos in range(0, len(polygons)):
                 tableWidget.insertRow(rowPos)
                 tableWidget.setItem(rowPos, 0, QTableWidgetItem(str(polygons[rowPos][0]))) # id
-                TYPE_NAME = ('L0', 'L1', 'L2', 'L3', 'L4')
                 type_id = polygons[rowPos][1]
-                tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAME[type_id])) # type
+                tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAMES[type_id])) # type
         tableWidget.resizeColumnsToContents()
 
     def open(self, path):
         if os.path.exists(path):
             try:
-                (polygons, l0, l1, l2, l3, l4) = DbHelper.getTables(path)
-                self.mapData.set(polygons, l0, l1, l2, l3, l4)
+                (polygons, levels) = DbHelper.getTables(path)
+                self.mapData.set(polygons, levels)
                 self.path = path
             except sqlite3.Error as error:
                 self.showMessage(repr(error))
