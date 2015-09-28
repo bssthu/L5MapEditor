@@ -94,13 +94,12 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(list)
     def updatePolygonList(self, polygons):
-        row = self.ui.polygonTableWidget.currentRow()
+        id = self.selectedId()
         self.fillTableWithPolygons(self.ui.polygonTableWidget, polygons)
         self.ui.graphicsView.setPolygons(polygons)
-        if row < 0:
-            row = 0
         if len(polygons) > 0:
-            self.ui.polygonTableWidget.setCurrentCell(row, 0)
+            if not self.selecteRowById(self.ui.polygonTableWidget, id):
+                self.ui.polygonTableWidget.setCurrentCell(0, 0)
 
     @pyqtSlot(list)
     def updateChildrenList(self, polygons):
@@ -162,8 +161,18 @@ class MainWindow(QMainWindow):
 
     def selectedId(self):
         row = self.ui.polygonTableWidget.currentRow()
-        id = int(self.ui.polygonTableWidget.item(row, 0).text())
-        return id
+        item = self.ui.polygonTableWidget.item(row, 0)
+        if item is not None:
+            return int(item.text())
+        else:
+            return -1
+
+    def selecteRowById(self, tableWidget, polygonId):
+        for row in range(0, tableWidget.rowCount()):
+            if tableWidget.item(row, 0).text() == str(polygonId):
+                tableWidget.setCurrentCell(row, 0)
+                return True
+        return False
 
     def showMessage(self, msg, title='L5MapEditor'):
         QMessageBox.information(self, title, msg);
