@@ -72,7 +72,11 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_deleteAction_triggered(self):
-        pass
+        id = self.selectedId()
+        if id >= 0:
+            row = self.ui.polygonTableWidget.currentRow()
+            self.mapData.removePolygon(id)
+            self.ui.polygonTableWidget.setCurrentCell(row, 0)
 
     @pyqtSlot()
     def on_aboutAction_triggered(self):
@@ -108,8 +112,9 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def polygonSelectionChanged(self):
         id = self.selectedId()
-        polygon = self.mapData.selectPolygon(id)
-        self.ui.graphicsView.selectPolygon(polygon)
+        if id >= 0:
+            polygon = self.mapData.selectPolygon(id)
+            self.ui.graphicsView.selectPolygon(polygon)
 
     @pyqtSlot()
     def scaleSliderChanged(self):
@@ -148,7 +153,7 @@ class MainWindow(QMainWindow):
                 self.mapData.set(polygons, l0, l1, l2, l3, l4)
                 self.path = path
             except sqlite3.Error as error:
-                self.showMessage(str(error))
+                self.showMessage(repr(error))
         else:
             self.showMessage('File %s not exists.' % path)
 
@@ -157,7 +162,7 @@ class MainWindow(QMainWindow):
             (polygons, levels) = self.mapData.get()
             DbHelper.writeTables(path, polygons, levels)
         except sqlite3.Error as error:
-            self.showMessage(str(error))
+            self.showMessage(repr(error))
 
     def selectedId(self):
         row = self.ui.polygonTableWidget.currentRow()

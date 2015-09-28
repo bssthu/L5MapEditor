@@ -44,9 +44,10 @@ class QMapGraphicsView(QGraphicsView):
     def selectPolygon(self, polygon):
         if self.selectedPolygon in self.scene().items():
             self.scene().removeItem(self.selectedPolygon)
-        polygonItem = PolygonItem(polygon[1], polygon[3])
-        self.selectedPolygon = PolygonSelect(polygonItem.getVertices(), polygonItem.boundingRect())
-        self.scene().addItem(self.selectedPolygon)
+        if polygon is not None:
+            polygonItem = PolygonItem(polygon[1], polygon[3])
+            self.selectedPolygon = PolygonSelect(polygonItem.getVertices(), polygonItem.boundingRect())
+            self.scene().addItem(self.selectedPolygon)
         self.scene().invalidate()
 
     def drawClosePolygon(self, close=True):

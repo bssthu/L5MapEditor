@@ -33,27 +33,38 @@ class MapData(QObject):
             polygon_id = polygon[0]
             self.polygonsDict[polygon_id] = polygon
         # 把 child 单独整理出来
+        self.__listChildren()
+        # notify
+        self.updatePolygonList.emit(self.polygons)
+
+    def __listChildren(self):
         self.childrenDict = {}
         for level in self.levels[1:]:
             for record in level:
                 polygon_id = record[1]
                 parent_id = record[2]
-                if parent_id not in self.childrenDict:
-                    self.childrenDict[parent_id] = []
-                self.childrenDict[parent_id].append(polygon_id)
-        # notify
-        self.updatePolygonList.emit(self.polygons)
+                self.__addChild(parent_id, polygon_id)
+
+    def __addChild(self, parent_id, child_id):
+        if parent_id != child_id:
+            if parent_id not in self.childrenDict:
+                self.childrenDict[parent_id] = []
+            self.childrenDict[parent_id].append(child_id)
 
     def get(self):
         return (self.polygons, self.levels)
 
     def selectPolygon(self, polygon_id):
+        # update children
         children = []
         if polygon_id in self.childrenDict:
-            for child_id in self.childrenDict[polygon_id]:
-                children.append(self.polygonsDict[child_id])
+            children = [self.polygonsDict[child_id] for child_id in self.childrenDict[polygon_id]]
         self.updateChildrenList.emit(children)
-        return self.polygonsDict[polygon_id]
+        # get the polygon
+        if polygon_id in self.polygonsDict:
+            return self.polygonsDict[polygon_id]
+        else:
+            return None
 
     def addPolygon(self, parent_id, type, verticesNum, vertices):
         polygon_id = parent_id
@@ -71,9 +82,25 @@ class MapData(QObject):
                 id = 1
             record = (id, polygon_id, parent_id)
             self.levels[type].append(record)
-            if parent_id not in self.childrenDict:
-                self.childrenDict[parent_id] = []
-            self.childrenDict[parent_id].append(polygon_id)
+            self.__addChild(parent_id, polygon_id)
         # notify
         self.updatePolygonList.emit(self.polygons)
+
+    def removePolygon(self, id):
+        self.__removePolygon(id)
+        self.__listChildren()
+        # notify
+        self.updatePolygonList.emit(self.polygons)
+
+    def __removePolygon(self, id):
+        if id in self.polygonsDict:
+            # remove children
+            if id in self.childrenDict:
+                #(self.__removePolygon(child_id) for child_id in self.childrenDict[id])
+                for child_id in self.childrenDict[id]:
+                    self.__removePolygon(child_id)
+            del self.polygonsDict[id]
+            self.polygons = [polygon for polygon in self.polygons if polygon[0] != id]
+            for i in range(0, len(self.levels)):
+                self.levels[i] = [level for level in self.levels[i] if level[1] != id]
 
