@@ -72,16 +72,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="closePolygonCheckBox">
-        <property name="text">
-         <string>绘制封闭多边形</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="insertTypeLabel">
         <property name="text">
          <string>插入类型</string>
@@ -169,8 +159,12 @@
    <addaction name="insertAction"/>
    <addaction name="deleteAction"/>
    <addaction name="separator"/>
-   <addaction name="aboutAction"/>
+   <addaction name="moveAction"/>
+   <addaction name="closedPolygonAction"/>
+   <addaction name="gridAction"/>
+   <addaction name="dotAction"/>
    <addaction name="separator"/>
+   <addaction name="aboutAction"/>
    <addaction name="exitAction"/>
   </widget>
   <action name="openAction">
@@ -258,6 +252,60 @@
    </property>
    <property name="shortcut">
     <string>Alt+X</string>
+   </property>
+  </action>
+  <action name="moveAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/img/move.png</normaloff>:/img/move.png</iconset>
+   </property>
+   <property name="text">
+    <string>移动</string>
+   </property>
+  </action>
+  <action name="closedPolygonAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/img/closed_polygon.png</normaloff>:/img/closed_polygon.png</iconset>
+   </property>
+   <property name="text">
+    <string>绘制封闭多边形</string>
+   </property>
+   <property name="toolTip">
+    <string>绘制封闭多边形</string>
+   </property>
+  </action>
+  <action name="gridAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>img/grid.png</normaloff>img/grid.png</iconset>
+   </property>
+   <property name="text">
+    <string>显示网格</string>
+   </property>
+  </action>
+  <action name="dotAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/img/dot.png</normaloff>:/img/dot.png</iconset>
+   </property>
+   <property name="text">
+    <string>拾取点</string>
    </property>
   </action>
  </widget>

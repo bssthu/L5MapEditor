@@ -8,5 +8,9 @@
     <file>img/exit.png</file>
     <file>img/map.png</file>
     <file>img/zoom.png</file>
+    <file>img/move.png</file>
+    <file>img/closed_polygon.png</file>
+    <file>img/grid.png</file>
+    <file>img/dot.png</file>
     </qresource>
 </RCC>

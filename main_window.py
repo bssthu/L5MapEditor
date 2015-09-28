@@ -47,7 +47,6 @@ class MainWindow(QMainWindow):
         # other signals/slots
         self.ui.polygonTableWidget.itemSelectionChanged.connect(self.polygonSelectionChanged)
         self.ui.scaleSlider.valueChanged.connect(self.scaleSliderChanged)
-        self.ui.closePolygonCheckBox.stateChanged.connect(self.closePolygonStateChanged)
         self.ui.graphicsView.polygonCreated.connect(self.addPolygon)
         # open default database
         self.open('default.sqlite')
@@ -89,6 +88,14 @@ class MainWindow(QMainWindow):
     def on_exitAction_triggered(self):
         exit()
 
+    @pyqtSlot()
+    def on_moveAction_triggered(self):
+        pass
+
+    @pyqtSlot()
+    def on_closedPolygonAction_triggered(self):
+        self.ui.graphicsView.drawClosePolygon(self.ui.closedPolygonAction.isChecked())
+
     def lockUI(self):
         self.ui.toolBar.setEnabled(False)
 
@@ -122,10 +129,6 @@ class MainWindow(QMainWindow):
         scale = math.exp(self.ui.scaleSlider.value() / 10)
         self.ui.graphicsView.resetTransform()
         self.ui.graphicsView.scale(scale, -scale)
-
-    @pyqtSlot(int)
-    def closePolygonStateChanged(self, state):
-        self.ui.graphicsView.drawClosePolygon(self.ui.closePolygonCheckBox.isChecked())
 
     @pyqtSlot(int, str)
     def addPolygon(self, verticesNum, vertices):
