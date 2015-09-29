@@ -11,6 +11,7 @@
     <file>img/move.png</file>
     <file>img/closed_polygon.png</file>
     <file>img/grid.png</file>
+    <file>img/dots.png</file>
     <file>img/dot.png</file>
     <file>img/start_point.png</file>
     </qresource>

@@ -63,6 +63,10 @@ class QMapGraphicsView(QGraphicsView):
         PolygonItem.closePolygon = close
         self.scene().invalidate()
 
+    def drawSelectionDots(self, draw=True):
+        PolygonItem.drawDots = draw
+        self.scene().invalidate()
+
     def markPoints(self, mark=True):
         PolygonItem.markPoints = mark
         self.scene().invalidate()

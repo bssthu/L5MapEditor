@@ -160,9 +160,10 @@
    <addaction name="deleteAction"/>
    <addaction name="separator"/>
    <addaction name="moveAction"/>
-   <addaction name="closedPolygonAction"/>
-   <addaction name="gridAction"/>
    <addaction name="dotAction"/>
+   <addaction name="closedPolygonAction"/>
+   <addaction name="dotsAction"/>
+   <addaction name="gridAction"/>
    <addaction name="markPointsAction"/>
    <addaction name="separator"/>
    <addaction name="aboutAction"/>
@@ -325,6 +326,21 @@
    </property>
    <property name="toolTip">
     <string>标出点</string>
+   </property>
+  </action>
+  <action name="dotsAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/img/dots.png</normaloff>:/img/dots.png</iconset>
+   </property>
+   <property name="text">
+    <string>突出选中图形</string>
    </property>
   </action>
  </widget>

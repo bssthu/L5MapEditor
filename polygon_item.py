@@ -63,4 +63,5 @@ PolygonItem.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(192, 192, 0)
 
 PolygonItem.closePolygon = True
 PolygonItem.markPoints = False
+PolygonItem.drawDots = True
 

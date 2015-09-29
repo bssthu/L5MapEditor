@@ -35,7 +35,8 @@ class PolygonSelect(QGraphicsWidget):
             # draw
             painter.setPen(pen)
             painter.drawPolyline(QPolygonF(self.vertices))
-            painter.fillRect(self.rect, brush)
+            if PolygonItem.drawDots:
+                painter.fillRect(self.rect, brush)
             if PolygonItem.closePolygon:
                 painter.drawLine(self.vertices[-1], self.vertices[0])
         if PolygonItem.markPoints:
