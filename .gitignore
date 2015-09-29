@@ -4,6 +4,7 @@
 __pycache__/
 *.py[cod]
 
+/build/
 resource_rc.py
 ui_Form.py
 

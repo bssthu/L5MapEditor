@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
         self.ui.scaleSlider.valueChanged.connect(self.scaleSliderChanged)
         self.ui.graphicsView.polygonCreated.connect(self.addPolygon)
         # open default database
-        self.open('default.sqlite')
+        self.open('default.sqlite', True)
 
 # slots
     @pyqtSlot()
@@ -173,16 +173,22 @@ class MainWindow(QMainWindow):
                 tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAMES[type_id])) # type
         tableWidget.resizeColumnsToContents()
 
-    def open(self, path):
+    def open(self, path, quiet=False):
         if os.path.exists(path):
             try:
                 (polygons, levels) = DbHelper.getTables(path)
                 self.mapData.set(polygons, levels)
                 self.path = path
             except sqlite3.Error as error:
-                self.showMessage(repr(error))
+                if quiet:
+                    print(repr(error))
+                else:
+                    self.showMessage(repr(error))
         else:
-            self.showMessage('File %s not exists.' % path)
+            if quiet:
+                print('File %s not exists.' % path)
+            else:
+                self.showMessage('File %s not exists.' % path)
 
     def save(self, path):
         try:
