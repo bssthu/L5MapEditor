@@ -66,9 +66,11 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def on_insertAction_triggered(self):
         if self.ui.insertAction.isChecked():
-            self.ui.graphicsView.beginInsert()
+            if not self.ui.graphicsView.beginInsert():
+                self.ui.insertAction.setChecked(False)
         else:
-            self.ui.graphicsView.endInsert()
+            if not self.ui.graphicsView.endInsert():
+                self.ui.insertAction.setChecked(True)
 
     @pyqtSlot()
     def on_deleteAction_triggered(self):
@@ -90,7 +92,12 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_moveAction_triggered(self):
-        pass
+        if self.ui.moveAction.isChecked():
+            if not self.ui.graphicsView.beginMove():
+                self.ui.moveAction.setChecked(False)
+        else:
+            if not self.ui.graphicsView.endMove():
+                self.ui.moveAction.setChecked(True)
 
     @pyqtSlot()
     def on_closedPolygonAction_triggered(self):

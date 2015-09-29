@@ -38,13 +38,13 @@ class PolygonSelect(QGraphicsWidget):
             painter.fillRect(self.rect, brush)
             if PolygonItem.closePolygon:
                 painter.drawLine(self.vertices[-1], self.vertices[0])
-            if PolygonItem.markPoints:
+        if PolygonItem.markPoints:
+            scale = painter.transform().m11()
+            L_SIZE = 20
+            S_SIZE = 10
+            if len(self.vertices) > 0:
                 scale = painter.transform().m11()
-                L_SIZE = 20
-                S_SIZE = 10
-                if len(self.vertices) >= 0:
-                    scale = painter.transform().m11()
-                    painter.drawEllipse(self.vertices[0], L_SIZE / scale, L_SIZE / scale)
-                for vertex in self.vertices:
-                    painter.drawEllipse(vertex, S_SIZE / scale, S_SIZE / scale)
+                painter.drawEllipse(self.vertices[0], L_SIZE / scale, L_SIZE / scale)
+            for vertex in self.vertices:
+                painter.drawEllipse(vertex, S_SIZE / scale, S_SIZE / scale)
 

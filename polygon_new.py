@@ -12,6 +12,7 @@ import math
 from PyQt5.QtWidgets import QGraphicsWidget
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QColor, QPolygonF, QPen
+from polygon_item import PolygonItem
 
 
 MAR = 50
@@ -33,6 +34,15 @@ class PolygonNew(QGraphicsWidget):
             pen.setWidth(0)
             painter.setPen(pen)
             painter.drawPolyline(QPolygonF(self.vertices))
+        if PolygonItem.markPoints:
+            scale = painter.transform().m11()
+            L_SIZE = 20
+            S_SIZE = 10
+            if len(self.vertices) > 0:
+                scale = painter.transform().m11()
+                painter.drawEllipse(self.vertices[0], L_SIZE / scale, L_SIZE / scale)
+            for vertex in self.vertices:
+                painter.drawEllipse(vertex, S_SIZE / scale, S_SIZE / scale)
 
     def addPoint(self, pt):
         self.vertices.append(QPointF(pt))
