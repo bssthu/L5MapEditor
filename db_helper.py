@@ -16,6 +16,7 @@ class DbHelper():
         conn = sqlite3.connect(filepath)
         cur = conn.cursor()
         polygons = cur.execute('SELECT * FROM POLYGON').fetchall()
+        polygons = [list(polygon) for polygon in polygons]
         levels = []
         for NAME in DbHelper.getTypeNames():
             levels.append(cur.execute('SELECT * FROM %s' % NAME).fetchall())

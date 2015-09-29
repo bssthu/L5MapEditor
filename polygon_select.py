@@ -21,12 +21,15 @@ class PolygonSelect(QGraphicsWidget):
         QGraphicsWidget.__init__(self)
         self.vertices = vertices
         self.rect = rect
+        self.offset = QPointF(0, 0)
+        self.newOffset = QPointF(0, 0)
 
     def boundingRect(self):
         return self.rect
 
     def paint(self, painter, option, widget):
-        if len(self.vertices) > 0:
+        vertices = [vertex + self.offset + self.newOffset for vertex in self.vertices]
+        if len(vertices) > 0:
             # init graphics
             pen = QPen(QColor(0, 0, 0))
             pen.setWidth(0)
@@ -34,18 +37,38 @@ class PolygonSelect(QGraphicsWidget):
             brush = QBrush(QColor(0, 0, 0), Qt.Dense7Pattern)
             # draw
             painter.setPen(pen)
-            painter.drawPolyline(QPolygonF(self.vertices))
+            painter.drawPolyline(QPolygonF(vertices))
             if PolygonItem.drawDots:
                 painter.fillRect(self.rect, brush)
             if PolygonItem.closePolygon:
-                painter.drawLine(self.vertices[-1], self.vertices[0])
+                painter.drawLine(vertices[-1], vertices[0])
         if PolygonItem.markPoints:
             scale = painter.transform().m11()
             L_SIZE = 20
             S_SIZE = 10
-            if len(self.vertices) > 0:
+            if len(vertices) > 0:
                 scale = painter.transform().m11()
-                painter.drawEllipse(self.vertices[0], L_SIZE / scale, L_SIZE / scale)
-            for vertex in self.vertices:
+                painter.drawEllipse(vertices[0], L_SIZE / scale, L_SIZE / scale)
+            for vertex in vertices:
                 painter.drawEllipse(vertex, S_SIZE / scale, S_SIZE / scale)
+
+    def setOffset(self, offset):
+        self.newOffset = offset
+
+    def applyOffset(self, offset):
+        self.offset += offset
+        self.newOffset = QPointF(0, 0)
+
+    def resetOffset(self):
+        self.offset = QPointF(0, 0)
+        self.newOffset = QPointF(0, 0)
+
+    def getOffset(self):
+        return self.offset
+
+    def getVerticesForDb(self):
+        vertices = [vertex + self.offset for vertex in self.vertices]
+        verticesNum = len(vertices)
+        verticesString = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in vertices)
+        return (verticesNum, verticesString)
 

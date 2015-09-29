@@ -66,7 +66,7 @@ class MapData(QObject):
         while polygon_id in self.polygonsDict:
             polygon_id += 1
         # add polygon
-        polygon = (polygon_id, type, verticesNum, vertices)
+        polygon = [polygon_id, type, verticesNum, vertices]
         self.polygons.append(polygon)
         self.polygonsDict[polygon_id] = polygon
         # set parent
@@ -78,6 +78,16 @@ class MapData(QObject):
             record = (id, polygon_id, parent_id)
             self.levels[type].append(record)
             self.__addChild(parent_id, polygon_id)
+        # notify
+        self.updatePolygonList.emit(self.polygons)
+
+    def updatePolygon(self, id, verticesNum, vertices):
+        for i in range(0, len(self.polygons)):
+            if self.polygons[i][0] == id:
+                self.polygons[i][2] = verticesNum
+                self.polygons[i][3] = vertices
+                self.polygonsDict[id] = self.polygons[i]
+                break
         # notify
         self.updatePolygonList.emit(self.polygons)
 

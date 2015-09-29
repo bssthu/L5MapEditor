@@ -55,7 +55,7 @@ class PolygonNew(QGraphicsWidget):
         if len(self.vertices) > 0:
             self.vertices = self.vertices[:-1]
 
-    def getVertices(self):
+    def getVerticesForDb(self):
         verticesNum = len(self.vertices)
         verticesString = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in self.vertices)
         return (verticesNum, verticesString)

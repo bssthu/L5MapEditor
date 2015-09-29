@@ -22,7 +22,10 @@ from polygon_select import PolygonSelect
 class QMapGraphicsView(QGraphicsView):
     leftClick = pyqtSignal(QPointF)
     rightClick = pyqtSignal()
+    mouseMove = pyqtSignal(QPointF)
+    leftUp = pyqtSignal(QPointF)
     polygonCreated = pyqtSignal(int, str)
+    polygonUpdated = pyqtSignal(int, str)
 
     def __init__(self, centralwidget):
         QGraphicsView.__init__(self, centralwidget)
@@ -44,6 +47,28 @@ class QMapGraphicsView(QGraphicsView):
     @pyqtSlot()
     def removePoint(self):
         self.newPolygon.removePoint()
+
+    @pyqtSlot(QPointF)
+    def setMoveBasePoint(self, pt):
+        self.moveBase = pt
+
+    @pyqtSlot(QPointF)
+    def movingToPoint(self, pt):
+        if self.selectedPolygon is not None:
+            offset = pt - self.moveBase
+            self.selectedPolygon.setOffset(offset)
+            self.scene().invalidate()
+
+    @pyqtSlot(QPointF)
+    def finishMove(self, pt):
+        if self.selectedPolygon is not None:
+            offset = pt - self.moveBase
+            self.selectedPolygon.applyOffset(offset)
+
+    @pyqtSlot(QPointF)
+    def resetMove(self):
+        if self.selectedPolygon is not None:
+            self.selectedPolygon.resetOffset()
 
     def setPolygons(self, polygons):
         self.scene().clear()
@@ -80,6 +105,16 @@ class QMapGraphicsView(QGraphicsView):
             self.rightClick.emit()
         self.scene().invalidate()
 
+    def mouseMoveEvent(self, event):
+        pt = self.mapToScene(event.pos())
+        self.mouseMove.emit(pt)
+
+    def mouseReleaseEvent(self, event):
+        button = event.button()
+        pt = self.mapToScene(event.pos())
+        if button == Qt.LeftButton:
+            self.leftUp.emit(pt)
+
     def beginInsert(self):
         return self.fsg_mgr.changeFsm('normal', 'insert')
 
@@ -102,7 +137,7 @@ class QMapGraphicsView(QGraphicsView):
 
     def __endInsert(self):
         # 处理新多边形
-        (verticesNum, verticesString) = self.newPolygon.getVertices()
+        (verticesNum, verticesString) = self.newPolygon.getVerticesForDb()
         self.scene().removeItem(self.newPolygon)
         self.newPolygon = None
         if verticesNum > 0:
@@ -112,10 +147,22 @@ class QMapGraphicsView(QGraphicsView):
         self.rightClick.disconnect(self.removePoint)
 
     def __beginMove(self):
-        pass
+        # signal
+        self.leftClick.connect(self.setMoveBasePoint)
+        self.mouseMove.connect(self.movingToPoint)
+        self.leftUp.connect(self.finishMove)
+        self.rightClick.connect(self.resetMove)
 
     def __endMove(self):
-        pass
+        # data
+        if self.selectedPolygon is not None:
+            (verticesNum, verticesString) = self.selectedPolygon.getVerticesForDb()
+            self.polygonUpdated.emit(verticesNum, verticesString)
+        # signal
+        self.leftClick.disconnect(self.setMoveBasePoint)
+        self.mouseMove.disconnect(self.movingToPoint)
+        self.leftUp.disconnect(self.finishMove)
+        self.rightClick.disconnect(self.resetMove)
 
 
 # State
@@ -130,8 +177,10 @@ class QMapGraphicsView(QGraphicsView):
         def getFsm(self, name):
             return self.__fsms[name.lower()]
 
-        def setFsm(self, name):
-            new_state = self.getFsm(name)
+        def changeFsm(self, curr_name, new_name):
+            if self.getFsm(curr_name) != self.state:
+                return False
+            new_state = self.getFsm(new_name)
             if self.state == self.getFsm('normal'):
                 if new_state == self.getFsm('insert'):  # normal => insert
                     self.__setFsm(new_state)
@@ -148,13 +197,6 @@ class QMapGraphicsView(QGraphicsView):
                     self.__setFsm(new_state)
                     return True
             return False
-
-        def changeFsm(self, curr_name, new_name):
-            state = self.getFsm(curr_name)
-            if state == self.state:
-                return self.setFsm(new_name)
-            else:
-                return False
 
         def __setFsm(self, new_state):
             self.state.exit_state.emit()
