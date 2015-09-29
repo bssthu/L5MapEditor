@@ -49,6 +49,7 @@ class PolygonNew(QGraphicsWidget):
         self.topLeft = QPointF(min(self.topLeft.x(), pt.x()), min(self.topLeft.y(), pt.y()))
         self.bottomRight = QPointF(max(self.bottomRight.x(), pt.x()), max(self.bottomRight.y(), pt.y()))
         self.rect = QRectF(self.topLeft, self.bottomRight).adjusted(-MAR, -MAR, MAR, MAR)
+        self.prepareGeometryChange()
 
     def removePoint(self):
         if len(self.vertices) > 0:
