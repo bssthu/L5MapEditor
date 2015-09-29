@@ -28,11 +28,8 @@ class DbHelper():
         cur = conn.cursor()
         # clear
         cur.execute('DELETE FROM POLYGON')
-        cur.execute('DELETE FROM L0')
-        cur.execute('DELETE FROM L1')
-        cur.execute('DELETE FROM L2')
-        cur.execute('DELETE FROM L3')
-        cur.execute('DELETE FROM L4')
+        for NAME in TYPE_NAMES:
+            cur.execute('DELETE FROM %s' % NAME)
         # insert
         sql = 'INSERT INTO POLYGON (_id, type, vertex_Num, vertices) VALUES (?,?,?,?)'
         for polygon in polygons:
