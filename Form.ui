@@ -163,6 +163,7 @@
    <addaction name="closedPolygonAction"/>
    <addaction name="gridAction"/>
    <addaction name="dotAction"/>
+   <addaction name="markPointsAction"/>
    <addaction name="separator"/>
    <addaction name="aboutAction"/>
    <addaction name="exitAction"/>
@@ -306,6 +307,24 @@
    </property>
    <property name="text">
     <string>拾取点</string>
+   </property>
+  </action>
+  <action name="markPointsAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/img/start_point.png</normaloff>:/img/start_point.png</iconset>
+   </property>
+   <property name="text">
+    <string>标出点</string>
+   </property>
+   <property name="toolTip">
+    <string>标出点</string>
    </property>
   </action>
  </widget>

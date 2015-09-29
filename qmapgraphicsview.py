@@ -50,8 +50,12 @@ class QMapGraphicsView(QGraphicsView):
             self.scene().addItem(self.selectedPolygon)
         self.scene().invalidate()
 
-    def drawClosePolygon(self, close=True):
+    def drawClosedPolygon(self, close=True):
         PolygonItem.closePolygon = close
+        self.scene().invalidate()
+
+    def markPoints(self, mark=True):
+        PolygonItem.markPoints = mark
         self.scene().invalidate()
 
     def beginInsert(self):

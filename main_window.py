@@ -94,7 +94,19 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_closedPolygonAction_triggered(self):
-        self.ui.graphicsView.drawClosePolygon(self.ui.closedPolygonAction.isChecked())
+        self.ui.graphicsView.drawClosedPolygon(self.ui.closedPolygonAction.isChecked())
+
+    @pyqtSlot()
+    def on_gridAction_triggered(self):
+        pass
+
+    @pyqtSlot()
+    def on_dotAction_triggered(self):
+        pass
+
+    @pyqtSlot()
+    def on_markPointsAction_triggered(self):
+        self.ui.graphicsView.markPoints(self.ui.markPointsAction.isChecked())
 
     def lockUI(self):
         self.ui.toolBar.setEnabled(False)

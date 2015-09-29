@@ -27,14 +27,24 @@ class PolygonSelect(QGraphicsWidget):
 
     def paint(self, painter, option, widget):
         if len(self.vertices) > 0:
-            closePolygon = PolygonItem.closePolygon
+            # init graphics
             pen = QPen(QColor(0, 0, 0))
             pen.setWidth(0)
             pen.setStyle(Qt.DashDotLine)
             brush = QBrush(QColor(0, 0, 0), Qt.Dense7Pattern)
+            # draw
             painter.setPen(pen)
             painter.drawPolyline(QPolygonF(self.vertices))
             painter.fillRect(self.rect, brush)
-            if closePolygon:
+            if PolygonItem.closePolygon:
                 painter.drawLine(self.vertices[-1], self.vertices[0])
+            if PolygonItem.markPoints:
+                scale = painter.transform().m11()
+                L_SIZE = 20
+                S_SIZE = 10
+                if len(self.vertices) >= 0:
+                    scale = painter.transform().m11()
+                    painter.drawEllipse(self.vertices[0], L_SIZE / scale, L_SIZE / scale)
+                for vertex in self.vertices:
+                    painter.drawEllipse(vertex, S_SIZE / scale, S_SIZE / scale)
 

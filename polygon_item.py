@@ -45,12 +45,13 @@ class PolygonItem(QGraphicsWidget):
 
     def paint(self, painter, option, widget):
         if len(self.vertices) > 1:
-            closePolygon = PolygonItem.closePolygon
+            # init graphics
             pen = QPen(PolygonItem.COLOR[self.type])
             pen.setWidth(0)
             painter.setPen(pen)
+            # draw
             painter.drawPolyline(QPolygonF(self.vertices))
-            if closePolygon:
+            if PolygonItem.closePolygon:
                 painter.drawLine(self.vertices[-1], self.vertices[0])
 
     def getVertices(self):
@@ -61,4 +62,5 @@ PolygonItem.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(192, 192, 0)
         QColor(0, 200, 0), QColor(0, 150, 250))
 
 PolygonItem.closePolygon = True
+PolygonItem.markPoints = False
 
