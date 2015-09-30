@@ -134,6 +134,10 @@ class MainWindow(QMainWindow):
                 self.ui.moveAction.setChecked(True)
 
     @pyqtSlot()
+    def on_pickPointAction_triggered(self):
+        self.ui.graphicsView.pickPoint(self.ui.pickPointAction.isChecked())
+
+    @pyqtSlot()
     def on_closedPolygonAction_triggered(self):
         self.ui.graphicsView.drawClosedPolygon(self.ui.closedPolygonAction.isChecked())
 
@@ -143,10 +147,6 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_gridAction_triggered(self):
-        pass
-
-    @pyqtSlot()
-    def on_dotAction_triggered(self):
         pass
 
     @pyqtSlot()

@@ -22,13 +22,13 @@ class PolygonSelect(QGraphicsWidget):
         self.vertices = vertices
         self.rect = rect
         self.offset = QPointF(0, 0)
-        self.newOffset = QPointF(0, 0)
+        self.oldVertices = vertices
 
     def boundingRect(self):
         return self.rect
 
     def paint(self, painter, option, widget):
-        vertices = [vertex + self.offset + self.newOffset for vertex in self.vertices]
+        vertices = [vertex + self.offset for vertex in self.vertices]
         if len(vertices) > 0:
             # init graphics
             pen = QPen(QColor(0, 0, 0))
@@ -53,22 +53,24 @@ class PolygonSelect(QGraphicsWidget):
                 painter.drawEllipse(vertex, S_SIZE / scale, S_SIZE / scale)
 
     def setOffset(self, offset):
-        self.newOffset = offset
+        self.offset = offset
 
-    def applyOffset(self, offset):
-        self.offset += offset
-        self.newOffset = QPointF(0, 0)
+    def applyOffset(self, offset):  # 移动到某处释放鼠标
+        self.vertices = [vertex + self.offset for vertex in self.vertices]
+        self.offset = QPointF(0, 0)
+
+    def confirmOffset(self):
+        self.oldVertices = self.vertices
 
     def resetOffset(self):
         self.offset = QPointF(0, 0)
-        self.newOffset = QPointF(0, 0)
+        self.vertices = self.oldVertices
 
     def getOffset(self):
         return self.offset
 
     def getVerticesForDb(self):
-        vertices = [vertex + self.offset for vertex in self.vertices]
-        verticesNum = len(vertices)
-        verticesString = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in vertices)
+        verticesNum = len(self.vertices)
+        verticesString = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in self.vertices)
         return (verticesNum, verticesString)
 

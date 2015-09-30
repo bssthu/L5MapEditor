@@ -158,9 +158,9 @@
    <addaction name="separator"/>
    <addaction name="insertAction"/>
    <addaction name="deleteAction"/>
-   <addaction name="separator"/>
    <addaction name="moveAction"/>
-   <addaction name="dotAction"/>
+   <addaction name="separator"/>
+   <addaction name="pickPointAction"/>
    <addaction name="closedPolygonAction"/>
    <addaction name="dotsAction"/>
    <addaction name="gridAction"/>
@@ -298,7 +298,7 @@
     <string>显示网格</string>
    </property>
   </action>
-  <action name="dotAction">
+  <action name="pickPointAction">
    <property name="checkable">
     <bool>true</bool>
    </property>

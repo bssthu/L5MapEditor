@@ -76,6 +76,9 @@ class QMapGraphicsView(QGraphicsView):
             self.scene().addItem(self.selectedPolygon)
         self.scene().invalidate()
 
+    def pickPoint(self, pick=True):
+        PolygonItem.pickPoint = pick
+
     def drawClosedPolygon(self, close=True):
         PolygonItem.closePolygon = close
         self.scene().invalidate()
@@ -136,6 +139,7 @@ class QMapGraphicsView(QGraphicsView):
     def endMove(self):
         # data
         if self.selectedPolygon is not None:
+            self.selectedPolygon.confirmOffset()
             (verticesNum, verticesString) = self.selectedPolygon.getVerticesForDb()
             self.polygonUpdated.emit(verticesNum, verticesString)
         # signal
