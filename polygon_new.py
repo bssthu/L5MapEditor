@@ -24,16 +24,22 @@ class PolygonNew(QGraphicsWidget):
         self.topLeft = QPointF(float('Inf'), float('Inf'))
         self.bottomRight = QPointF(-float('Inf'), -float('Inf'))
         self.rect = QRectF()
+        self.mousePoint = None
 
     def boundingRect(self):
         return self.rect
 
     def paint(self, painter, option, widget):
+        pen = QPen(QColor(0, 0, 0))
+        pen.setWidth(0)
+        redPen = QPen(QColor(255, 0, 0))
+        redPen.setWidth(0)
+        # lines
+        painter.setPen(pen)
         if len(self.vertices) > 1:
-            pen = QPen(QColor(0, 0, 0))
-            pen.setWidth(0)
-            painter.setPen(pen)
             painter.drawPolyline(QPolygonF(self.vertices))
+        # point mark
+        painter.setPen(pen)
         if PolygonItem.markPoints:
             scale = painter.transform().m11()
             L_SIZE = 20
@@ -43,9 +49,25 @@ class PolygonNew(QGraphicsWidget):
                 painter.drawEllipse(self.vertices[0], L_SIZE / scale, L_SIZE / scale)
             for vertex in self.vertices:
                 painter.drawEllipse(vertex, S_SIZE / scale, S_SIZE / scale)
+        # pre add
+        painter.setPen(redPen)
+        if self.mousePoint is not None:
+            if len(self.vertices) > 0:
+                painter.drawLine(self.vertices[-1], self.mousePoint)
+            if PolygonItem.markPoints:
+                S_SIZE = 10
+                painter.drawEllipse(self.mousePoint, S_SIZE / scale, S_SIZE / scale)
+
+    def preAddPoint(self, pt):
+        self.mousePoint = QPointF(pt)
+        self.updateBoundingRect(pt)
 
     def addPoint(self, pt):
+        self.mousePoint = None
         self.vertices.append(QPointF(pt))
+        self.updateBoundingRect(pt)
+
+    def updateBoundingRect(self, pt):
         self.topLeft = QPointF(min(self.topLeft.x(), pt.x()), min(self.topLeft.y(), pt.y()))
         self.bottomRight = QPointF(max(self.bottomRight.x(), pt.x()), max(self.bottomRight.y(), pt.y()))
         self.rect = QRectF(self.topLeft, self.bottomRight).adjusted(-MAR, -MAR, MAR, MAR)

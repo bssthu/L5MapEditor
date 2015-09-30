@@ -36,6 +36,11 @@ class QMapGraphicsView(QGraphicsView):
     def addPoint(self, pt):
         self.newPolygon.addPoint(pt)
 
+    @pyqtSlot(QPointF)
+    def preAddPoint(self, pt):      # 鼠标移动到点
+        self.newPolygon.preAddPoint(pt)
+        self.scene().invalidate()
+
     @pyqtSlot()
     def removePoint(self):
         self.newPolygon.removePoint()
@@ -115,7 +120,9 @@ class QMapGraphicsView(QGraphicsView):
         self.newPolygon = PolygonNew()
         self.scene().addItem(self.newPolygon)
         # signal
-        self.leftClick.connect(self.addPoint)
+        self.leftUp.connect(self.addPoint)
+        self.leftClick.connect(self.preAddPoint)
+        self.mouseMove.connect(self.preAddPoint)
         self.rightClick.connect(self.removePoint)
 
     def endInsert(self):
@@ -126,7 +133,9 @@ class QMapGraphicsView(QGraphicsView):
         if verticesNum > 0:
             self.polygonCreated.emit(verticesNum, verticesString)
         # signal
-        self.leftClick.disconnect(self.addPoint)
+        self.leftUp.disconnect(self.addPoint)
+        self.leftClick.disconnect(self.preAddPoint)
+        self.mouseMove.disconnect(self.preAddPoint)
         self.rightClick.disconnect(self.removePoint)
 
     def beginMove(self):

@@ -59,7 +59,7 @@ class PolygonSelect(QGraphicsWidget):
         self.vertices = [vertex + self.offset for vertex in self.vertices]
         self.offset = QPointF(0, 0)
 
-    def confirmOffset(self):
+    def confirmOffset(self):        # 退出移动状态，保存
         self.oldVertices = self.vertices
 
     def resetOffset(self):
