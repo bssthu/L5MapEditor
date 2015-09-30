@@ -12,14 +12,16 @@ import os
 import math
 import sqlite3
 from PyQt5 import QtWidgets
+from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QGraphicsScene, QTableWidgetItem
 from PyQt5.QtWidgets import QFileDialog, QInputDialog
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QObject
 from ui_Form import Ui_MainWindow
 from db_helper import DbHelper
 from map_data import MapData
+from fsm_mgr import FsmMgr
 
 
 class MainWindow(QMainWindow):
@@ -44,6 +46,8 @@ class MainWindow(QMainWindow):
         self.mapData.updatePolygonList.connect(self.updatePolygonList)
         self.mapData.updateChildrenList.connect(self.updateChildrenList)
         self.path = None
+        # fsm
+        self.__initFsm()
         # other signals/slots
         self.ui.polygonTableWidget.itemSelectionChanged.connect(self.polygonSelectionChanged)
         self.ui.scaleSlider.valueChanged.connect(self.scaleSliderChanged)
@@ -52,7 +56,36 @@ class MainWindow(QMainWindow):
         # open default database
         self.open('default.sqlite', True)
 
+    def __initFsm(self):
+        self.fsm_mgr = FsmMgr()
+        self.fsm_mgr.change_state.connect(self.changeState)
+        self.fsm_mgr.getFsm('insert').enter_state.connect(self.ui.graphicsView.beginInsert)
+        self.fsm_mgr.getFsm('insert').exit_state.connect(self.ui.graphicsView.endInsert)
+        self.fsm_mgr.getFsm('move').enter_state.connect(self.ui.graphicsView.beginMove)
+        self.fsm_mgr.getFsm('move').exit_state.connect(self.ui.graphicsView.endMove)
+
 # slots
+    @pyqtSlot(QObject)
+    def changeState(self, new_state):
+        if new_state == self.fsm_mgr.getFsm('normal'):
+            self.ui.insertAction.setEnabled(True)
+            self.ui.deleteAction.setEnabled(True)
+            self.ui.moveAction.setEnabled(True)
+            self.ui.graphicsView.setCursor(QCursor(Qt.ArrowCursor))
+            self.ui.polygonTableWidget.setEnabled(True)
+        elif new_state == self.fsm_mgr.getFsm('insert'):
+            self.ui.insertAction.setEnabled(True)
+            self.ui.deleteAction.setEnabled(False)
+            self.ui.moveAction.setEnabled(False)
+            self.ui.graphicsView.setCursor(QCursor(Qt.CrossCursor))
+            self.ui.polygonTableWidget.setEnabled(True)
+        elif new_state == self.fsm_mgr.getFsm('move'):
+            self.ui.insertAction.setEnabled(False)
+            self.ui.deleteAction.setEnabled(False)
+            self.ui.moveAction.setEnabled(True)
+            self.ui.graphicsView.setCursor(QCursor(Qt.DragMoveCursor))
+            self.ui.polygonTableWidget.setEnabled(False)
+
     @pyqtSlot()
     def on_openAction_triggered(self):
         path = QFileDialog.getOpenFileName(self, '载入数据', '.', '数据库文档(*.sqlite)')[0]
@@ -67,10 +100,10 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def on_insertAction_triggered(self):
         if self.ui.insertAction.isChecked():
-            if not self.ui.graphicsView.beginInsert():
+            if not self.fsm_mgr.changeFsm('normal', 'insert'):
                 self.ui.insertAction.setChecked(False)
         else:
-            if not self.ui.graphicsView.endInsert():
+            if not self.fsm_mgr.changeFsm('insert', 'normal'):
                 self.ui.insertAction.setChecked(True)
 
     @pyqtSlot()
@@ -94,10 +127,10 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def on_moveAction_triggered(self):
         if self.ui.moveAction.isChecked():
-            if not self.ui.graphicsView.beginMove():
+            if not self.fsm_mgr.changeFsm('normal', 'move'):
                 self.ui.moveAction.setChecked(False)
         else:
-            if not self.ui.graphicsView.endMove():
+            if not self.fsm_mgr.changeFsm('move', 'normal'):
                 self.ui.moveAction.setChecked(True)
 
     @pyqtSlot()
