@@ -12,22 +12,15 @@ import math
 from PyQt5.QtWidgets import QGraphicsWidget
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QColor, QPolygonF, QPen
-from polygon_item import PolygonItem
+from polygon_base import PolygonBase
 
 
 MAR = 50
 
-class PolygonNew(QGraphicsWidget):
+class PolygonNew(PolygonBase):
     def __init__(self):
-        QGraphicsWidget.__init__(self)
-        self.vertices = []
-        self.topLeft = QPointF(float('Inf'), float('Inf'))
-        self.bottomRight = QPointF(-float('Inf'), -float('Inf'))
-        self.rect = QRectF()
+        super().__init__()
         self.mousePoint = None
-
-    def boundingRect(self):
-        return self.rect
 
     def paint(self, painter, option, widget):
         pen = QPen(QColor(0, 0, 0))
@@ -40,7 +33,7 @@ class PolygonNew(QGraphicsWidget):
             painter.drawPolyline(QPolygonF(self.vertices))
         # point mark
         painter.setPen(pen)
-        if PolygonItem.markPoints:
+        if PolygonBase.markPoints:
             scale = painter.transform().m11()
             L_SIZE = 20
             S_SIZE = 10
@@ -54,7 +47,7 @@ class PolygonNew(QGraphicsWidget):
         if self.mousePoint is not None:
             if len(self.vertices) > 0:
                 painter.drawLine(self.vertices[-1], self.mousePoint)
-            if PolygonItem.markPoints:
+            if PolygonBase.markPoints:
                 S_SIZE = 10
                 painter.drawEllipse(self.mousePoint, S_SIZE / scale, S_SIZE / scale)
 
@@ -67,19 +60,8 @@ class PolygonNew(QGraphicsWidget):
         self.vertices.append(QPointF(pt))
         self.updateBoundingRect(pt)
 
-    def updateBoundingRect(self, pt):
-        self.topLeft = QPointF(min(self.topLeft.x(), pt.x()), min(self.topLeft.y(), pt.y()))
-        self.bottomRight = QPointF(max(self.bottomRight.x(), pt.x()), max(self.bottomRight.y(), pt.y()))
-        self.rect = QRectF(self.topLeft, self.bottomRight).adjusted(-MAR, -MAR, MAR, MAR)
-        self.prepareGeometryChange()
-
     def removePoint(self):
         if len(self.vertices) > 0:
             self.vertices = self.vertices[:-1]
         self.mousePoint = None
-
-    def getVerticesForDb(self):
-        verticesNum = len(self.vertices)
-        verticesString = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in self.vertices)
-        return (verticesNum, verticesString)
 

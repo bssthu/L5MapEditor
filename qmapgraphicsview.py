@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import QGraphicsView
 from PyQt5.QtCore import QPointF
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
+from polygon_base import PolygonBase
 from polygon_item import PolygonItem
 from polygon_new import PolygonNew
 from polygon_select import PolygonSelect
@@ -29,7 +30,7 @@ class QMapGraphicsView(QGraphicsView):
     pointsUpdated = pyqtSignal(list)
 
     def __init__(self, centralwidget):
-        QGraphicsView.__init__(self, centralwidget)
+        super().__init__(centralwidget)
         self.selectedPolygon = None
 
 # slots
@@ -85,22 +86,22 @@ class QMapGraphicsView(QGraphicsView):
         self.scene().invalidate()
 
     def movePoint(self, allow=True):
-        PolygonItem.movePoint = allow
+        PolygonBase.movePoint = allow
 
     def selectPoint(self, pointId):
         self.selectedPolygon.setPointId(pointId)
         self.scene().invalidate()
 
     def drawClosedPolygon(self, allow=True):
-        PolygonItem.closePolygon = allow
+        PolygonBase.closePolygon = allow
         self.scene().invalidate()
 
     def drawSelectionDots(self, allow=True):
-        PolygonItem.drawDots = allow
+        PolygonBase.drawDots = allow
         self.scene().invalidate()
 
     def markPoints(self, allow=True):
-        PolygonItem.markPoints = allow
+        PolygonBase.markPoints = allow
         self.scene().invalidate()
 
     def mousePressEvent(self, event):

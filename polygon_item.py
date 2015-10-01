@@ -12,15 +12,15 @@ import math
 from PyQt5.QtWidgets import QGraphicsWidget
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QColor, QPolygonF, QPen
+from polygon_base import PolygonBase
 
 
 MAR = 50
 
-class PolygonItem(QGraphicsWidget):
+class PolygonItem(PolygonBase):
     def __init__(self, type, verticesString):
-        QGraphicsWidget.__init__(self)
+        super().__init__()
         self.type = type
-        self.vertices = []
         xlist = []
         ylist = []
         for vertexString in verticesString.split(';'):
@@ -40,9 +40,6 @@ class PolygonItem(QGraphicsWidget):
             self.bottomRight = QPointF(-float('Inf'), -float('Inf'))
             self.rect = QRectF()
 
-    def boundingRect(self):
-        return self.rect
-
     def paint(self, painter, option, widget):
         if len(self.vertices) > 1:
             # init graphics
@@ -53,17 +50,4 @@ class PolygonItem(QGraphicsWidget):
             painter.drawPolyline(QPolygonF(self.vertices))
             if PolygonItem.closePolygon:
                 painter.drawLine(self.vertices[-1], self.vertices[0])
-
-    def getVertices(self):
-        return self.vertices
-
-
-PolygonItem.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(192, 192, 0),
-        QColor(0, 200, 0), QColor(0, 150, 250))
-
-PolygonItem.movePoint = False
-PolygonItem.closePolygon = True
-PolygonItem.drawDots = True
-PolygonItem.drawGrid = False
-PolygonItem.markPoints = True
 

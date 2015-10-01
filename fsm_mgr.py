@@ -15,7 +15,7 @@ class FsmMgr(QObject):
     changeState = pyqtSignal(QObject)
 
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
         self.__fsms = {}
         self.__fsms['normal'] = self.FsmNormal()
         self.__fsms['empty'] = self.FsmEmpty()

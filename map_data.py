@@ -18,7 +18,7 @@ class MapData(QObject):
     updatePointLis = pyqtSignal(list)
 
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
 
     def set(self, polygons, levels):
         self.polygons = polygons

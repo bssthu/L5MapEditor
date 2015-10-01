@@ -13,20 +13,21 @@ from PyQt5.QtWidgets import QGraphicsWidget
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPolygonF, QPen, QBrush
-from polygon_item import PolygonItem
+from polygon_base import PolygonBase
 
 
-class PolygonSelect(QGraphicsWidget):
+MAR = 50
+
+class PolygonSelect(PolygonBase):
     def __init__(self, vertices, rect):
-        QGraphicsWidget.__init__(self)
+        super().__init__()
         self.vertices = vertices
         self.rect = rect
+        self.topLeft = rect.topLeft() + QPointF(MAR, MAR)
+        self.bottomRight = rect.bottomRight() - QPointF(MAR, MAR)
         self.offset = QPointF(0, 0)
         self.oldVertices = vertices
         self.pointId = -1
-
-    def boundingRect(self):
-        return self.rect
 
     def paint(self, painter, option, widget):
         # init graphics
@@ -42,12 +43,12 @@ class PolygonSelect(QGraphicsWidget):
             # draw
             painter.setPen(pen)
             painter.drawPolyline(QPolygonF(vertices))
-            if PolygonItem.drawDots:
+            if PolygonBase.drawDots:
                 painter.fillRect(self.rect, brush)
-            if PolygonItem.closePolygon:
+            if PolygonBase.closePolygon:
                 painter.drawLine(vertices[-1], vertices[0])
         scale = painter.transform().m11()
-        if PolygonItem.markPoints:
+        if PolygonBase.markPoints:
             L_SIZE = 20
             S_SIZE = 10
             if len(vertices) > 0:
@@ -68,13 +69,16 @@ class PolygonSelect(QGraphicsWidget):
 
     def applyOffset(self, offset):  # 移动到某处释放鼠标
         self.vertices = self.__applyOffset(self.vertices, offset)
+        if not PolygonBase.movePoint:
+            self.moveBoundingRect(offset)
         self.offset = QPointF(0, 0)
 
     def __applyOffset(self, vertices, offset):
         vertices = vertices[:]
-        if PolygonItem.movePoint:
+        if PolygonBase.movePoint:
             if self.pointId >= 0:
                 vertices[self.pointId] = vertices[self.pointId] + offset
+                self.updateBoundingRect(vertices[self.pointId])
         else:
             vertices = [vertex + offset for vertex in vertices]
         return vertices
@@ -88,12 +92,4 @@ class PolygonSelect(QGraphicsWidget):
 
     def getOffset(self):
         return self.offset
-
-    def getVertices(self):
-        return self.vertices
-
-    def getVerticesForDb(self):
-        verticesNum = len(self.vertices)
-        verticesString = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in self.vertices)
-        return (verticesNum, verticesString)
 

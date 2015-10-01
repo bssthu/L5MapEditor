@@ -26,7 +26,7 @@ from fsm_mgr import FsmMgr
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
-        QMainWindow.__init__(self)
+        super().__init__()
         # ui
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
