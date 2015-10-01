@@ -37,8 +37,8 @@ class MainWindow(QMainWindow):
         self.ui.polygonTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.ui.polygonTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.polygonTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.childrenTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.ui.childrenTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.ui.secondTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.ui.secondTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.ui.insertTypeComboBox.addItems(DbHelper.getTypeNames())
         self.ui.graphicsView.scale(1, -1)   # invert y
         # data
@@ -50,6 +50,7 @@ class MainWindow(QMainWindow):
         self.__initFsm()
         # other signals/slots
         self.ui.polygonTableWidget.itemSelectionChanged.connect(self.polygonSelectionChanged)
+        self.ui.secondTableWidget.itemSelectionChanged.connect(self.secondSelectionChanged)
         self.ui.scaleSlider.valueChanged.connect(self.scaleSliderChanged)
         self.ui.graphicsView.polygonCreated.connect(self.addPolygon)
         self.ui.graphicsView.polygonUpdated.connect(self.updatePolygon)
@@ -59,11 +60,18 @@ class MainWindow(QMainWindow):
 
     def __initFsm(self):
         self.fsmMgr = FsmMgr()
-        self.fsmMgr.change_state.connect(self.changeState)
+        self.fsmMgr.changeState.connect(self.changeState)
         self.fsmMgr.getFsm('insert').enterState.connect(self.ui.graphicsView.beginInsert)
         self.fsmMgr.getFsm('insert').exitState.connect(self.ui.graphicsView.endInsert)
-        self.fsmMgr.getFsm('move').enterState.connect(self.ui.graphicsView.beginMove)
-        self.fsmMgr.getFsm('move').exitState.connect(self.ui.graphicsView.endMove)
+        self.fsmMgr.getFsm('normal').transferToState.connect(
+                lambda name: self.ui.graphicsView.beginMove() if (name == 'move') else None)
+        self.fsmMgr.getFsm('normal').transferToState.connect(
+                lambda name: self.ui.graphicsView.beginMove() if (name == 'move_point') else None)
+        #self.fsmMgr.getFsm('move_point').enterState.connect(self.ui.graphicsView.beginMove)
+        self.fsmMgr.getFsm('move').transferToState.connect(
+                lambda name: self.ui.graphicsView.endMove() if (name == 'normal') else None)
+        self.fsmMgr.getFsm('move_point').transferToState.connect(
+                lambda name: self.ui.graphicsView.endMove() if (name == 'normal') else None)
         self.changeState(self.fsmMgr.getCurrentState())
 
 # slots
@@ -76,6 +84,7 @@ class MainWindow(QMainWindow):
             self.ui.moveAction.setEnabled(False)
             self.ui.graphicsView.setCursor(QCursor(Qt.ForbiddenCursor))
             self.ui.polygonTableWidget.setEnabled(False)
+            self.ui.secondTableWidget.setEnabled(False)
             self.ui.list2TypeLabel.setText('')
         if new_state == self.fsmMgr.getFsm('normal'):
             self.ui.saveAction.setEnabled(True)
@@ -84,14 +93,16 @@ class MainWindow(QMainWindow):
             self.ui.moveAction.setEnabled(True)
             self.ui.graphicsView.setCursor(QCursor(Qt.ArrowCursor))
             self.ui.polygonTableWidget.setEnabled(True)
+            self.ui.secondTableWidget.setEnabled(True)
             self.ui.list2TypeLabel.setText('children')
-            self.ui.childrenTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+            self.ui.secondTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         elif new_state == self.fsmMgr.getFsm('insert'):
             self.ui.insertAction.setEnabled(True)
             self.ui.deleteAction.setEnabled(False)
             self.ui.moveAction.setEnabled(False)
             self.ui.graphicsView.setCursor(QCursor(Qt.CrossCursor))
             self.ui.polygonTableWidget.setEnabled(True)
+            self.ui.secondTableWidget.setEnabled(True)
             self.ui.list2TypeLabel.setText('children')
         elif new_state == self.fsmMgr.getFsm('move'):
             self.ui.insertAction.setEnabled(False)
@@ -99,14 +110,16 @@ class MainWindow(QMainWindow):
             self.ui.moveAction.setEnabled(True)
             self.ui.graphicsView.setCursor(QCursor(Qt.DragMoveCursor))
             self.ui.polygonTableWidget.setEnabled(False)
+            self.ui.secondTableWidget.setEnabled(True)
             self.ui.list2TypeLabel.setText('points')
-            self.ui.childrenTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+            self.ui.secondTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         elif new_state == self.fsmMgr.getFsm('move_point'):
             self.ui.insertAction.setEnabled(False)
             self.ui.deleteAction.setEnabled(False)
             self.ui.moveAction.setEnabled(True)
             self.ui.graphicsView.setCursor(QCursor(Qt.DragMoveCursor))
             self.ui.polygonTableWidget.setEnabled(False)
+            self.ui.secondTableWidget.setEnabled(False)
             self.ui.list2TypeLabel.setText('points')
 
     @pyqtSlot()
@@ -149,16 +162,21 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_moveAction_triggered(self):
+        stateName = 'move' if not self.ui.movePointAction.isChecked() else 'move_point'
         if self.ui.moveAction.isChecked():
-            if not self.fsmMgr.changeFsm('normal', 'move'):
+            if not self.fsmMgr.changeFsm('normal', stateName):
                 self.ui.moveAction.setChecked(False)
         else:
-            if not self.fsmMgr.changeFsm('move', 'normal'):
+            if not self.fsmMgr.changeFsm(stateName, 'normal'):
                 self.ui.moveAction.setChecked(True)
 
     @pyqtSlot()
-    def on_pickPointAction_triggered(self):
-        self.ui.graphicsView.pickPoint(self.ui.pickPointAction.isChecked())
+    def on_movePointAction_triggered(self):
+        self.ui.graphicsView.movePoint(self.ui.movePointAction.isChecked())
+        if self.ui.movePointAction.isChecked():
+            self.fsmMgr.changeFsm('move', 'move_point')
+        else:
+            self.fsmMgr.changeFsm('move_point', 'move')
 
     @pyqtSlot()
     def on_closedPolygonAction_triggered(self):
@@ -195,7 +213,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(list)
     def updateChildList(self, polygons):
-        self.fillTableWithPolygons(self.ui.childrenTableWidget, polygons)
+        self.fillTableWithPolygons(self.ui.secondTableWidget, polygons)
 
     @pyqtSlot()
     def polygonSelectionChanged(self):
@@ -203,6 +221,11 @@ class MainWindow(QMainWindow):
         if id >= 0:
             polygon = self.mapData.selectPolygon(id)
             self.ui.graphicsView.selectPolygon(polygon)
+
+    @pyqtSlot()
+    def secondSelectionChanged(self):
+        if self.ui.moveAction.isChecked():
+            self.ui.graphicsView.selectPoint(self.ui.secondTableWidget.currentRow())
 
     @pyqtSlot()
     def scaleSliderChanged(self):
@@ -223,9 +246,12 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(list)
     def updatePoints(self, points):
-        self.fillTableWithPoints(self.ui.childrenTableWidget, points)
-        if (self.ui.childrenTableWidget.rowCount() > 0):
-            self.ui.childrenTableWidget.setCurrentCell(0, 0)
+        row = self.ui.secondTableWidget.currentRow()
+        self.fillTableWithPoints(self.ui.secondTableWidget, points)
+        rowCount = self.ui.secondTableWidget.rowCount()
+        if (rowCount > 0):
+            row = min(rowCount - 1, max(0, row))
+            self.ui.secondTableWidget.setCurrentCell(row, 0)
 
     def fillTableWithPolygons(self, tableWidget, polygons):
         tableWidget.clear()

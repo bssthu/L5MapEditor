@@ -84,19 +84,23 @@ class QMapGraphicsView(QGraphicsView):
             self.scene().addItem(self.selectedPolygon)
         self.scene().invalidate()
 
-    def pickPoint(self, pick=True):
-        PolygonItem.pickPoint = pick
+    def movePoint(self, allow=True):
+        PolygonItem.movePoint = allow
 
-    def drawClosedPolygon(self, close=True):
-        PolygonItem.closePolygon = close
+    def selectPoint(self, pointId):
+        self.selectedPolygon.setPointId(pointId)
         self.scene().invalidate()
 
-    def drawSelectionDots(self, draw=True):
-        PolygonItem.drawDots = draw
+    def drawClosedPolygon(self, allow=True):
+        PolygonItem.closePolygon = allow
         self.scene().invalidate()
 
-    def markPoints(self, mark=True):
-        PolygonItem.markPoints = mark
+    def drawSelectionDots(self, allow=True):
+        PolygonItem.drawDots = allow
+        self.scene().invalidate()
+
+    def markPoints(self, allow=True):
+        PolygonItem.markPoints = allow
         self.scene().invalidate()
 
     def mousePressEvent(self, event):
@@ -110,7 +114,8 @@ class QMapGraphicsView(QGraphicsView):
 
     def mouseMoveEvent(self, event):
         pt = self.mapToScene(event.pos())
-        self.mouseMove.emit(pt)
+        if event.buttons() == Qt.LeftButton:
+            self.mouseMove.emit(pt)
 
     def mouseReleaseEvent(self, event):
         button = event.button()

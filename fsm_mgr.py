@@ -12,7 +12,7 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal, QObject
 
 
 class FsmMgr(QObject):
-    change_state = pyqtSignal(QObject)
+    changeState = pyqtSignal(QObject)
 
     def __init__(self):
         QObject.__init__(self)
@@ -76,25 +76,32 @@ class FsmMgr(QObject):
     def __setFsm(self, newState):
         self.state.exitState.emit()
         newState.enterState.emit()
+        self.state.transferToState.emit(str(newState))
         self.state = newState
-        self.change_state.emit(newState)
+        self.changeState.emit(newState)
 
     class BaseFsm(QObject):
         enterState = pyqtSignal()
         exitState = pyqtSignal()
+        transferToState = pyqtSignal(str)
 
     class FsmEmpty(BaseFsm):
-        pass
+        def __str__(self):
+            return 'empty'
 
     class FsmNormal(BaseFsm):
-        pass
+        def __str__(self):
+            return 'normal'
 
     class FsmInsert(BaseFsm):
-        pass
+        def __str__(self):
+            return 'insert'
 
     class FsmMove(BaseFsm):
-        pass
+        def __str__(self):
+            return 'move'
 
     class FsmMovePoint(BaseFsm):
-        pass
+        def __str__(self):
+            return 'move_point'
 

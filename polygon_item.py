@@ -61,8 +61,9 @@ class PolygonItem(QGraphicsWidget):
 PolygonItem.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(192, 192, 0),
         QColor(0, 200, 0), QColor(0, 150, 250))
 
+PolygonItem.movePoint = False
 PolygonItem.closePolygon = True
-PolygonItem.markPoints = False
 PolygonItem.drawDots = True
-PolygonItem.pickPoint = False
+PolygonItem.drawGrid = False
+PolygonItem.markPoints = True
 
