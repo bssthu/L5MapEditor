@@ -15,6 +15,7 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal
 class MapData(QObject):
     updatePolygonList = pyqtSignal(list)
     updateChildrenList = pyqtSignal(list)
+    updatePointLis = pyqtSignal(list)
 
     def __init__(self):
         QObject.__init__(self)
@@ -55,6 +56,13 @@ class MapData(QObject):
         if polygon_id in self.childrenDict:
             children = [self.polygonsDict[child_id] for child_id in self.childrenDict[polygon_id]]
         self.updateChildrenList.emit(children)
+        # get the polygon
+        if polygon_id in self.polygonsDict:
+            return self.polygonsDict[polygon_id]
+        else:
+            return None
+
+    def getPolygon(self, polygon_id):
         # get the polygon
         if polygon_id in self.polygonsDict:
             return self.polygonsDict[polygon_id]

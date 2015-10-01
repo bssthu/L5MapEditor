@@ -26,6 +26,7 @@ class QMapGraphicsView(QGraphicsView):
     leftUp = pyqtSignal(QPointF)
     polygonCreated = pyqtSignal(int, str)
     polygonUpdated = pyqtSignal(int, str)
+    pointsUpdated = pyqtSignal(list)
 
     def __init__(self, centralwidget):
         QGraphicsView.__init__(self, centralwidget)
@@ -61,11 +62,13 @@ class QMapGraphicsView(QGraphicsView):
         if self.selectedPolygon is not None:
             offset = pt - self.moveBase
             self.selectedPolygon.applyOffset(offset)
+            self.pointsUpdated.emit(self.selectedPolygon.getVertices())
 
     @pyqtSlot(QPointF)
     def resetMove(self):
         if self.selectedPolygon is not None:
             self.selectedPolygon.resetOffset()
+            self.pointsUpdated.emit(self.selectedPolygon.getVertices())
 
     def setPolygons(self, polygons):
         self.scene().clear()
@@ -139,6 +142,8 @@ class QMapGraphicsView(QGraphicsView):
         self.rightClick.disconnect(self.removePoint)
 
     def beginMove(self):
+        # data
+        self.pointsUpdated.emit(self.selectedPolygon.getVertices())
         # signal
         self.leftClick.connect(self.setMoveBasePoint)
         self.mouseMove.connect(self.movingToPoint)

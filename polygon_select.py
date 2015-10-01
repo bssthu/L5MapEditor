@@ -69,6 +69,9 @@ class PolygonSelect(QGraphicsWidget):
     def getOffset(self):
         return self.offset
 
+    def getVertices(self):
+        return self.vertices
+
     def getVerticesForDb(self):
         verticesNum = len(self.vertices)
         verticesString = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in self.vertices)

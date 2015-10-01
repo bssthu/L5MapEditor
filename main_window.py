@@ -53,6 +53,7 @@ class MainWindow(QMainWindow):
         self.ui.scaleSlider.valueChanged.connect(self.scaleSliderChanged)
         self.ui.graphicsView.polygonCreated.connect(self.addPolygon)
         self.ui.graphicsView.polygonUpdated.connect(self.updatePolygon)
+        self.ui.graphicsView.pointsUpdated.connect(self.updatePoints)
         # open default database
         self.open('default.sqlite', True)
 
@@ -63,28 +64,50 @@ class MainWindow(QMainWindow):
         self.fsm_mgr.getFsm('insert').exit_state.connect(self.ui.graphicsView.endInsert)
         self.fsm_mgr.getFsm('move').enter_state.connect(self.ui.graphicsView.beginMove)
         self.fsm_mgr.getFsm('move').exit_state.connect(self.ui.graphicsView.endMove)
+        self.changeState(self.fsm_mgr.getCurrentState())
 
 # slots
     @pyqtSlot(QObject)
     def changeState(self, new_state):
+        if new_state == self.fsm_mgr.getFsm('empty'):
+            self.ui.saveAction.setEnabled(False)
+            self.ui.insertAction.setEnabled(False)
+            self.ui.deleteAction.setEnabled(False)
+            self.ui.moveAction.setEnabled(False)
+            self.ui.graphicsView.setCursor(QCursor(Qt.ForbiddenCursor))
+            self.ui.polygonTableWidget.setEnabled(False)
+            self.ui.list2TypeLabel.setText('')
         if new_state == self.fsm_mgr.getFsm('normal'):
+            self.ui.saveAction.setEnabled(True)
             self.ui.insertAction.setEnabled(True)
             self.ui.deleteAction.setEnabled(True)
             self.ui.moveAction.setEnabled(True)
             self.ui.graphicsView.setCursor(QCursor(Qt.ArrowCursor))
             self.ui.polygonTableWidget.setEnabled(True)
+            self.ui.list2TypeLabel.setText('children')
+            self.ui.childrenTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         elif new_state == self.fsm_mgr.getFsm('insert'):
             self.ui.insertAction.setEnabled(True)
             self.ui.deleteAction.setEnabled(False)
             self.ui.moveAction.setEnabled(False)
             self.ui.graphicsView.setCursor(QCursor(Qt.CrossCursor))
             self.ui.polygonTableWidget.setEnabled(True)
+            self.ui.list2TypeLabel.setText('children')
         elif new_state == self.fsm_mgr.getFsm('move'):
             self.ui.insertAction.setEnabled(False)
             self.ui.deleteAction.setEnabled(False)
             self.ui.moveAction.setEnabled(True)
             self.ui.graphicsView.setCursor(QCursor(Qt.DragMoveCursor))
             self.ui.polygonTableWidget.setEnabled(False)
+            self.ui.list2TypeLabel.setText('points')
+            self.ui.childrenTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        elif new_state == self.fsm_mgr.getFsm('move_point'):
+            self.ui.insertAction.setEnabled(False)
+            self.ui.deleteAction.setEnabled(False)
+            self.ui.moveAction.setEnabled(True)
+            self.ui.graphicsView.setCursor(QCursor(Qt.DragMoveCursor))
+            self.ui.polygonTableWidget.setEnabled(False)
+            self.ui.list2TypeLabel.setText('points')
 
     @pyqtSlot()
     def on_openAction_triggered(self):
@@ -198,6 +221,10 @@ class MainWindow(QMainWindow):
         id = self.selectedId()
         self.mapData.updatePolygon(id, verticesNum, vertices)
 
+    @pyqtSlot(list)
+    def updatePoints(self, points):
+        self.fillTableWithPoints(self.ui.childrenTableWidget, points)
+
     def fillTableWithPolygons(self, tableWidget, polygons):
         tableWidget.clear()
         tableWidget.setRowCount(0)
@@ -212,12 +239,24 @@ class MainWindow(QMainWindow):
                 tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAMES[type_id])) # type
         tableWidget.resizeColumnsToContents()
 
+    def fillTableWithPoints(self, tableWidget, points):
+        tableWidget.clear()
+        tableWidget.setRowCount(0)
+        tableWidget.setColumnCount(2)
+        tableWidget.setHorizontalHeaderLabels(('x', 'y'))
+        for row in range(0, len(points)):
+            tableWidget.insertRow(row)
+            tableWidget.setItem(row, 0, QTableWidgetItem(str(points[row].x())))
+            tableWidget.setItem(row, 1, QTableWidgetItem(str(points[row].y())))
+        tableWidget.resizeColumnsToContents()
+
     def open(self, path, quiet=False):
         if os.path.exists(path):
             try:
                 (polygons, levels) = DbHelper.getTables(path)
                 self.mapData.set(polygons, levels)
                 self.path = path
+                self.fsm_mgr.changeFsm('empty', 'normal')
             except sqlite3.Error as error:
                 if quiet:
                     print(repr(error))
