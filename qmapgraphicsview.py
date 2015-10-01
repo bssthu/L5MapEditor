@@ -38,27 +38,27 @@ class QMapGraphicsView(QGraphicsView):
         self.newPolygon.addPoint(pt)
 
     @pyqtSlot(QPointF)
-    def preAddPoint(self, pt):      # 鼠标移动到点
+    def preAddPoint(self, pt):      # 按住鼠标并移动到点
         self.newPolygon.preAddPoint(pt)
         self.scene().invalidate()
 
     @pyqtSlot()
-    def removePoint(self):
+    def removePoint(self):          # 右键移除最新添加的点
         self.newPolygon.removePoint()
 
     @pyqtSlot(QPointF)
-    def setMoveBasePoint(self, pt):
+    def setMoveMouseBasePoint(self, pt):    # 移动起点
         self.moveBase = pt
 
     @pyqtSlot(QPointF)
-    def movingToPoint(self, pt):
+    def setMoveMouseToPoint(self, pt):  # 移动到的点，左键按住
         if self.selectedPolygon is not None:
             offset = pt - self.moveBase
             self.selectedPolygon.setOffset(offset)
             self.scene().invalidate()
 
     @pyqtSlot(QPointF)
-    def finishMove(self, pt):
+    def finishMove(self, pt):       # 移动到的点，松开左键
         if self.selectedPolygon is not None:
             offset = pt - self.moveBase
             self.selectedPolygon.applyOffset(offset)
@@ -75,7 +75,7 @@ class QMapGraphicsView(QGraphicsView):
         for polygon in polygons:
             self.scene().addItem(PolygonItem(polygon[1], polygon[3]))
 
-    def selectPolygon(self, polygon):
+    def selectPolygon(self, polygon):   # 绘制选中的多边形
         if self.selectedPolygon in self.scene().items():
             self.scene().removeItem(self.selectedPolygon)
         if polygon is not None:
@@ -145,8 +145,8 @@ class QMapGraphicsView(QGraphicsView):
         # data
         self.pointsUpdated.emit(self.selectedPolygon.getVertices())
         # signal
-        self.leftClick.connect(self.setMoveBasePoint)
-        self.mouseMove.connect(self.movingToPoint)
+        self.leftClick.connect(self.setMoveMouseBasePoint)
+        self.mouseMove.connect(self.setMoveMouseToPoint)
         self.leftUp.connect(self.finishMove)
         self.rightClick.connect(self.resetMove)
 
@@ -157,8 +157,8 @@ class QMapGraphicsView(QGraphicsView):
             (verticesNum, verticesString) = self.selectedPolygon.getVerticesForDb()
             self.polygonUpdated.emit(verticesNum, verticesString)
         # signal
-        self.leftClick.disconnect(self.setMoveBasePoint)
-        self.mouseMove.disconnect(self.movingToPoint)
+        self.leftClick.disconnect(self.setMoveMouseBasePoint)
+        self.mouseMove.disconnect(self.setMoveMouseToPoint)
         self.leftUp.disconnect(self.finishMove)
         self.rightClick.disconnect(self.resetMove)
 

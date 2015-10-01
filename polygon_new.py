@@ -76,6 +76,7 @@ class PolygonNew(QGraphicsWidget):
     def removePoint(self):
         if len(self.vertices) > 0:
             self.vertices = self.vertices[:-1]
+        self.mousePoint = None
 
     def getVerticesForDb(self):
         verticesNum = len(self.vertices)

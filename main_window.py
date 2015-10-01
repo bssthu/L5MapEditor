@@ -44,7 +44,7 @@ class MainWindow(QMainWindow):
         # data
         self.mapData = MapData()
         self.mapData.updatePolygonList.connect(self.updatePolygonList)
-        self.mapData.updateChildrenList.connect(self.updateChildrenList)
+        self.mapData.updateChildList.connect(self.updateChildList)
         self.path = None
         # fsm
         self.__initFsm()
@@ -58,18 +58,18 @@ class MainWindow(QMainWindow):
         self.open('default.sqlite', True)
 
     def __initFsm(self):
-        self.fsm_mgr = FsmMgr()
-        self.fsm_mgr.change_state.connect(self.changeState)
-        self.fsm_mgr.getFsm('insert').enter_state.connect(self.ui.graphicsView.beginInsert)
-        self.fsm_mgr.getFsm('insert').exit_state.connect(self.ui.graphicsView.endInsert)
-        self.fsm_mgr.getFsm('move').enter_state.connect(self.ui.graphicsView.beginMove)
-        self.fsm_mgr.getFsm('move').exit_state.connect(self.ui.graphicsView.endMove)
-        self.changeState(self.fsm_mgr.getCurrentState())
+        self.fsmMgr = FsmMgr()
+        self.fsmMgr.change_state.connect(self.changeState)
+        self.fsmMgr.getFsm('insert').enterState.connect(self.ui.graphicsView.beginInsert)
+        self.fsmMgr.getFsm('insert').exitState.connect(self.ui.graphicsView.endInsert)
+        self.fsmMgr.getFsm('move').enterState.connect(self.ui.graphicsView.beginMove)
+        self.fsmMgr.getFsm('move').exitState.connect(self.ui.graphicsView.endMove)
+        self.changeState(self.fsmMgr.getCurrentState())
 
 # slots
     @pyqtSlot(QObject)
     def changeState(self, new_state):
-        if new_state == self.fsm_mgr.getFsm('empty'):
+        if new_state == self.fsmMgr.getFsm('empty'):
             self.ui.saveAction.setEnabled(False)
             self.ui.insertAction.setEnabled(False)
             self.ui.deleteAction.setEnabled(False)
@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
             self.ui.graphicsView.setCursor(QCursor(Qt.ForbiddenCursor))
             self.ui.polygonTableWidget.setEnabled(False)
             self.ui.list2TypeLabel.setText('')
-        if new_state == self.fsm_mgr.getFsm('normal'):
+        if new_state == self.fsmMgr.getFsm('normal'):
             self.ui.saveAction.setEnabled(True)
             self.ui.insertAction.setEnabled(True)
             self.ui.deleteAction.setEnabled(True)
@@ -86,14 +86,14 @@ class MainWindow(QMainWindow):
             self.ui.polygonTableWidget.setEnabled(True)
             self.ui.list2TypeLabel.setText('children')
             self.ui.childrenTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-        elif new_state == self.fsm_mgr.getFsm('insert'):
+        elif new_state == self.fsmMgr.getFsm('insert'):
             self.ui.insertAction.setEnabled(True)
             self.ui.deleteAction.setEnabled(False)
             self.ui.moveAction.setEnabled(False)
             self.ui.graphicsView.setCursor(QCursor(Qt.CrossCursor))
             self.ui.polygonTableWidget.setEnabled(True)
             self.ui.list2TypeLabel.setText('children')
-        elif new_state == self.fsm_mgr.getFsm('move'):
+        elif new_state == self.fsmMgr.getFsm('move'):
             self.ui.insertAction.setEnabled(False)
             self.ui.deleteAction.setEnabled(False)
             self.ui.moveAction.setEnabled(True)
@@ -101,7 +101,7 @@ class MainWindow(QMainWindow):
             self.ui.polygonTableWidget.setEnabled(False)
             self.ui.list2TypeLabel.setText('points')
             self.ui.childrenTableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        elif new_state == self.fsm_mgr.getFsm('move_point'):
+        elif new_state == self.fsmMgr.getFsm('move_point'):
             self.ui.insertAction.setEnabled(False)
             self.ui.deleteAction.setEnabled(False)
             self.ui.moveAction.setEnabled(True)
@@ -123,10 +123,10 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def on_insertAction_triggered(self):
         if self.ui.insertAction.isChecked():
-            if not self.fsm_mgr.changeFsm('normal', 'insert'):
+            if not self.fsmMgr.changeFsm('normal', 'insert'):
                 self.ui.insertAction.setChecked(False)
         else:
-            if not self.fsm_mgr.changeFsm('insert', 'normal'):
+            if not self.fsmMgr.changeFsm('insert', 'normal'):
                 self.ui.insertAction.setChecked(True)
 
     @pyqtSlot()
@@ -150,10 +150,10 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def on_moveAction_triggered(self):
         if self.ui.moveAction.isChecked():
-            if not self.fsm_mgr.changeFsm('normal', 'move'):
+            if not self.fsmMgr.changeFsm('normal', 'move'):
                 self.ui.moveAction.setChecked(False)
         else:
-            if not self.fsm_mgr.changeFsm('move', 'normal'):
+            if not self.fsmMgr.changeFsm('move', 'normal'):
                 self.ui.moveAction.setChecked(True)
 
     @pyqtSlot()
@@ -190,11 +190,11 @@ class MainWindow(QMainWindow):
         self.fillTableWithPolygons(self.ui.polygonTableWidget, polygons)
         self.ui.graphicsView.setPolygons(polygons)
         if len(polygons) > 0:
-            if not self.selecteRowById(self.ui.polygonTableWidget, id):
+            if not self.selectRowById(self.ui.polygonTableWidget, id):
                 self.ui.polygonTableWidget.setCurrentCell(0, 0)
 
     @pyqtSlot(list)
-    def updateChildrenList(self, polygons):
+    def updateChildList(self, polygons):
         self.fillTableWithPolygons(self.ui.childrenTableWidget, polygons)
 
     @pyqtSlot()
@@ -224,6 +224,8 @@ class MainWindow(QMainWindow):
     @pyqtSlot(list)
     def updatePoints(self, points):
         self.fillTableWithPoints(self.ui.childrenTableWidget, points)
+        if (self.ui.childrenTableWidget.rowCount() > 0):
+            self.ui.childrenTableWidget.setCurrentCell(0, 0)
 
     def fillTableWithPolygons(self, tableWidget, polygons):
         tableWidget.clear()
@@ -256,7 +258,7 @@ class MainWindow(QMainWindow):
                 (polygons, levels) = DbHelper.getTables(path)
                 self.mapData.set(polygons, levels)
                 self.path = path
-                self.fsm_mgr.changeFsm('empty', 'normal')
+                self.fsmMgr.changeFsm('empty', 'normal')
             except sqlite3.Error as error:
                 if quiet:
                     print(repr(error))
@@ -283,7 +285,7 @@ class MainWindow(QMainWindow):
         else:
             return -1
 
-    def selecteRowById(self, tableWidget, polygonId):
+    def selectRowById(self, tableWidget, polygonId):
         for row in range(0, tableWidget.rowCount()):
             if tableWidget.item(row, 0).text() == str(polygonId):
                 tableWidget.setCurrentCell(row, 0)

@@ -14,7 +14,7 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal
 
 class MapData(QObject):
     updatePolygonList = pyqtSignal(list)
-    updateChildrenList = pyqtSignal(list)
+    updateChildList = pyqtSignal(list)
     updatePointLis = pyqtSignal(list)
 
     def __init__(self):
@@ -33,8 +33,8 @@ class MapData(QObject):
         # notify
         self.updatePolygonList.emit(self.polygons)
 
-    def __listChildren(self):
-        self.childrenDict = {}
+    def __listChildren(self):   # 更新 self.childDict
+        self.childDict = {}
         for level in self.levels[1:]:
             for record in level:
                 polygon_id = record[1]
@@ -43,9 +43,9 @@ class MapData(QObject):
 
     def __addChild(self, parent_id, child_id):
         if parent_id != child_id:
-            if parent_id not in self.childrenDict:
-                self.childrenDict[parent_id] = []
-            self.childrenDict[parent_id].append(child_id)
+            if parent_id not in self.childDict:
+                self.childDict[parent_id] = []
+            self.childDict[parent_id].append(child_id)
 
     def get(self):
         return (self.polygons, self.levels)
@@ -53,9 +53,9 @@ class MapData(QObject):
     def selectPolygon(self, polygon_id):
         # update children
         children = []
-        if polygon_id in self.childrenDict:
-            children = [self.polygonsDict[child_id] for child_id in self.childrenDict[polygon_id]]
-        self.updateChildrenList.emit(children)
+        if polygon_id in self.childDict:
+            children = [self.polygonsDict[child_id] for child_id in self.childDict[polygon_id]]
+        self.updateChildList.emit(children)
         # get the polygon
         if polygon_id in self.polygonsDict:
             return self.polygonsDict[polygon_id]
@@ -76,6 +76,7 @@ class MapData(QObject):
         # add polygon
         polygon = [polygon_id, type, verticesNum, vertices]
         self.polygons.append(polygon)
+        self.polygons.sort(key=lambda polygon: polygon[0])
         self.polygonsDict[polygon_id] = polygon
         # set parent
         if type > 0:
@@ -89,7 +90,7 @@ class MapData(QObject):
         # notify
         self.updatePolygonList.emit(self.polygons)
 
-    def updatePolygon(self, id, verticesNum, vertices):
+    def updatePolygon(self, id, verticesNum, vertices):     # 更新某个多边形的数据
         for i in range(0, len(self.polygons)):
             if self.polygons[i][0] == id:
                 self.polygons[i][2] = verticesNum
@@ -108,8 +109,8 @@ class MapData(QObject):
     def __removePolygon(self, id):
         if id in self.polygonsDict:
             # remove children
-            if id in self.childrenDict:
-                for child_id in self.childrenDict[id]:
+            if id in self.childDict:
+                for child_id in self.childDict[id]:
                     self.__removePolygon(child_id)
             del self.polygonsDict[id]
             self.polygons = [polygon for polygon in self.polygons if polygon[0] != id]
