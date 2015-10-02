@@ -35,11 +35,11 @@ class DbHelper():
         sql = 'INSERT INTO POLYGON (_id, type, vertex_Num, vertices) VALUES (?,?,?,?)'
         for polygon in polygons:
             cur.execute(sql, polygon)
-        sql = 'INSERT INTO %s (_id, polygon_id) VALUES (?,?)' % TYPE_NAMES[0]
+        sql = 'INSERT INTO %s (_id, polygon_id, type) VALUES (?,?,?)' % TYPE_NAMES[0]
         for record in levels[0]:
             cur.execute(sql, record)
         for i in range(1, len(levels)):
-            sql = 'INSERT INTO %s (_id, polygon_id, parent_id) VALUES (?,?,?)' % TYPE_NAMES[i]
+            sql = 'INSERT INTO %s (_id, polygon_id, type, parent_id) VALUES (?,?,?,?)' % TYPE_NAMES[i]
             for record in levels[i]:
                 cur.execute(sql, record)
         conn.commit()

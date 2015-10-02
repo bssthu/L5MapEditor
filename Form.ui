@@ -178,7 +178,10 @@
     <string>打开</string>
    </property>
    <property name="toolTip">
-    <string>打开</string>
+    <string>打开(Ctrl+O)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="saveAction">
@@ -190,7 +193,10 @@
     <string>保存</string>
    </property>
    <property name="toolTip">
-    <string>保存</string>
+    <string>保存(Ctrl+S)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="insertAction">
@@ -265,7 +271,13 @@
      <normaloff>:/img/move.png</normaloff>:/img/move.png</iconset>
    </property>
    <property name="text">
+    <string>移动(&amp;M)</string>
+   </property>
+   <property name="toolTip">
     <string>移动</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+M</string>
    </property>
   </action>
   <action name="closedPolygonAction">

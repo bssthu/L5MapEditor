@@ -14,10 +14,10 @@ make install  # 在 build/ 路径生成 .exe 等，需要 cx_Freeze
 
 ## 数据库结构
 - POLYGON (_id, type, vertex_Num, vertices)
-- L0 (_id, polygon_Id)
-- L1 (_id, polygon_Id, parent_Id)
+- L0 (_id, polygon_Id, type)
+- L1 (_id, polygon_Id, type, parent_Id)
 - ...
-- L4 (_id, polygon_Id, parent_Id)
+- L4 (_id, polygon_Id, type, parent_Id)
 
 POLYGON 为多边形表, type = #i 则在 L#i 表中可查到它的信息。
 

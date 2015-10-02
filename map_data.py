@@ -38,7 +38,7 @@ class MapData(QObject):
         for level in self.levels[1:]:
             for record in level:
                 polygon_id = record[1]
-                parent_id = record[2]
+                parent_id = record[3]
                 self.__addChild(parent_id, polygon_id)
 
     def __addChild(self, parent_id, child_id):
@@ -84,7 +84,7 @@ class MapData(QObject):
                 id = max(record[0] for record in self.levels[type]) + 1
             else:
                 id = 1
-            record = (id, polygon_id, parent_id)
+            record = (id, polygon_id, 0, parent_id)
             self.levels[type].append(record)
             self.__addChild(parent_id, polygon_id)
         # notify
