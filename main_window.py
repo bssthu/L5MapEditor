@@ -27,6 +27,7 @@ from fsm_mgr import FsmMgr
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__()
+        DbHelper.loadTypeNames()
         # ui
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)

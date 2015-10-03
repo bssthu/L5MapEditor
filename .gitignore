@@ -10,3 +10,4 @@ ui_Form.py
 
 *.db
 *.sqlite
+*.cfg

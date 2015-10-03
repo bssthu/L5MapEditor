@@ -35,11 +35,11 @@ class DbHelper():
         sql = 'INSERT INTO POLYGON (_id, type, vertex_Num, vertices) VALUES (?,?,?,?)'
         for polygon in polygons:
             cur.execute(sql, polygon)
-        sql = 'INSERT INTO %s (_id, polygon_id, type) VALUES (?,?,?)' % TYPE_NAMES[0]
+        sql = 'INSERT INTO %s VALUES (?,?,?)' % TYPE_NAMES[0]
         for record in levels[0]:
             cur.execute(sql, record)
         for i in range(1, len(levels)):
-            sql = 'INSERT INTO %s (_id, polygon_id, type, parent_id) VALUES (?,?,?,?)' % TYPE_NAMES[i]
+            sql = 'INSERT INTO %s VALUES (?,?,?,?)' % TYPE_NAMES[i]
             for record in levels[i]:
                 cur.execute(sql, record)
         conn.commit()
@@ -47,6 +47,19 @@ class DbHelper():
 
     def getTypeNames():
         return DbHelper.TYPE_NAMES
+
+    def loadTypeNames():
+        names = []
+        try:
+            fp = open('PolygonType.cfg')
+            for line in fp.readlines():
+                if line.strip() != '':
+                    names.append(line.strip())
+            fp.close()
+        except Error as e:
+            print(repr(e))
+        else:
+            DbHelper.TYPE_NAMES = tuple(names)
 
 
 DbHelper.TYPE_NAMES = ('L0', 'L1', 'L2', 'L3', 'L4')
