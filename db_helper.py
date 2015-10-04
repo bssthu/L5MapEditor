@@ -56,7 +56,7 @@ class DbHelper():
                 if line.strip() != '':
                     names.append(line.strip())
             fp.close()
-        except Error as e:
+        except Exception as e:
             print(repr(e))
         else:
             DbHelper.TYPE_NAMES = tuple(names)
