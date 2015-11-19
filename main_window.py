@@ -207,7 +207,7 @@ class MainWindow(QMainWindow):
     def updatePolygonList(self, polygons):
         id = self.selectedId()
         self.fillTableWithPolygons(self.ui.polygonTableWidget, polygons)
-        self.ui.graphicsView.setPolygons(polygons)
+        self.ui.graphicsView.setPolygons(polygons, len(DbHelper.getTypeNames()))
         if len(polygons) > 0:
             if not self.selectRowById(self.ui.polygonTableWidget, id):
                 self.ui.polygonTableWidget.setCurrentCell(0, 0)
@@ -262,10 +262,12 @@ class MainWindow(QMainWindow):
         if len(polygons) > 0:
             TYPE_NAMES = DbHelper.getTypeNames()
             for rowPos in range(0, len(polygons)):
-                tableWidget.insertRow(rowPos)
-                tableWidget.setItem(rowPos, 0, QTableWidgetItem(str(polygons[rowPos][0]))) # id
                 type_id = polygons[rowPos][1]
-                tableWidget.setItem(rowPos, 1, QTableWidgetItem(TYPE_NAMES[type_id])) # type
+                #if type_id < len(TYPE_NAMES):
+                if True:
+                    tableWidget.insertRow(rowPos)
+                    tableWidget.setItem(rowPos, 0, QTableWidgetItem(str(polygons[rowPos][0]))) # id
+                    tableWidget.setItem(rowPos, 1, QTableWidgetItem(DbHelper.getTypeName(type_id))) # type
         tableWidget.resizeColumnsToContents()
 
     def fillTableWithPoints(self, tableWidget, points):

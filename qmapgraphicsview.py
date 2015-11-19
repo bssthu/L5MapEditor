@@ -71,10 +71,13 @@ class QMapGraphicsView(QGraphicsView):
             self.selectedPolygon.resetOffset()
             self.pointsUpdated.emit(self.selectedPolygon.getVertices())
 
-    def setPolygons(self, polygons):
+    def setPolygons(self, polygons, typeNum):
         self.scene().clear()
         for polygon in polygons:
-            self.scene().addItem(PolygonItem(polygon[1], polygon[3]))
+            type = polygon[1]
+            vertices = polygon[3]
+            if type < typeNum:
+                self.scene().addItem(PolygonItem(type, vertices))
 
     def selectPolygon(self, polygon):   # 绘制选中的多边形
         if self.selectedPolygon in self.scene().items():

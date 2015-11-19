@@ -48,6 +48,12 @@ class DbHelper():
     def getTypeNames():
         return DbHelper.TYPE_NAMES
 
+    def getTypeName(id):
+        if id >= 0 and id < len(DbHelper.TYPE_NAMES):
+            return DbHelper.TYPE_NAMES[id]
+        else:
+            return 'Unknown'
+
     def loadTypeNames():
         names = []
         try:
