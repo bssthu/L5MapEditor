@@ -303,8 +303,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
-     <normaloff>img/grid.png</normaloff>img/grid.png</iconset>
+    <iconset resource="resource.qrc">
+     <normaloff>:/img/grid.png</normaloff>:/img/grid.png</iconset>
    </property>
    <property name="text">
     <string>显示网格</string>
