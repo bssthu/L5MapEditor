@@ -27,7 +27,7 @@ from fsm_mgr import FsmMgr
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__()
-        DbHelper.loadTypeNames()
+        DbHelper.loadLayerNames()
         # ui
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         self.ui.polygonTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.ui.secondTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.secondTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.insertTypeComboBox.addItems(DbHelper.getTypeNames())
+        self.ui.insertLayerComboBox.addItems(DbHelper.getLayerNames())
         self.ui.graphicsView.scale(1, -1)   # invert y
         # data
         self.mapData = MapData()
@@ -207,7 +207,7 @@ class MainWindow(QMainWindow):
     def updatePolygonList(self, polygons):
         id = self.selectedId()
         self.fillTableWithPolygons(self.ui.polygonTableWidget, polygons)
-        self.ui.graphicsView.setPolygons(polygons, len(DbHelper.getTypeNames()))
+        self.ui.graphicsView.setPolygons(polygons, len(DbHelper.getLayerNames()))
         if len(polygons) > 0:
             if not self.selectRowById(self.ui.polygonTableWidget, id):
                 self.ui.polygonTableWidget.setCurrentCell(0, 0)
@@ -237,8 +237,8 @@ class MainWindow(QMainWindow):
     @pyqtSlot(int, str)
     def addPolygon(self, verticesNum, vertices):
         id = self.selectedId()
-        type = self.ui.insertTypeComboBox.currentIndex()
-        self.mapData.addPolygon(id, type, verticesNum, vertices)
+        layer = self.ui.insertTypeComboBox.currentIndex()
+        self.mapData.addPolygon(id, layer, verticesNum, vertices)
 
     @pyqtSlot(int, str)
     def updatePolygon(self, verticesNum, vertices):
@@ -258,16 +258,13 @@ class MainWindow(QMainWindow):
         tableWidget.clear()
         tableWidget.setRowCount(0)
         tableWidget.setColumnCount(2)
-        tableWidget.setHorizontalHeaderLabels(('id', 'type'))
+        tableWidget.setHorizontalHeaderLabels(('id', 'layer'))
         if len(polygons) > 0:
-            TYPE_NAMES = DbHelper.getTypeNames()
             for rowPos in range(0, len(polygons)):
-                type_id = polygons[rowPos][1]
-                #if type_id < len(TYPE_NAMES):
-                if True:
-                    tableWidget.insertRow(rowPos)
-                    tableWidget.setItem(rowPos, 0, QTableWidgetItem(str(polygons[rowPos][0]))) # id
-                    tableWidget.setItem(rowPos, 1, QTableWidgetItem(DbHelper.getTypeName(type_id))) # type
+                layer_id = polygons[rowPos][1]
+                tableWidget.insertRow(rowPos)
+                tableWidget.setItem(rowPos, 0, QTableWidgetItem(str(polygons[rowPos][0]))) # id
+                tableWidget.setItem(rowPos, 1, QTableWidgetItem(DbHelper.getLayerName(layer_id))) # layer
         tableWidget.resizeColumnsToContents()
 
     def fillTableWithPoints(self, tableWidget, points):

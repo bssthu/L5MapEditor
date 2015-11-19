@@ -69,23 +69,23 @@ class MapData(QObject):
         else:
             return None
 
-    def addPolygon(self, parent_id, type, verticesNum, vertices):
+    def addPolygon(self, parent_id, layer, verticesNum, vertices):
         polygon_id = parent_id
         while polygon_id in self.polygonsDict:
             polygon_id += 1
         # add polygon
-        polygon = [polygon_id, type, verticesNum, vertices]
+        polygon = [polygon_id, layer, verticesNum, vertices]
         self.polygons.append(polygon)
         self.polygons.sort(key=lambda polygon: polygon[0])
         self.polygonsDict[polygon_id] = polygon
         # set parent
-        if type > 0:
-            if len(self.levels[type]) > 0:
-                id = max(record[0] for record in self.levels[type]) + 1
+        if layer > 0:
+            if len(self.levels[layer]) > 0:
+                id = max(record[0] for record in self.levels[layer]) + 1
             else:
                 id = 1
             record = (id, polygon_id, 0, parent_id)
-            self.levels[type].append(record)
+            self.levels[layer].append(record)
             self.__addChild(parent_id, polygon_id)
         # notify
         self.updatePolygonList.emit(self.polygons)

@@ -18,9 +18,9 @@ from polygon_base import PolygonBase
 MAR = 50
 
 class PolygonItem(PolygonBase):
-    def __init__(self, type, verticesString):
+    def __init__(self, layer, verticesString):
         super().__init__()
-        self.type = type
+        self.layer = layer
         xlist = []
         ylist = []
         for vertexString in verticesString.split(';'):
@@ -43,7 +43,7 @@ class PolygonItem(PolygonBase):
     def paint(self, painter, option, widget):
         if len(self.vertices) > 1:
             # init graphics
-            pen = QPen(PolygonItem.COLOR[self.type])
+            pen = QPen(PolygonItem.COLOR[self.layer])
             pen.setWidth(0)
             painter.setPen(pen)
             # draw

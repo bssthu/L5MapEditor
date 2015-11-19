@@ -72,14 +72,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="insertTypeLabel">
+       <widget class="QLabel" name="insertLayerLabel">
         <property name="text">
-         <string>插入类型</string>
+         <string>插入层</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="insertTypeComboBox"/>
+       <widget class="QComboBox" name="insertLayerComboBox"/>
       </item>
      </layout>
     </item>
