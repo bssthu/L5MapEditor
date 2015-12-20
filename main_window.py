@@ -237,7 +237,7 @@ class MainWindow(QMainWindow):
     @pyqtSlot(int, str)
     def addPolygon(self, verticesNum, vertices):
         id = self.selectedId()
-        layer = self.ui.insertTypeComboBox.currentIndex()
+        layer = self.ui.insertLayerComboBox.currentIndex()
         self.mapData.addPolygon(id, layer, verticesNum, vertices)
 
     @pyqtSlot(int, str)
