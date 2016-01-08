@@ -16,15 +16,14 @@ from PyQt5.QtGui import QColor, QPolygonF, QPen, QBrush
 from polygon_base import PolygonBase
 
 
-MAR = 50
-
 class PolygonSelect(PolygonBase):
     def __init__(self, vertices, rect):
         super().__init__()
+        self.MAR = 50
         self.vertices = vertices
         self.rect = rect
-        self.topLeft = rect.topLeft() + QPointF(MAR, MAR)
-        self.bottomRight = rect.bottomRight() - QPointF(MAR, MAR)
+        self.topLeft = rect.topLeft() + QPointF(self.MAR, self.MAR)
+        self.bottomRight = rect.bottomRight() - QPointF(self.MAR, self.MAR)
         self.offset = QPointF(0, 0)
         self.oldVertices = vertices
         self.pointId = -1
@@ -60,6 +59,13 @@ class PolygonSelect(PolygonBase):
             painter.setPen(redPen)
             if len(vertices) > 0:
                 painter.drawEllipse(vertices[self.pointId], M_SIZE / scale, M_SIZE / scale)
+
+    def setScale(self, scale):
+        self.MAR = 20 / scale
+        self.generateMarginBoundingRectByTopLeftBottomRight()
+        tmp = self.rect.width()
+        # will crash without prev line, reason unknown
+        self.prepareGeometryChange()
 
     def setPointId(self, pointId):
         self.pointId = pointId

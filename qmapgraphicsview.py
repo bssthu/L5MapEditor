@@ -71,6 +71,12 @@ class QMapGraphicsView(QGraphicsView):
             self.selectedPolygon.resetOffset()
             self.pointsUpdated.emit(self.selectedPolygon.getVertices())
 
+    def scale(self, sx, sy):
+        super().scale(sx, sy)
+        if self.selectedPolygon is not None:
+            self.selectedPolygon.setScale(sx)
+        self.scene().invalidate()
+
     def setPolygons(self, polygons, layerNum):
         self.scene().clear()
         for polygon in polygons:
@@ -78,6 +84,7 @@ class QMapGraphicsView(QGraphicsView):
             vertices = polygon[3]
             if layer < layerNum:
                 self.scene().addItem(PolygonItem(layer, vertices))
+        self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
     def selectPolygon(self, polygon):   # 绘制选中的多边形
         if self.selectedPolygon in self.scene().items():
@@ -85,6 +92,7 @@ class QMapGraphicsView(QGraphicsView):
         if polygon is not None:
             polygonItem = PolygonItem(polygon[1], polygon[3])
             self.selectedPolygon = PolygonSelect(polygonItem.getVertices(), polygonItem.boundingRect())
+            self.selectedPolygon.setScale(self.transform().m11())
             self.scene().addItem(self.selectedPolygon)
         self.scene().invalidate()
 

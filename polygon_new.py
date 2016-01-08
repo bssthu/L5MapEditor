@@ -15,8 +15,6 @@ from PyQt5.QtGui import QColor, QPolygonF, QPen
 from polygon_base import PolygonBase
 
 
-MAR = 50
-
 class PolygonNew(PolygonBase):
     def __init__(self):
         super().__init__()

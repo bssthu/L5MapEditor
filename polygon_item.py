@@ -15,8 +15,6 @@ from PyQt5.QtGui import QColor, QPolygonF, QPen
 from polygon_base import PolygonBase
 
 
-MAR = 50
-
 class PolygonItem(PolygonBase):
     def __init__(self, layer, verticesString):
         super().__init__()
@@ -34,7 +32,7 @@ class PolygonItem(PolygonBase):
         if len(self.vertices) > 0:
             self.topLeft = QPointF(min(xlist), min(ylist))
             self.bottomRight = QPointF(max(xlist), max(ylist))
-            self.rect = QRectF(self.topLeft, self.bottomRight).adjusted(-MAR, -MAR, MAR, MAR)
+            self.generateMarginBoundingRectByTopLeftBottomRight()
         else:
             self.topLeft = QPointF(float('Inf'), float('Inf'))
             self.bottomRight = QPointF(-float('Inf'), -float('Inf'))

@@ -14,11 +14,10 @@ from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QColor, QPolygonF, QPen
 
 
-MAR = 50
-
 class PolygonBase(QGraphicsWidget):
     def __init__(self):
         super().__init__()
+        self.MAR = 50
         self.vertices = []
         self.topLeft = QPointF(float('Inf'), float('Inf'))
         self.bottomRight = QPointF(-float('Inf'), -float('Inf'))
@@ -27,10 +26,13 @@ class PolygonBase(QGraphicsWidget):
     def boundingRect(self):
         return self.rect
 
+    def generateMarginBoundingRectByTopLeftBottomRight(self):
+        self.rect = QRectF(self.topLeft, self.bottomRight).adjusted(-self.MAR, -self.MAR, self.MAR, self.MAR)
+
     def updateBoundingRect(self, pt):
         self.topLeft = QPointF(min(self.topLeft.x(), pt.x()), min(self.topLeft.y(), pt.y()))
         self.bottomRight = QPointF(max(self.bottomRight.x(), pt.x()), max(self.bottomRight.y(), pt.y()))
-        self.rect = QRectF(self.topLeft, self.bottomRight).adjusted(-MAR, -MAR, MAR, MAR)
+        self.generateMarginBoundingRectByTopLeftBottomRight()
         self.prepareGeometryChange()
 
     def moveBoundingRect(self, offset):
