@@ -24,6 +24,7 @@ class PolygonSelect(PolygonBase):
         self.rect = rect
         self.topLeft = rect.topLeft() + QPointF(self.MAR, self.MAR)
         self.bottomRight = rect.bottomRight() - QPointF(self.MAR, self.MAR)
+        self.dotsRect = self.rect
         self.offset = QPointF(0, 0)
         self.oldVertices = vertices
         self.pointId = -1
@@ -43,7 +44,7 @@ class PolygonSelect(PolygonBase):
             painter.setPen(pen)
             painter.drawPolyline(QPolygonF(vertices))
             if PolygonBase.drawDots:
-                painter.fillRect(self.rect, brush)
+                painter.fillRect(self.dotsRect, brush)
             if PolygonBase.closePolygon:
                 painter.drawLine(vertices[-1], vertices[0])
         scale = painter.transform().m11()
@@ -62,10 +63,7 @@ class PolygonSelect(PolygonBase):
 
     def setScale(self, scale):
         self.MAR = 20 / scale
-        self.generateMarginBoundingRectByTopLeftBottomRight()
-        tmp = self.rect.width()
-        # will crash without prev line, reason unknown
-        self.prepareGeometryChange()
+        self.dotsRect = QRectF(self.topLeft, self.bottomRight).adjusted(-self.MAR, -self.MAR, self.MAR, self.MAR)
 
     def setPointId(self, pointId):
         self.pointId = pointId

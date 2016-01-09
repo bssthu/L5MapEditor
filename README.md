@@ -22,6 +22,7 @@ make install  # 在 build/ 路径生成 .exe 等，需要 cx_Freeze
 POLYGON 为多边形表, type = #i 则在 L#i 表中可查到它的信息。
 
 L0 至 L4 表示多边形的从属关系。
+名字可以在`PolygonLayer.cfg`中修改。
 
 ## 界面简介
 略
