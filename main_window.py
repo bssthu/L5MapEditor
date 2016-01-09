@@ -57,6 +57,7 @@ class MainWindow(QMainWindow):
         self.ui.graphicsView.polygonUpdated.connect(self.updatePolygon)
         self.ui.graphicsView.pointsUpdated.connect(self.updatePoints)
         # open default database
+        self.setAcceptDrops(True)
         self.open('default.sqlite', True)
 
     def __initFsm(self):
@@ -317,6 +318,19 @@ class MainWindow(QMainWindow):
                 tableWidget.setCurrentCell(row, 0)
                 return True
         return False
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        url = event.mimeData().urls()[0]
+        if url.isLocalFile():
+            path = url.toLocalFile()
+            if os.path.isfile(path):
+                self.open(path)
 
     def showMessage(self, msg, title='L5MapEditor'):
         QMessageBox.information(self, title, msg);
