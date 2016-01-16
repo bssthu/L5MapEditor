@@ -107,8 +107,8 @@ class QMapGraphicsView(QGraphicsView):
         PolygonBase.closePolygon = allow
         self.scene().invalidate()
 
-    def drawSelectionDots(self, allow=True):
-        PolygonBase.drawDots = allow
+    def highlightSelection(self, allow=True):
+        PolygonBase.highlightSelection = allow
         self.scene().invalidate()
 
     def markPoints(self, allow=True):

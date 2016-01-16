@@ -36,14 +36,14 @@ class PolygonSelect(PolygonBase):
         pen.setStyle(Qt.DashDotLine)
         redPen = QPen(QColor(255, 0, 0))
         redPen.setWidth(0)
-        brush = QBrush(QColor(0, 0, 0), Qt.Dense7Pattern)
         # current vertices
         vertices = self.__applyOffset(self.vertices, self.offset)
         if len(vertices) > 0:
             # draw
             painter.setPen(pen)
             painter.drawPolyline(QPolygonF(vertices))
-            if PolygonBase.drawDots:
+            if PolygonBase.highlightSelection:
+                brush = QBrush(QColor(0, 0, 0, 64))
                 painter.fillRect(self.dotsRect, brush)
             if PolygonBase.closePolygon:
                 painter.drawLine(vertices[-1], vertices[0])

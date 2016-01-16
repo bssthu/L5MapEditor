@@ -55,7 +55,7 @@ PolygonBase.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(192, 192, 0)
 
 PolygonBase.movePoint = False
 PolygonBase.closePolygon = True
-PolygonBase.drawDots = True
+PolygonBase.highlightSelection = True
 PolygonBase.drawGrid = False
 PolygonBase.markPoints = True
 

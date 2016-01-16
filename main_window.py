@@ -185,8 +185,8 @@ class MainWindow(QMainWindow):
         self.ui.graphicsView.drawClosedPolygon(self.ui.closedPolygonAction.isChecked())
 
     @pyqtSlot()
-    def on_dotsAction_triggered(self):
-        self.ui.graphicsView.drawSelectionDots(self.ui.dotsAction.isChecked())
+    def on_highlightAction_triggered(self):
+        self.ui.graphicsView.highlightSelection(self.ui.highlightAction.isChecked())
 
     @pyqtSlot()
     def on_gridAction_triggered(self):
