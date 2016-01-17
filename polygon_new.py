@@ -25,6 +25,7 @@ class PolygonNew(PolygonBase):
         pen.setWidth(0)
         redPen = QPen(QColor(255, 0, 0))
         redPen.setWidth(0)
+        scale = 1
         # lines
         painter.setPen(pen)
         if len(self.vertices) > 1:

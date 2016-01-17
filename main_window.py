@@ -69,7 +69,6 @@ class MainWindow(QMainWindow):
                 lambda name: self.ui.graphicsView.beginMove() if (name == 'move') else None)
         self.fsmMgr.getFsm('normal').transferToState.connect(
                 lambda name: self.ui.graphicsView.beginMove() if (name == 'move_point') else None)
-        #self.fsmMgr.getFsm('move_point').enterState.connect(self.ui.graphicsView.beginMove)
         self.fsmMgr.getFsm('move').transferToState.connect(
                 lambda name: self.ui.graphicsView.endMove() if (name == 'normal') else None)
         self.fsmMgr.getFsm('move_point').transferToState.connect(
@@ -156,7 +155,7 @@ class MainWindow(QMainWindow):
     def on_aboutAction_triggered(self):
         info = 'L5MapEditor by bssthu\n\n'   \
                 'https://github.com/bssthu/L5MapEditor'
-        QMessageBox.about(self, '关于', info);
+        QMessageBox.about(self, '关于', info)
 
     @pyqtSlot()
     def on_exitAction_triggered(self):
@@ -333,7 +332,7 @@ class MainWindow(QMainWindow):
                 self.open(path)
 
     def showMessage(self, msg, title='L5MapEditor'):
-        QMessageBox.information(self, title, msg);
+        QMessageBox.information(self, title, msg)
 
 
 if __name__ == '__main__':

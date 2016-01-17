@@ -8,10 +8,9 @@
 #
 
 
-import math
 from PyQt5.QtWidgets import QGraphicsWidget
 from PyQt5.QtCore import QRectF, QPointF
-from PyQt5.QtGui import QColor, QPolygonF, QPen
+from PyQt5.QtGui import QColor
 
 
 class PolygonBase(QGraphicsWidget):

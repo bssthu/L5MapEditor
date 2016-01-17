@@ -8,16 +8,13 @@
 #
 
 
-import sqlite3
 from PyQt5.QtWidgets import QGraphicsView
 from PyQt5.QtCore import QPointF
-from PyQt5.QtCore import QObject
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
 from polygon_base import PolygonBase
 from polygon_item import PolygonItem
 from polygon_new import PolygonNew
 from polygon_select import PolygonSelect
-from fsm_mgr import FsmMgr
 
 
 class QMapGraphicsView(QGraphicsView):

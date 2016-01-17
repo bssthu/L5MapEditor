@@ -8,8 +8,6 @@
 #
 
 
-import math
-from PyQt5.QtWidgets import QGraphicsWidget
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPolygonF, QPen, QBrush
