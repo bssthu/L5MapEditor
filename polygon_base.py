@@ -13,6 +13,9 @@ from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QColor
 
 
+COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(192, 192, 0), QColor(0, 200, 0), QColor(0, 150, 250))
+
+
 class PolygonBase(QGraphicsWidget):
     def __init__(self):
         super().__init__()
@@ -48,9 +51,6 @@ class PolygonBase(QGraphicsWidget):
         vertices_string = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in self.vertices)
         return vertices_num, vertices_string
 
-
-PolygonBase.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(192, 192, 0),
-                     QColor(0, 200, 0), QColor(0, 150, 250))
 
 PolygonBase.move_point = False
 PolygonBase.close_polygon = True

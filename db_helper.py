@@ -49,7 +49,7 @@ def getTables(file_path):
     for NAME in getLayerNames():
         levels.append(cur.execute('SELECT * FROM %s' % NAME).fetchall())
     conn.close()
-    return (polygons, levels)
+    return polygons, levels
 
 
 def writeTables(file_path, polygons, levels):

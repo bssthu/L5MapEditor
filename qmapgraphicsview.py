@@ -85,7 +85,7 @@ class QMapGraphicsView(QGraphicsView):
                 self.scene().addItem(PolygonItem(layer, vertices))
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
-    def selectPolygon(self, polygon):   # 绘制选中的多边形
+    def setSelectedPolygon(self, polygon):   # 绘制选中的多边形
         if self.selected_polygon in self.scene().items():
             self.scene().removeItem(self.selected_polygon)
         if polygon is not None:
@@ -96,22 +96,22 @@ class QMapGraphicsView(QGraphicsView):
         self.scene().invalidate()
 
     def movePoint(self, allow=True):
-        PolygonBase.movePoint = allow
+        PolygonBase.move_point = allow
 
     def selectPoint(self, point_id):
         self.selected_polygon.setPointId(point_id)
         self.scene().invalidate()
 
     def drawClosedPolygon(self, allow=True):
-        PolygonBase.closePolygon = allow
+        PolygonBase.close_polygon = allow
         self.scene().invalidate()
 
     def highlightSelection(self, allow=True):
-        PolygonBase.highlightSelection = allow
+        PolygonBase.highlight_selection = allow
         self.scene().invalidate()
 
     def markPoints(self, allow=True):
-        PolygonBase.markPoints = allow
+        PolygonBase.mark_points = allow
         self.scene().invalidate()
 
     def mousePressEvent(self, event):

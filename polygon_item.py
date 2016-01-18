@@ -10,7 +10,7 @@
 
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QPolygonF, QPen
-from polygon_base import PolygonBase
+from polygon_base import PolygonBase, COLOR
 
 
 class PolygonItem(PolygonBase):
@@ -23,7 +23,7 @@ class PolygonItem(PolygonBase):
             vertex_string = vertex_string.strip()
             if vertex_string != '':
                 vertex = vertex_string.split(',')
-                vertex_f = [ float(vertex[0]), float(vertex[1]) ]
+                vertex_f = [float(vertex[0]), float(vertex[1])]
                 self.vertices.append(QPointF(vertex_f[0], vertex_f[1]))
                 x_list.append(vertex_f[0])
                 y_list.append(vertex_f[1])
@@ -39,7 +39,7 @@ class PolygonItem(PolygonBase):
     def paint(self, painter, option, widget):
         if len(self.vertices) > 1:
             # init graphics
-            pen = QPen(PolygonBase.COLOR[self.layer])
+            pen = QPen(COLOR[self.layer])
             pen.setWidth(0)
             painter.setPen(pen)
             # draw

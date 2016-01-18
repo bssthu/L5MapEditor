@@ -45,7 +45,6 @@ class MainWindow(QMainWindow):
         # data
         self.map_data = MapData()
         self.map_data.updatePolygonList.connect(self.updatePolygonList)
-        self.map_data.updateChildList.connect(self.updateChildList)
         self.path = None
         # fsm
         self.__initFsm()
@@ -205,11 +204,11 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(list)
     def updatePolygonList(self, polygons):
-        id = self.selectedId()
+        _id = self.selectedId()
         self.fillTableWithPolygons(self.ui.polygon_table_widget, polygons)
         self.ui.graphics_view.setPolygons(polygons, len(db_helper.getLayerNames()))
         if len(polygons) > 0:
-            if not self.selectRowById(self.ui.polygon_table_widget, id):
+            if not self.selectRowById(self.ui.polygon_table_widget, _id):
                 self.ui.polygon_table_widget.setCurrentCell(0, 0)
 
     @pyqtSlot(list)
@@ -218,10 +217,14 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def polygonSelectionChanged(self):
-        id = self.selectedId()
-        if id >= 0:
-            polygon = self.map_data.selectPolygon(id)
-            self.ui.graphics_view.selectPolygon(polygon)
+        _id = self.selectedId()
+        if _id >= 0:
+            # draw polygon
+            polygon = self.map_data.getPolygon(_id)
+            self.ui.graphics_view.setSelectedPolygon(polygon)
+            # list children
+            child_list = self.map_data.getPolygonChildList(_id)
+            self.updateChildList(child_list)
 
     @pyqtSlot()
     def secondSelectionChanged(self):
@@ -236,14 +239,14 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(int, str)
     def addPolygon(self, vertices_num, vertices):
-        id = self.selectedId()
+        _id = self.selectedId()
         layer = self.ui.insert_layer_combo_box.currentIndex()
-        self.map_data.addPolygon(id, layer, vertices_num, vertices)
+        self.map_data.addPolygon(_id, layer, vertices_num, vertices)
 
     @pyqtSlot(int, str)
     def updatePolygon(self, vertices_num, vertices):
-        id = self.selectedId()
-        self.map_data.updatePolygon(id, vertices_num, vertices)
+        _id = self.selectedId()
+        self.map_data.updatePolygon(_id, vertices_num, vertices)
 
     @pyqtSlot(list)
     def updatePoints(self, points):
