@@ -8,44 +8,42 @@
 #
 
 
-import math
-from PyQt5.QtWidgets import QGraphicsWidget
 from PyQt5.QtCore import QRectF, QPointF
-from PyQt5.QtGui import QColor, QPolygonF, QPen
+from PyQt5.QtGui import QPolygonF, QPen
 from polygon_base import PolygonBase
 
 
 class PolygonItem(PolygonBase):
-    def __init__(self, layer, verticesString):
+    def __init__(self, layer, vertices_string):
         super().__init__()
         self.layer = layer
-        xlist = []
-        ylist = []
-        for vertexString in verticesString.split(';'):
-            vertexString = vertexString.strip()
-            if vertexString != '':
-                vertex = vertexString.split(',')
-                vertexF = [ float(vertex[0]), float(vertex[1]) ]
-                self.vertices.append(QPointF(vertexF[0], vertexF[1]))
-                xlist.append(vertexF[0])
-                ylist.append(vertexF[1])
+        x_list = []
+        y_list = []
+        for vertex_string in vertices_string.split(';'):
+            vertex_string = vertex_string.strip()
+            if vertex_string != '':
+                vertex = vertex_string.split(',')
+                vertex_f = [ float(vertex[0]), float(vertex[1]) ]
+                self.vertices.append(QPointF(vertex_f[0], vertex_f[1]))
+                x_list.append(vertex_f[0])
+                y_list.append(vertex_f[1])
         if len(self.vertices) > 0:
-            self.topLeft = QPointF(min(xlist), min(ylist))
-            self.bottomRight = QPointF(max(xlist), max(ylist))
+            self.top_left = QPointF(min(x_list), min(y_list))
+            self.bottom_right = QPointF(max(x_list), max(y_list))
             self.generateMarginBoundingRectByTopLeftBottomRight()
         else:
-            self.topLeft = QPointF(float('Inf'), float('Inf'))
-            self.bottomRight = QPointF(-float('Inf'), -float('Inf'))
+            self.top_left = QPointF(float('Inf'), float('Inf'))
+            self.bottom_right = QPointF(-float('Inf'), -float('Inf'))
             self.rect = QRectF()
 
     def paint(self, painter, option, widget):
         if len(self.vertices) > 1:
             # init graphics
-            pen = QPen(PolygonItem.COLOR[self.layer])
+            pen = QPen(PolygonBase.COLOR[self.layer])
             pen.setWidth(0)
             painter.setPen(pen)
             # draw
             painter.drawPolyline(QPolygonF(self.vertices))
-            if PolygonItem.closePolygon:
+            if PolygonBase.close_polygon:
                 painter.drawLine(self.vertices[-1], self.vertices[0])
 

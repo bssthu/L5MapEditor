@@ -26,78 +26,80 @@ class QMapGraphicsView(QGraphicsView):
     polygonUpdated = pyqtSignal(int, str)
     pointsUpdated = pyqtSignal(list)
 
-    def __init__(self, centralwidget):
-        super().__init__(centralwidget)
-        self.selectedPolygon = None
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.selected_polygon = None
+        self.move_base = QPointF()
+        self.new_polygon = None
 
 # slots
     @pyqtSlot(QPointF)
     def addPoint(self, pt):
-        self.newPolygon.addPoint(pt)
+        self.new_polygon.addPoint(pt)
 
     @pyqtSlot(QPointF)
     def preAddPoint(self, pt):      # 按住鼠标并移动到点
-        self.newPolygon.preAddPoint(pt)
+        self.new_polygon.preAddPoint(pt)
         self.scene().invalidate()
 
     @pyqtSlot()
     def removePoint(self):          # 右键移除最新添加的点
-        self.newPolygon.removePoint()
+        self.new_polygon.removePoint()
 
     @pyqtSlot(QPointF)
     def setMoveMouseBasePoint(self, pt):    # 移动起点
-        self.moveBase = pt
+        self.move_base = pt
 
     @pyqtSlot(QPointF)
     def setMoveMouseToPoint(self, pt):  # 移动到的点，左键按住
-        if self.selectedPolygon is not None:
-            offset = pt - self.moveBase
-            self.selectedPolygon.setOffset(offset)
+        if self.selected_polygon is not None:
+            offset = pt - self.move_base
+            self.selected_polygon.setOffset(offset)
             self.scene().invalidate()
 
     @pyqtSlot(QPointF)
     def finishMove(self, pt):       # 移动到的点，松开左键
-        if self.selectedPolygon is not None:
-            offset = pt - self.moveBase
-            self.selectedPolygon.applyOffset(offset)
-            self.pointsUpdated.emit(self.selectedPolygon.getVertices())
+        if self.selected_polygon is not None:
+            offset = pt - self.move_base
+            self.selected_polygon.applyOffset(offset)
+            self.pointsUpdated.emit(self.selected_polygon.getVertices())
 
     @pyqtSlot(QPointF)
     def resetMove(self):
-        if self.selectedPolygon is not None:
-            self.selectedPolygon.resetOffset()
-            self.pointsUpdated.emit(self.selectedPolygon.getVertices())
+        if self.selected_polygon is not None:
+            self.selected_polygon.resetOffset()
+            self.pointsUpdated.emit(self.selected_polygon.getVertices())
 
     def scale(self, sx, sy):
         super().scale(sx, sy)
-        if self.selectedPolygon is not None:
-            self.selectedPolygon.setScale(sx)
+        if self.selected_polygon is not None:
+            self.selected_polygon.setScale(sx)
         self.scene().invalidate()
 
-    def setPolygons(self, polygons, layerNum):
+    def setPolygons(self, polygons, layer_num):
         self.scene().clear()
         for polygon in polygons:
             layer = polygon[1]
             vertices = polygon[3]
-            if layer < layerNum:
+            if layer < layer_num:
                 self.scene().addItem(PolygonItem(layer, vertices))
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
     def selectPolygon(self, polygon):   # 绘制选中的多边形
-        if self.selectedPolygon in self.scene().items():
-            self.scene().removeItem(self.selectedPolygon)
+        if self.selected_polygon in self.scene().items():
+            self.scene().removeItem(self.selected_polygon)
         if polygon is not None:
-            polygonItem = PolygonItem(polygon[1], polygon[3])
-            self.selectedPolygon = PolygonSelect(polygonItem.getVertices(), polygonItem.boundingRect())
-            self.selectedPolygon.setScale(self.transform().m11())
-            self.scene().addItem(self.selectedPolygon)
+            polygon_item = PolygonItem(polygon[1], polygon[3])
+            self.selected_polygon = PolygonSelect(polygon_item.getVertices(), polygon_item.boundingRect())
+            self.selected_polygon.setScale(self.transform().m11())
+            self.scene().addItem(self.selected_polygon)
         self.scene().invalidate()
 
     def movePoint(self, allow=True):
         PolygonBase.movePoint = allow
 
-    def selectPoint(self, pointId):
-        self.selectedPolygon.setPointId(pointId)
+    def selectPoint(self, point_id):
+        self.selected_polygon.setPointId(point_id)
         self.scene().invalidate()
 
     def drawClosedPolygon(self, allow=True):
@@ -134,8 +136,8 @@ class QMapGraphicsView(QGraphicsView):
 
     def beginInsert(self):
         # data
-        self.newPolygon = PolygonNew()
-        self.scene().addItem(self.newPolygon)
+        self.new_polygon = PolygonNew()
+        self.scene().addItem(self.new_polygon)
         # signal
         self.leftUp.connect(self.addPoint)
         self.leftClick.connect(self.preAddPoint)
@@ -144,11 +146,11 @@ class QMapGraphicsView(QGraphicsView):
 
     def endInsert(self):
         # 处理新多边形
-        (verticesNum, verticesString) = self.newPolygon.getVerticesForDb()
-        self.scene().removeItem(self.newPolygon)
-        self.newPolygon = None
-        if verticesNum > 0:
-            self.polygonCreated.emit(verticesNum, verticesString)
+        (vertices_num, vertices_string) = self.new_polygon.getVerticesForDb()
+        self.scene().removeItem(self.new_polygon)
+        self.new_polygon = None
+        if vertices_num > 0:
+            self.polygonCreated.emit(vertices_num, vertices_string)
         # signal
         self.leftUp.disconnect(self.addPoint)
         self.leftClick.disconnect(self.preAddPoint)
@@ -157,7 +159,7 @@ class QMapGraphicsView(QGraphicsView):
 
     def beginMove(self):
         # data
-        self.pointsUpdated.emit(self.selectedPolygon.getVertices())
+        self.pointsUpdated.emit(self.selected_polygon.getVertices())
         # signal
         self.leftClick.connect(self.setMoveMouseBasePoint)
         self.mouseMove.connect(self.setMoveMouseToPoint)
@@ -166,10 +168,10 @@ class QMapGraphicsView(QGraphicsView):
 
     def endMove(self):
         # data
-        if self.selectedPolygon is not None:
-            self.selectedPolygon.confirmOffset()
-            (verticesNum, verticesString) = self.selectedPolygon.getVerticesForDb()
-            self.polygonUpdated.emit(verticesNum, verticesString)
+        if self.selected_polygon is not None:
+            self.selected_polygon.confirmOffset()
+            (vertices_num, vertices_string) = self.selected_polygon.getVerticesForDb()
+            self.polygonUpdated.emit(vertices_num, vertices_string)
         # signal
         self.leftClick.disconnect(self.setMoveMouseBasePoint)
         self.mouseMove.disconnect(self.setMoveMouseToPoint)

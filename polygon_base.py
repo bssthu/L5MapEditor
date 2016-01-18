@@ -18,25 +18,25 @@ class PolygonBase(QGraphicsWidget):
         super().__init__()
         self.MAR = 50
         self.vertices = []
-        self.topLeft = QPointF(float('Inf'), float('Inf'))
-        self.bottomRight = QPointF(-float('Inf'), -float('Inf'))
+        self.top_left = QPointF(float('Inf'), float('Inf'))
+        self.bottom_right = QPointF(-float('Inf'), -float('Inf'))
         self.rect = QRectF()
 
     def boundingRect(self):
         return self.rect
 
     def generateMarginBoundingRectByTopLeftBottomRight(self):
-        self.rect = QRectF(self.topLeft, self.bottomRight).adjusted(-self.MAR, -self.MAR, self.MAR, self.MAR)
+        self.rect = QRectF(self.top_left, self.bottom_right).adjusted(-self.MAR, -self.MAR, self.MAR, self.MAR)
 
     def updateBoundingRect(self, pt):
-        self.topLeft = QPointF(min(self.topLeft.x(), pt.x()), min(self.topLeft.y(), pt.y()))
-        self.bottomRight = QPointF(max(self.bottomRight.x(), pt.x()), max(self.bottomRight.y(), pt.y()))
+        self.top_left = QPointF(min(self.top_left.x(), pt.x()), min(self.top_left.y(), pt.y()))
+        self.bottom_right = QPointF(max(self.bottom_right.x(), pt.x()), max(self.bottom_right.y(), pt.y()))
         self.generateMarginBoundingRectByTopLeftBottomRight()
         self.prepareGeometryChange()
 
     def moveBoundingRect(self, offset):
-        self.topLeft = self.topLeft + offset
-        self.bottomRight = self.bottomRight + offset
+        self.top_left += offset
+        self.bottom_right += offset
         self.rect.adjust(offset.x(), offset.y(), offset.x(), offset.y())
         self.prepareGeometryChange()
 
@@ -44,17 +44,17 @@ class PolygonBase(QGraphicsWidget):
         return self.vertices
 
     def getVerticesForDb(self):
-        verticesNum = len(self.vertices)
-        verticesString = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in self.vertices)
-        return (verticesNum, verticesString)
+        vertices_num = len(self.vertices)
+        vertices_string = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in self.vertices)
+        return vertices_num, vertices_string
 
 
 PolygonBase.COLOR = (QColor(255, 0, 0), QColor(255, 0, 255), QColor(192, 192, 0),
-        QColor(0, 200, 0), QColor(0, 150, 250))
+                     QColor(0, 200, 0), QColor(0, 150, 250))
 
-PolygonBase.movePoint = False
-PolygonBase.closePolygon = True
-PolygonBase.highlightSelection = True
-PolygonBase.drawGrid = False
-PolygonBase.markPoints = True
+PolygonBase.move_point = False
+PolygonBase.close_polygon = True
+PolygonBase.highlight_selection = True
+PolygonBase.draw_grid = False
+PolygonBase.mark_points = True
 

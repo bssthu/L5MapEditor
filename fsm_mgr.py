@@ -16,12 +16,13 @@ class FsmMgr(QObject):
 
     def __init__(self):
         super().__init__()
-        self.__fsms = {}
-        self.__fsms['normal'] = self.FsmNormal()
-        self.__fsms['empty'] = self.FsmEmpty()
-        self.__fsms['insert'] = self.FsmInsert()
-        self.__fsms['move'] = self.FsmMove()
-        self.__fsms['move_point'] = self.FsmMovePoint()
+        self.__fsms = {
+            'normal': self.FsmNormal(),
+            'empty': self.FsmEmpty(),
+            'insert': self.FsmInsert(),
+            'move': self.FsmMove(),
+            'move_point': self.FsmMovePoint()
+        }
         self.state = self.__fsms['empty']
 
     def getCurrentState(self):
@@ -30,55 +31,55 @@ class FsmMgr(QObject):
     def getFsm(self, name):
         return self.__fsms[name.lower()]
 
-    def changeFsm(self, currName, newName):
-        if self.getFsm(currName) != self.state:
+    def changeFsm(self, curr_name, new_name):
+        if self.getFsm(curr_name) != self.state:
             return False
-        newName = newName.lower()
-        newState = self.getFsm(newName)
+        new_name = new_name.lower()
+        new_state = self.getFsm(new_name)
         if self.state == self.getFsm('empty'):
-            if newState == self.getFsm('normal'):  # empty => normal
-                self.__setFsm(newState)
+            if new_state == self.getFsm('normal'):  # empty => normal
+                self.__setFsm(new_state)
                 return True
         # normal => empty / insert / move / move_point
         elif self.state == self.getFsm('normal'):
-            if newState == self.getFsm('insert'):  # normal => insert
-                self.__setFsm(newState)
+            if new_state == self.getFsm('insert'):  # normal => insert
+                self.__setFsm(new_state)
                 return True
-            elif newState == self.getFsm('move'):  # normal => move
-                self.__setFsm(newState)
+            elif new_state == self.getFsm('move'):  # normal => move
+                self.__setFsm(new_state)
                 return True
-            elif newState == self.getFsm('move_point'):  # normal => move_point
-                self.__setFsm(newState)
+            elif new_state == self.getFsm('move_point'):  # normal => move_point
+                self.__setFsm(new_state)
                 return True
         # insert => normal
         elif self.state == self.getFsm('insert'):
-            if newState == self.getFsm('normal'):  # insert => normal
-                self.__setFsm(newState)
+            if new_state == self.getFsm('normal'):  # insert => normal
+                self.__setFsm(new_state)
                 return True
         # move => normal / move_point
         elif self.state == self.getFsm('move'):
-            if newState == self.getFsm('normal'):  # move => normal
-                self.__setFsm(newState)
+            if new_state == self.getFsm('normal'):  # move => normal
+                self.__setFsm(new_state)
                 return True
-            elif newState == self.getFsm('move_point'):  # move => move_point
-                self.__setFsm(newState)
+            elif new_state == self.getFsm('move_point'):  # move => move_point
+                self.__setFsm(new_state)
                 return True
         # move_point => normal / move
         elif self.state == self.getFsm('move_point'):
-            if newState == self.getFsm('normal'):  # move_point => normal
-                self.__setFsm(newState)
+            if new_state == self.getFsm('normal'):  # move_point => normal
+                self.__setFsm(new_state)
                 return True
-            elif newState == self.getFsm('move'):  # move_point => move
-                self.__setFsm(newState)
+            elif new_state == self.getFsm('move'):  # move_point => move
+                self.__setFsm(new_state)
                 return True
         return False
 
-    def __setFsm(self, newState):
+    def __setFsm(self, new_state):
         self.state.exitState.emit()
-        newState.enterState.emit()
-        self.state.transferToState.emit(str(newState))
-        self.state = newState
-        self.changeState.emit(newState)
+        new_state.enterState.emit()
+        self.state.transferToState.emit(str(new_state))
+        self.state = new_state
+        self.changeState.emit(new_state)
 
     class BaseFsm(QObject):
         enterState = pyqtSignal()

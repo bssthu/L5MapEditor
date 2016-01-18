@@ -28,10 +28,10 @@
    <iconset resource="resource.qrc">
     <normaloff>:/img/map.png</normaloff>:/img/map.png</iconset>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="central_widget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="1" column="4" rowspan="8">
-     <widget class="QSlider" name="scaleSlider">
+     <widget class="QSlider" name="scale_slider">
       <property name="minimum">
        <number>-40</number>
       </property>
@@ -44,7 +44,7 @@
      </widget>
     </item>
     <item row="1" column="1" rowspan="8">
-     <widget class="QTableWidget" name="secondTableWidget">
+     <widget class="QTableWidget" name="second_table_widget">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>1</horstretch>
@@ -54,9 +54,9 @@
      </widget>
     </item>
     <item row="0" column="1" colspan="3">
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="horizontal_layout">
       <item>
-       <widget class="QLabel" name="list2TypeLabel">
+       <widget class="QLabel" name="list2_type_label">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
           <horstretch>1</horstretch>
@@ -72,19 +72,19 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="insertLayerLabel">
+       <widget class="QLabel" name="insert_layer_label">
         <property name="text">
          <string>插入层</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="insertLayerComboBox"/>
+       <widget class="QComboBox" name="insert_layer_combo_box"/>
       </item>
      </layout>
     </item>
     <item row="1" column="3" rowspan="8">
-     <widget class="QMapGraphicsView" name="graphicsView">
+     <widget class="QMapGraphicsView" name="graphics_view">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>4</horstretch>
@@ -99,7 +99,7 @@
      </widget>
     </item>
     <item row="0" column="0" rowspan="9">
-     <widget class="QTableWidget" name="polygonTableWidget">
+     <widget class="QTableWidget" name="polygon_table_widget">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>1</horstretch>
@@ -109,7 +109,7 @@
      </widget>
     </item>
     <item row="0" column="4">
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="zoom_icon_label">
       <property name="maximumSize">
        <size>
         <width>22</width>
@@ -129,7 +129,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
+  <widget class="QMenuBar" name="menu_bar">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -139,8 +139,8 @@
     </rect>
    </property>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QToolBar" name="toolBar">
+  <widget class="QStatusBar" name="status_bar"/>
+  <widget class="QToolBar" name="tool_bar">
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -153,23 +153,23 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="openAction"/>
-   <addaction name="saveAction"/>
+   <addaction name="open_action"/>
+   <addaction name="save_action"/>
    <addaction name="separator"/>
-   <addaction name="insertAction"/>
-   <addaction name="deleteAction"/>
-   <addaction name="moveAction"/>
+   <addaction name="insert_action"/>
+   <addaction name="delete_action"/>
+   <addaction name="move_action"/>
    <addaction name="separator"/>
-   <addaction name="movePointAction"/>
-   <addaction name="closedPolygonAction"/>
-   <addaction name="highlightAction"/>
-   <addaction name="gridAction"/>
-   <addaction name="markPointsAction"/>
+   <addaction name="move_point_action"/>
+   <addaction name="closed_polygon_action"/>
+   <addaction name="highlight_action"/>
+   <addaction name="grid_action"/>
+   <addaction name="mark_points_action"/>
    <addaction name="separator"/>
-   <addaction name="aboutAction"/>
-   <addaction name="exitAction"/>
+   <addaction name="about_action"/>
+   <addaction name="exit_action"/>
   </widget>
-  <action name="openAction">
+  <action name="open_action">
    <property name="icon">
     <iconset resource="resource.qrc">
      <normaloff>:/img/folder.png</normaloff>:/img/folder.png</iconset>
@@ -184,7 +184,7 @@
     <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="saveAction">
+  <action name="save_action">
    <property name="icon">
     <iconset resource="resource.qrc">
      <normaloff>:/img/save.png</normaloff>:/img/save.png</iconset>
@@ -199,7 +199,7 @@
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="insertAction">
+  <action name="insert_action">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -217,7 +217,7 @@
     <string>Alt+I</string>
    </property>
   </action>
-  <action name="deleteAction">
+  <action name="delete_action">
    <property name="icon">
     <iconset resource="resource.qrc">
      <normaloff>:/img/close.png</normaloff>:/img/close.png</iconset>
@@ -232,7 +232,7 @@
     <string>Alt+D</string>
    </property>
   </action>
-  <action name="aboutAction">
+  <action name="about_action">
    <property name="icon">
     <iconset resource="resource.qrc">
      <normaloff>:/img/info.png</normaloff>:/img/info.png</iconset>
@@ -247,7 +247,7 @@
     <string>Alt+A</string>
    </property>
   </action>
-  <action name="exitAction">
+  <action name="exit_action">
    <property name="icon">
     <iconset resource="resource.qrc">
      <normaloff>:/img/exit.png</normaloff>:/img/exit.png</iconset>
@@ -262,7 +262,7 @@
     <string>Alt+X</string>
    </property>
   </action>
-  <action name="moveAction">
+  <action name="move_action">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -280,7 +280,7 @@
     <string>Alt+M</string>
    </property>
   </action>
-  <action name="closedPolygonAction">
+  <action name="closed_polygon_action">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -298,7 +298,7 @@
     <string>绘制封闭多边形</string>
    </property>
   </action>
-  <action name="gridAction">
+  <action name="grid_action">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -310,7 +310,7 @@
     <string>显示网格</string>
    </property>
   </action>
-  <action name="movePointAction">
+  <action name="move_point_action">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -322,7 +322,7 @@
     <string>拾取点</string>
    </property>
   </action>
-  <action name="markPointsAction">
+  <action name="mark_points_action">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -340,7 +340,7 @@
     <string>标出点</string>
    </property>
   </action>
-  <action name="highlightAction">
+  <action name="highlight_action">
    <property name="checkable">
     <bool>true</bool>
    </property>
