@@ -144,10 +144,10 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_delete_action_triggered(self):
-        id = self.selectedId()
-        if id >= 0:
+        _id = self.selectedId()
+        if _id >= 0:
             row = self.ui.polygon_table_widget.currentRow()
-            self.map_data.removePolygon(id)
+            self.map_data.execute('delete polygon %d' % _id)
             self.ui.polygon_table_widget.setCurrentCell(row, 0)
 
     @pyqtSlot()

@@ -18,9 +18,9 @@ def getLayerNames():
     return LAYER_NAMES
 
 
-def getLayerName(id):
-    if 0 <= id < len(LAYER_NAMES):
-        return LAYER_NAMES[id]
+def getLayerName(_id):
+    if 0 <= _id < len(LAYER_NAMES):
+        return LAYER_NAMES[_id]
     else:
         return 'Unknown'
 
