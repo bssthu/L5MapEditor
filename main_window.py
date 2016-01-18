@@ -19,7 +19,7 @@ from PyQt5.QtWidgets import QGraphicsScene, QTableWidgetItem
 from PyQt5.QtWidgets import QFileDialog, QInputDialog
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QObject
 from ui_Form import Ui_MainWindow
-from db_helper import DbHelper
+import db_helper
 from map_data import MapData
 from fsm_mgr import FsmMgr
 
@@ -27,7 +27,7 @@ from fsm_mgr import FsmMgr
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__()
-        DbHelper.loadLayerNames()
+        db_helper.loadLayerNames()
         # ui
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         self.ui.polygonTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.ui.secondTableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.secondTableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.insertLayerComboBox.addItems(DbHelper.getLayerNames())
+        self.ui.insertLayerComboBox.addItems(db_helper.getLayerNames())
         self.ui.graphicsView.scale(1, -1)   # invert y
         # data
         self.mapData = MapData()
@@ -207,7 +207,7 @@ class MainWindow(QMainWindow):
     def updatePolygonList(self, polygons):
         id = self.selectedId()
         self.fillTableWithPolygons(self.ui.polygonTableWidget, polygons)
-        self.ui.graphicsView.setPolygons(polygons, len(DbHelper.getLayerNames()))
+        self.ui.graphicsView.setPolygons(polygons, len(db_helper.getLayerNames()))
         if len(polygons) > 0:
             if not self.selectRowById(self.ui.polygonTableWidget, id):
                 self.ui.polygonTableWidget.setCurrentCell(0, 0)
@@ -264,7 +264,7 @@ class MainWindow(QMainWindow):
                 layer_id = polygons[rowPos][1]
                 tableWidget.insertRow(rowPos)
                 tableWidget.setItem(rowPos, 0, QTableWidgetItem(str(polygons[rowPos][0]))) # id
-                tableWidget.setItem(rowPos, 1, QTableWidgetItem(DbHelper.getLayerName(layer_id))) # layer
+                tableWidget.setItem(rowPos, 1, QTableWidgetItem(db_helper.getLayerName(layer_id))) # layer
         tableWidget.resizeColumnsToContents()
 
     def fillTableWithPoints(self, tableWidget, points):
@@ -281,7 +281,7 @@ class MainWindow(QMainWindow):
     def open(self, path, quiet=False):
         if os.path.exists(path):
             try:
-                (polygons, levels) = DbHelper.getTables(path)
+                (polygons, levels) = db_helper.getTables(path)
                 self.mapData.set(polygons, levels)
                 self.path = path
                 self.fsmMgr.changeFsm('empty', 'normal')
@@ -299,7 +299,7 @@ class MainWindow(QMainWindow):
     def save(self, path):
         try:
             (polygons, levels) = self.mapData.get()
-            DbHelper.writeTables(path, polygons, levels)
+            db_helper.writeTables(path, polygons, levels)
         except sqlite3.Error as error:
             self.showMessage(repr(error))
 
