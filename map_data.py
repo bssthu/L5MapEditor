@@ -20,6 +20,7 @@ class MapData(QObject):
         self.polygons = []
         self.levels = []
         self.child_dict = {}
+        self.additional_dict = {}
         self.polygon_dict = {}
 
     def set(self, polygons, levels):
@@ -38,27 +39,46 @@ class MapData(QObject):
     def get(self):
         return self.polygons, self.levels
 
-    def __updateChildDict(self):   # 更新 self.childDict
+    def invalidate(self):
+        self.__updateChildDict()
+        self.__updateAdditionalDict()
+
+    def __updateChildDict(self):   # 更新 self.child_dict
         self.child_dict = {}
         for level in self.levels[1:]:
             for record in level:
-                polygon_id = record[1]
-                parent_id = record[3]
-                self.__addChild(parent_id, polygon_id)
+                (polygon_id, parent_id) = (record[1], record[3])
+                self.__updateChildInfo(polygon_id, parent_id)
 
-    def __addChild(self, parent_id, child_id):
+    def __updateAdditionalDict(self):   # 更新 self.additional_dict
+        self.additional_dict = {}
+        for level in self.levels:
+            for record in level:
+                (polygon_id, additional) = (record[1], record[2])
+                self.__updateAdditionalOfPolygon(polygon_id, additional)
+
+    def __updateChildInfo(self, child_id, parent_id):
         if parent_id != child_id:
             if parent_id not in self.child_dict:
                 self.child_dict[parent_id] = []
             self.child_dict[parent_id].append(child_id)
 
-    def getPolygonChildList(self, polygon_id):
+    def __updateAdditionalOfPolygon(self, polygon_id, additional):
+        self.additional_dict[polygon_id] = additional
+
+    def getChildListOfPolygon(self, polygon_id):
         # update children
         children = []
         if polygon_id in self.child_dict:
             children = [self.polygon_dict[child_id] for child_id in self.child_dict[polygon_id]]
         # get the polygon
         return children
+
+    def getAdditionalOfPolygon(self, polygon_id):
+        if polygon_id in self.additional_dict:
+            return self.additional_dict[polygon_id]
+        else:
+            return None
 
     def getPolygon(self, polygon_id):
         # get the polygon
@@ -84,7 +104,7 @@ class MapData(QObject):
                 _id = 1
             record = (_id, polygon_id, 0, parent_id)
             self.levels[layer].append(record)
-            self.__addChild(parent_id, polygon_id)
+            self.__updateChildInfo(polygon_id, parent_id)
         # notify
         self.updatePolygonList.emit(self.polygons)
 

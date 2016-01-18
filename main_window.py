@@ -223,7 +223,7 @@ class MainWindow(QMainWindow):
             polygon = self.map_data.getPolygon(_id)
             self.ui.graphics_view.setSelectedPolygon(polygon)
             # list children
-            child_list = self.map_data.getPolygonChildList(_id)
+            child_list = self.map_data.getChildListOfPolygon(_id)
             self.updateChildList(child_list)
 
     @pyqtSlot()
@@ -253,21 +253,28 @@ class MainWindow(QMainWindow):
         row = self.ui.second_table_widget.currentRow()
         self.fillTableWithPoints(self.ui.second_table_widget, points)
         row_count = self.ui.second_table_widget.rowCount()
-        if (row_count > 0):
+        if row_count > 0:
             row = min(row_count - 1, max(0, row))
             self.ui.second_table_widget.setCurrentCell(row, 0)
 
     def fillTableWithPolygons(self, table_widget, polygons):
         table_widget.clear()
         table_widget.setRowCount(0)
-        table_widget.setColumnCount(2)
-        table_widget.setHorizontalHeaderLabels(('id', 'layer'))
+        table_widget.setColumnCount(3)
+        table_widget.setHorizontalHeaderLabels(('id', 'layer', 'type'))
         if len(polygons) > 0:
-            for rowPos in range(0, len(polygons)):
-                layer_id = polygons[rowPos][1]
-                table_widget.insertRow(rowPos)
-                table_widget.setItem(rowPos, 0, QTableWidgetItem(str(polygons[rowPos][0]))) # id
-                table_widget.setItem(rowPos, 1, QTableWidgetItem(db_helper.getLayerName(layer_id))) # layer
+            for row in range(0, len(polygons)):
+                table_widget.insertRow(row)
+                # id
+                _id = polygons[row][0]
+                table_widget.setItem(row, 0, QTableWidgetItem(str(_id)))
+                # layer
+                layer_id = polygons[row][1]
+                layer_name = db_helper.getLayerName(layer_id)
+                table_widget.setItem(row, 1, QTableWidgetItem(layer_name))
+                # type
+                type = self.map_data.getAdditionalOfPolygon(_id)
+                table_widget.setItem(row, 2, QTableWidgetItem(str(type)))
         table_widget.resizeColumnsToContents()
 
     def fillTableWithPoints(self, table_widget, points):
