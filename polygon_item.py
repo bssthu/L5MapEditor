@@ -14,19 +14,15 @@ from polygon_base import PolygonBase, COLOR
 
 
 class PolygonItem(PolygonBase):
-    def __init__(self, layer, vertices_string):
+    def __init__(self, layer, vertices):
         super().__init__()
         self.layer = layer
         x_list = []
         y_list = []
-        for vertex_string in vertices_string.split(';'):
-            vertex_string = vertex_string.strip()
-            if vertex_string != '':
-                vertex = vertex_string.split(',')
-                vertex_f = [float(vertex[0]), float(vertex[1])]
-                self.vertices.append(QPointF(vertex_f[0], vertex_f[1]))
-                x_list.append(vertex_f[0])
-                y_list.append(vertex_f[1])
+        for vertex in vertices:
+            self.vertices.append(QPointF(vertex[0], vertex[1]))
+            x_list.append(vertex[0])
+            y_list.append(vertex[1])
         if len(self.vertices) > 0:
             self.top_left = QPointF(min(x_list), min(y_list))
             self.bottom_right = QPointF(max(x_list), max(y_list))

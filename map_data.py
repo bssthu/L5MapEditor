@@ -35,6 +35,9 @@ class MapData(QObject):
                 'shape': self.executeRemovePolygon,
                 'pt': None
             },
+            'set': {
+                'pt': self.executeSetPoint
+            },
             'mov': {
                 'shape': self.executeMovePolygon,
                 'pt': self.executeMovePoint
@@ -114,7 +117,7 @@ class MapData(QObject):
         for polygon in self.polygons:
             if polygon[0] == _id:
                 polygon[2] = len(vertices)
-                polygon[3] = ';\n'.join('%f,%f' % (vertex[0], vertex[1]) for vertex in vertices)
+                polygon[3] = vertices
                 self.polygon_dict[_id] = polygon
                 break
 
@@ -144,6 +147,12 @@ class MapData(QObject):
         _id = int(commands[0])
         self.__removePolygon(_id)
 
+    def executeSetPoint(self, commands):
+        if len(commands) != 4:
+            raise Exception(COMMAND_GRAMMAR_ERROR)
+        (_id, pt_id, dx, dy) = (int(commands[0]), int(commands[1]), float(commands[2]), float(commands[3]))
+        self.__setPoint(_id, pt_id, dx, dy)
+
     def executeMovePolygon(self, commands):
         if len(commands) != 3:
             raise Exception(COMMAND_GRAMMAR_ERROR)
@@ -157,7 +166,7 @@ class MapData(QObject):
         pass
 
     def __addPolygon(self, polygon_id, layer, additional, parent_id):
-        polygon = [polygon_id, layer, 0, '']
+        polygon = [polygon_id, layer, 0, []]
         self.polygons.append(polygon)
         self.polygons.sort(key=lambda p: polygon[0])
         self.polygon_dict[polygon_id] = polygon
@@ -176,13 +185,8 @@ class MapData(QObject):
     def __appendPoint(self, polygon_id, x, y):
         polygon = self.polygon_dict[polygon_id]
         vertex_num = int(polygon[2])
-        vertex_string = polygon[3].strip()
-        if not vertex_string.endswith(';'):
-            vertex_string += ';'
-        vertex_string += '\n%f, %f' % (x, y)
-        vertex_num += 1
-        polygon[2] = vertex_num
-        polygon[3] = vertex_string
+        polygon[2] = vertex_num + 1
+        polygon[3].append([x, y])
 
     def __removePolygon(self, _id):
         if _id in self.polygon_dict:
@@ -194,6 +198,10 @@ class MapData(QObject):
             self.polygons = [polygon for polygon in self.polygons if polygon[0] != _id]
             for i in range(0, len(self.levels)):
                 self.levels[i] = [level for level in self.levels[i] if level[1] != _id]
+
+    def __setPoint(self, polygon_id, pt_id, dx, dy):
+        polygon = self.polygon_dict[polygon_id]
+        # TODO: set pt
 
     def __movePolygon(self, polygon_id, dx, dy):
         polygon = self.polygon_dict[polygon_id]

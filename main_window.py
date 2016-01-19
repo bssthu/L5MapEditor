@@ -247,6 +247,7 @@ class MainWindow(QMainWindow):
             self.ui.second_table_widget.setCurrentCell(row, 0)
 
     def execute(self, command):
+        print(command)
         try:
             self.map_data.execute(command)
             self.updatePolygonList(self.map_data.getPolygons())

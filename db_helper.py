@@ -45,6 +45,14 @@ def getTables(file_path):
     cur = conn.cursor()
     polygons = cur.execute('SELECT * FROM POLYGON').fetchall()
     polygons = [list(polygon) for polygon in polygons]
+    for polygon in polygons:
+        vertex_str = polygon[3].strip().strip(';')
+        if vertex_str == '':
+            polygon[3] = []
+            polygon[2] = 0
+        else:
+            polygon[3] = [[float(v.strip()) for v in pt_str.strip().split(',')] for pt_str in vertex_str.split(';')]
+            polygon[2] = len(polygon[3])
     levels = []
     for NAME in getLayerNames():
         levels.append(cur.execute('SELECT * FROM %s' % NAME).fetchall())
@@ -63,7 +71,11 @@ def writeTables(file_path, polygons, levels):
     # insert
     sql = 'INSERT INTO POLYGON (_id, layer, vertex_Num, vertices) VALUES (?,?,?,?)'
     for polygon in polygons:
-        cur.execute(sql, polygon)
+        polygon_copy = polygon[0:3]
+        vertex_str = ';\n'.join('%f,%f' % (vertex[0], vertex[1]) for vertex in polygon[3])
+        polygon_copy.append(vertex_str)
+        polygon_copy += polygon[4:]
+        cur.execute(sql, polygon_copy)
     sql = 'INSERT INTO %s VALUES (?,?,?)' % LAYER_NAMES[0]
     for record in levels[0]:
         cur.execute(sql, record)
