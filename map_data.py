@@ -150,8 +150,8 @@ class MapData(QObject):
     def executeSetPoint(self, commands):
         if len(commands) != 4:
             raise Exception(COMMAND_GRAMMAR_ERROR)
-        (_id, pt_id, dx, dy) = (int(commands[0]), int(commands[1]), float(commands[2]), float(commands[3]))
-        self.__setPoint(_id, pt_id, dx, dy)
+        (_id, pt_id, x, y) = (int(commands[0]), int(commands[1]), float(commands[2]), float(commands[3]))
+        self.__setPoint(_id, pt_id, x, y)
 
     def executeMovePolygon(self, commands):
         if len(commands) != 3:
@@ -199,13 +199,17 @@ class MapData(QObject):
             for i in range(0, len(self.levels)):
                 self.levels[i] = [level for level in self.levels[i] if level[1] != _id]
 
-    def __setPoint(self, polygon_id, pt_id, dx, dy):
+    def __setPoint(self, polygon_id, pt_id, x, y):
         polygon = self.polygon_dict[polygon_id]
-        # TODO: set pt
+        point = polygon[3][pt_id]
+        point[0] = x
+        point[1] = y
 
     def __movePolygon(self, polygon_id, dx, dy):
         polygon = self.polygon_dict[polygon_id]
-        # TODO: move polygon
+        for point in polygon[3]:
+            point[0] += dx
+            point[1] += dy
 
 
 def createChildDict(levels):   # 更新 self.child_dict
