@@ -242,10 +242,10 @@ class MainWindow(QMainWindow):
         for vertex in vertices:
             self.execute('add pt %d %f %f' % (_id, vertex[0], vertex[1]))
 
-    @pyqtSlot(int, str)
-    def updatePolygon(self, vertices_num, vertices):
+    @pyqtSlot(list)
+    def updatePolygon(self, vertices):
         _id = self.selectedId()
-        self.map_data.updatePolygon(_id, vertices_num, vertices)
+        self.map_data.updatePolygon(_id, vertices)
 
     @pyqtSlot(list)
     def updatePoints(self, points):

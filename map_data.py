@@ -109,11 +109,11 @@ class MapData(QObject):
             _id += 1
         return _id
 
-    def updatePolygon(self, _id, vertices_num, vertices):     # 更新某个多边形的数据
+    def updatePolygon(self, _id, vertices):     # 更新某个多边形的数据
         for polygon in self.polygons:
             if polygon[0] == _id:
-                polygon[2] = vertices_num
-                polygon[3] = vertices
+                polygon[2] = len(vertices)
+                polygon[3] = ';\n'.join('%f,%f' % (vertex[0], vertex[1]) for vertex in vertices)
                 self.polygon_dict[_id] = polygon
                 break
         # notify

@@ -23,7 +23,7 @@ class QMapGraphicsView(QGraphicsView):
     mouseMove = pyqtSignal(QPointF)
     leftUp = pyqtSignal(QPointF)
     polygonCreated = pyqtSignal(list)
-    polygonUpdated = pyqtSignal(int, str)
+    polygonUpdated = pyqtSignal(list)
     pointsUpdated = pyqtSignal(list)
 
     def __init__(self, parent):
@@ -170,8 +170,8 @@ class QMapGraphicsView(QGraphicsView):
         # data
         if self.selected_polygon is not None:
             self.selected_polygon.confirmOffset()
-            (vertices_num, vertices_string) = self.selected_polygon.getVerticesForDb()
-            self.polygonUpdated.emit(vertices_num, vertices_string)
+            vertices = self.selected_polygon.getVerticesForDb()
+            self.polygonUpdated.emit(vertices)
         # signal
         self.leftClick.disconnect(self.setMoveMouseBasePoint)
         self.mouseMove.disconnect(self.setMoveMouseToPoint)
