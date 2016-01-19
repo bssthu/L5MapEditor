@@ -9,7 +9,6 @@
 
 
 from PyQt5.QtCore import QObject
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
 
 
 COMMAND_UNRESOLVED = '无法解析的命令'

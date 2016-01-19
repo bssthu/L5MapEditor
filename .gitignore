@@ -12,6 +12,7 @@ ui_Form.py
 *.sqlite
 *.cfg
 *.log
+*.json
 
 .idea/
 *.iml

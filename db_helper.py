@@ -9,35 +9,7 @@
 
 
 import sqlite3
-
-
-LAYER_NAMES = ('L0', 'L1', 'L2', 'L3', 'L4')
-
-
-def getLayerNames():
-    return LAYER_NAMES
-
-
-def getLayerName(_id):
-    if 0 <= _id < len(LAYER_NAMES):
-        return LAYER_NAMES[_id]
-    else:
-        return 'Unknown'
-
-
-def loadLayerNames():
-    global LAYER_NAMES
-    names = []
-    try:
-        fp = open('PolygonLayer.cfg')
-        for line in fp.readlines():
-            if line.strip() != '':
-                names.append(line.strip())
-        fp.close()
-    except Exception as e:
-        print(repr(e))
-    else:
-        LAYER_NAMES = tuple(names)
+import config_loader
 
 
 def getTables(file_path):
@@ -54,14 +26,15 @@ def getTables(file_path):
             polygon[3] = [[float(v.strip()) for v in pt_str.strip().split(',')] for pt_str in vertex_str.split(';')]
             polygon[2] = len(polygon[3])
     levels = []
-    for NAME in getLayerNames():
+    for NAME in config_loader.getLayerNames():
+        print(NAME)
         levels.append(cur.execute('SELECT * FROM %s' % NAME).fetchall())
     conn.close()
     return polygons, levels
 
 
 def writeTables(file_path, polygons, levels):
-    LAYER_NAMES = getLayerNames()
+    LAYER_NAMES = config_loader.getLayerNames()
     conn = sqlite3.connect(file_path)
     cur = conn.cursor()
     # clear

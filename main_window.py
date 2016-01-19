@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import QGraphicsScene, QTableWidgetItem
 from PyQt5.QtWidgets import QFileDialog, QInputDialog
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QObject
 from ui_Form import Ui_MainWindow
+import config_loader
 import db_helper
 from map_data import MapData
 from fsm_mgr import FsmMgr
@@ -27,7 +28,7 @@ from fsm_mgr import FsmMgr
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__()
-        db_helper.loadLayerNames()
+        config_loader.loadAll()
         # ui
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -40,7 +41,7 @@ class MainWindow(QMainWindow):
         self.ui.polygon_table_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.ui.second_table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.second_table_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.insert_layer_combo_box.addItems(db_helper.getLayerNames())
+        self.ui.insert_layer_combo_box.addItems(config_loader.getLayerNames())
         self.ui.graphics_view.scale(1, -1)   # invert y
         # data
         self.map_data = MapData()
@@ -264,7 +265,7 @@ class MainWindow(QMainWindow):
     def updatePolygonList(self, polygons):
         _id = self.selectedId()
         self.fillTableWithPolygons(self.ui.polygon_table_widget, polygons)
-        self.ui.graphics_view.setPolygons(polygons, len(db_helper.getLayerNames()))
+        self.ui.graphics_view.setPolygons(polygons, len(config_loader.getLayerNames()))
         if len(polygons) > 0:
             if not self.selectRowById(self.ui.polygon_table_widget, _id):
                 self.ui.polygon_table_widget.setCurrentCell(0, 0)
@@ -282,7 +283,7 @@ class MainWindow(QMainWindow):
                 table_widget.setItem(row, 0, QTableWidgetItem(str(_id)))
                 # layer
                 layer_id = polygons[row][1]
-                layer_name = db_helper.getLayerName(layer_id)
+                layer_name = config_loader.getLayerName(layer_id)
                 table_widget.setItem(row, 1, QTableWidgetItem(layer_name))
                 # type
                 type = self.map_data.getAdditionalOfPolygon(_id)
