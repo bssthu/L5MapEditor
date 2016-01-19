@@ -72,6 +72,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="insert_additional_label">
+        <property name="text">
+         <string>属性</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="insert_additional_combo_box"/>
+      </item>
+      <item>
        <widget class="QLabel" name="insert_layer_label">
         <property name="text">
          <string>插入层</string>
@@ -155,6 +165,9 @@
    </attribute>
    <addaction name="open_action"/>
    <addaction name="save_action"/>
+   <addaction name="separator"/>
+   <addaction name="undo_action"/>
+   <addaction name="redo_action"/>
    <addaction name="separator"/>
    <addaction name="insert_action"/>
    <addaction name="delete_action"/>
@@ -353,6 +366,30 @@
    </property>
    <property name="text">
     <string>突出选中图形</string>
+   </property>
+  </action>
+  <action name="undo_action">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/img/undo.png</normaloff>:/img/undo.png</iconset>
+   </property>
+   <property name="text">
+    <string>撤销</string>
+   </property>
+   <property name="toolTip">
+    <string>撤销</string>
+   </property>
+  </action>
+  <action name="redo_action">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/img/redo.png</normaloff>:/img/redo.png</iconset>
+   </property>
+   <property name="text">
+    <string>重做</string>
+   </property>
+   <property name="toolTip">
+    <string>重做</string>
    </property>
   </action>
  </widget>
