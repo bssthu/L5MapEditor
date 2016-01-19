@@ -22,7 +22,7 @@ class QMapGraphicsView(QGraphicsView):
     rightClick = pyqtSignal()
     mouseMove = pyqtSignal(QPointF)
     leftUp = pyqtSignal(QPointF)
-    polygonCreated = pyqtSignal(int, str)
+    polygonCreated = pyqtSignal(list)
     polygonUpdated = pyqtSignal(int, str)
     pointsUpdated = pyqtSignal(list)
 
@@ -146,11 +146,11 @@ class QMapGraphicsView(QGraphicsView):
 
     def endInsert(self):
         # 处理新多边形
-        (vertices_num, vertices_string) = self.new_polygon.getVerticesForDb()
+        vertices = self.new_polygon.getVerticesForDb()
         self.scene().removeItem(self.new_polygon)
         self.new_polygon = None
-        if vertices_num > 0:
-            self.polygonCreated.emit(vertices_num, vertices_string)
+        if len(vertices) > 0:
+            self.polygonCreated.emit(vertices)
         # signal
         self.leftUp.disconnect(self.addPoint)
         self.leftClick.disconnect(self.preAddPoint)

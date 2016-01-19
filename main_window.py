@@ -84,7 +84,6 @@ class MainWindow(QMainWindow):
             self.ui.move_action.setEnabled(False)
             self.ui.graphics_view.setCursor(QCursor(Qt.ForbiddenCursor))
             self.ui.polygon_table_widget.setEnabled(False)
-            self.ui.second_table_widget.setEnabled(False)
             self.ui.list2_type_label.setText('')
         if new_state == self.fsm_mgr.getFsm('normal'):
             self.ui.save_action.setEnabled(True)
@@ -93,7 +92,6 @@ class MainWindow(QMainWindow):
             self.ui.move_action.setEnabled(True)
             self.ui.graphics_view.setCursor(QCursor(Qt.ArrowCursor))
             self.ui.polygon_table_widget.setEnabled(True)
-            self.ui.second_table_widget.setEnabled(True)
             self.ui.list2_type_label.setText('children')
             self.ui.second_table_widget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         elif new_state == self.fsm_mgr.getFsm('insert'):
@@ -102,7 +100,6 @@ class MainWindow(QMainWindow):
             self.ui.move_action.setEnabled(False)
             self.ui.graphics_view.setCursor(QCursor(Qt.CrossCursor))
             self.ui.polygon_table_widget.setEnabled(True)
-            self.ui.second_table_widget.setEnabled(True)
             self.ui.list2_type_label.setText('children')
         elif new_state == self.fsm_mgr.getFsm('move'):
             self.ui.insert_action.setEnabled(False)
@@ -110,7 +107,6 @@ class MainWindow(QMainWindow):
             self.ui.move_action.setEnabled(True)
             self.ui.graphics_view.setCursor(QCursor(Qt.DragMoveCursor))
             self.ui.polygon_table_widget.setEnabled(False)
-            self.ui.second_table_widget.setEnabled(True)
             self.ui.list2_type_label.setText('points')
             self.ui.second_table_widget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         elif new_state == self.fsm_mgr.getFsm('move_point'):
@@ -119,7 +115,6 @@ class MainWindow(QMainWindow):
             self.ui.move_action.setEnabled(True)
             self.ui.graphics_view.setCursor(QCursor(Qt.DragMoveCursor))
             self.ui.polygon_table_widget.setEnabled(False)
-            self.ui.second_table_widget.setEnabled(False)
             self.ui.list2_type_label.setText('points')
 
     @pyqtSlot()
@@ -147,7 +142,7 @@ class MainWindow(QMainWindow):
         _id = self.selectedId()
         if _id >= 0:
             row = self.ui.polygon_table_widget.currentRow()
-            self.map_data.execute('delete polygon %d' % _id)
+            self.execute('del shape %d' % _id)
             self.ui.polygon_table_widget.setCurrentCell(row, 0)
 
     @pyqtSlot()
@@ -237,11 +232,15 @@ class MainWindow(QMainWindow):
         self.ui.graphics_view.resetTransform()
         self.ui.graphics_view.scale(scale, -scale)
 
-    @pyqtSlot(int, str)
-    def addPolygon(self, vertices_num, vertices):
-        _id = self.selectedId()
+    @pyqtSlot(list)
+    def addPolygon(self, vertices):
+        parent_id = self.selectedId()
+        _id = self.map_data.getSpareId(parent_id)
         layer = self.ui.insert_layer_combo_box.currentIndex()
-        self.map_data.addPolygon(_id, layer, vertices_num, vertices)
+        additional = 0
+        self.execute('add shape %d %d %s %d' % (_id, layer, str(additional), parent_id))
+        for vertex in vertices:
+            self.execute('add pt %d %f %f' % (_id, vertex[0], vertex[1]))
 
     @pyqtSlot(int, str)
     def updatePolygon(self, vertices_num, vertices):
@@ -256,6 +255,15 @@ class MainWindow(QMainWindow):
         if row_count > 0:
             row = min(row_count - 1, max(0, row))
             self.ui.second_table_widget.setCurrentCell(row, 0)
+
+    def execute(self, command):
+        try:
+            self.map_data.execute(command)
+        except Exception as e:
+            self.showMessage(repr(e), '执行命令出错')
+            return False
+        else:
+            return True
 
     def fillTableWithPolygons(self, table_widget, polygons):
         table_widget.clear()

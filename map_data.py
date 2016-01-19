@@ -29,12 +29,16 @@ class MapData(QObject):
         self.polygon_dict = {}
         self.command_tree = {
             'add': {
-                'polygon': None,
-                'point': None
+                'shape': self.executeAddPolygon,
+                'pt': self.executeAddPoint
             },
-            'delete': {
-                'polygon': self.executeRemovePolygon,
-                'point': None
+            'del': {
+                'shape': self.executeRemovePolygon,
+                'pt': None
+            },
+            'mov': {
+                'shape': None,
+                'pt': None
             }
         }
 
@@ -69,7 +73,7 @@ class MapData(QObject):
                 self.executeInTree(leaf, commands[1:])
             elif callable(leaf):
                 # call it
-                leaf(*commands[1:])
+                leaf(*[commands[1:]])
             # else it's the tree's problem
         else:
             raise Exception(COMMAND_UNRESOLVED)
@@ -77,6 +81,7 @@ class MapData(QObject):
     def invalidate(self):
         self.child_dict = createChildDict(self.levels)
         self.additional_dict = createAdditionalDict(self.levels)
+        self.updatePolygonList.emit(self.polygons)
 
     def getChildListOfPolygon(self, polygon_id):
         # update children
@@ -99,26 +104,10 @@ class MapData(QObject):
         else:
             return None
 
-    def addPolygon(self, parent_id, layer, vertices_num, vertices):
-        polygon_id = parent_id
-        while polygon_id in self.polygon_dict:
-            polygon_id += 1
-        # add polygon
-        polygon = [polygon_id, layer, vertices_num, vertices]
-        self.polygons.append(polygon)
-        self.polygons.sort(key=lambda p: polygon[0])
-        self.polygon_dict[polygon_id] = polygon
-        # set parent
-        if layer > 0:
-            if len(self.levels[layer]) > 0:
-                _id = max(record[0] for record in self.levels[layer]) + 1
-            else:
-                _id = 1
-            record = (_id, polygon_id, 0, parent_id)
-            self.levels[layer].append(record)
-            setParentOfChild(self.child_dict, polygon_id, parent_id)
-        # notify
-        self.updatePolygonList.emit(self.polygons)
+    def getSpareId(self, _id):
+        while _id in self.polygon_dict:
+            _id += 1
+        return _id
 
     def updatePolygon(self, _id, vertices_num, vertices):     # 更新某个多边形的数据
         for polygon in self.polygons:
@@ -130,14 +119,63 @@ class MapData(QObject):
         # notify
         self.updatePolygonList.emit(self.polygons)
 
+    def executeAddPolygon(self, commands):
+        if len(commands) == 3:
+            (_id, layer, additional) = (int(commands[0]), int(commands[1]), commands[2])
+            parent_id = None
+        elif len(commands) == 4:
+            (_id, layer, additional, parent_id) = (int(commands[0]), int(commands[1]), int(commands[2]), int(commands[3]))
+        else:
+            raise Exception(COMMAND_GRAMMAR_ERROR)
+        # add
+        self.__addPolygon(_id, layer, additional, parent_id)
+        # notify
+        self.invalidate()
+
+    def executeAddPoint(self, commands):
+        if len(commands) != 3:
+            raise Exception(COMMAND_GRAMMAR_ERROR)
+        (_id, x, y) = (int(commands[0]), float(commands[1]), float(commands[2]))
+        self.__appendPoint(_id, x, y)
+        # notify
+        self.invalidate()
+
     def executeRemovePolygon(self, commands):
         if len(commands) != 1:
             raise Exception(COMMAND_GRAMMAR_ERROR)
         _id = int(commands[0])
         self.__removePolygon(_id)
-        self.invalidate()
         # notify
-        self.updatePolygonList.emit(self.polygons)
+        self.invalidate()
+
+    def __addPolygon(self, polygon_id, layer, additional, parent_id):
+        polygon = [polygon_id, layer, 0, '']
+        self.polygons.append(polygon)
+        self.polygons.sort(key=lambda p: polygon[0])
+        self.polygon_dict[polygon_id] = polygon
+        # update self.levels, set parent info
+        if layer >= 0:
+            if len(self.levels[layer]) > 0:
+                _id = max(record[0] for record in self.levels[layer]) + 1
+            else:
+                _id = 1
+            if layer == 0:
+                record = (_id, polygon_id, additional)
+            else:
+                record = (_id, polygon_id, additional, parent_id)
+            self.levels[layer].append(record)
+
+    def __appendPoint(self, polygon_id, x, y):
+        polygon = self.polygon_dict[polygon_id]
+        vertex_num = int(polygon[2])
+        vertex_string = polygon[3].strip()
+        if not vertex_string.endswith(';'):
+            vertex_string += ';'
+        vertex_string += '\n%f, %f' % (x, y)
+        vertex_num += 1
+        polygon[2] = vertex_num
+        polygon[3] = vertex_string
+
 
     def __removePolygon(self, _id):
         if _id in self.polygon_dict:

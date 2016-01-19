@@ -47,9 +47,9 @@ class PolygonBase(QGraphicsWidget):
         return self.vertices
 
     def getVerticesForDb(self):
-        vertices_num = len(self.vertices)
-        vertices_string = ';\n'.join('%f,%f' % (vertex.x(), vertex.y()) for vertex in self.vertices)
-        return vertices_num, vertices_string
+        vertices = []
+        vertices += ([vertex.x(), vertex.y()] for vertex in self.vertices)
+        return vertices
 
 
 PolygonBase.move_point = False
