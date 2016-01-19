@@ -15,11 +15,10 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal
 COMMAND_UNRESOLVED = '无法解析的命令'
 COMMAND_UNFINISHED = '不完整的命令'
 COMMAND_GRAMMAR_ERROR = '语法错误'
+COMMAND_ID_NOT_FOUND = 'ID不存在'
 
 
 class MapData(QObject):
-    updatePolygonList = pyqtSignal(list)
-
     def __init__(self):
         super().__init__()
         self.polygons = []
@@ -37,8 +36,8 @@ class MapData(QObject):
                 'pt': None
             },
             'mov': {
-                'shape': None,
-                'pt': None
+                'shape': self.executeMovePolygon,
+                'pt': self.executeMovePoint
             }
         }
 
@@ -52,15 +51,18 @@ class MapData(QObject):
             self.polygon_dict[polygon_id] = polygon
         # 更新信息
         self.invalidate()
-        # notify
-        self.updatePolygonList.emit(self.polygons)
 
     def get(self):
         return self.polygons, self.levels
 
+    def getPolygons(self):
+        return self.polygons
+
     def execute(self, command):
         commands = command.strip().split(' ')
         self.executeInTree(self.command_tree, commands)
+        # notify
+        self.invalidate()
 
     def executeInTree(self, command_tree, commands):
         tree = command_tree
@@ -81,7 +83,6 @@ class MapData(QObject):
     def invalidate(self):
         self.child_dict = createChildDict(self.levels)
         self.additional_dict = createAdditionalDict(self.levels)
-        self.updatePolygonList.emit(self.polygons)
 
     def getChildListOfPolygon(self, polygon_id):
         # update children
@@ -116,8 +117,6 @@ class MapData(QObject):
                 polygon[3] = ';\n'.join('%f,%f' % (vertex[0], vertex[1]) for vertex in vertices)
                 self.polygon_dict[_id] = polygon
                 break
-        # notify
-        self.updatePolygonList.emit(self.polygons)
 
     def executeAddPolygon(self, commands):
         if len(commands) == 3:
@@ -129,24 +128,33 @@ class MapData(QObject):
             raise Exception(COMMAND_GRAMMAR_ERROR)
         # add
         self.__addPolygon(_id, layer, additional, parent_id)
-        # notify
-        self.invalidate()
 
     def executeAddPoint(self, commands):
         if len(commands) != 3:
             raise Exception(COMMAND_GRAMMAR_ERROR)
         (_id, x, y) = (int(commands[0]), float(commands[1]), float(commands[2]))
-        self.__appendPoint(_id, x, y)
-        # notify
-        self.invalidate()
+        if _id in self.polygon_dict:
+            self.__appendPoint(_id, x, y)
+        else:
+            raise Exception(COMMAND_ID_NOT_FOUND)
 
     def executeRemovePolygon(self, commands):
         if len(commands) != 1:
             raise Exception(COMMAND_GRAMMAR_ERROR)
         _id = int(commands[0])
         self.__removePolygon(_id)
-        # notify
-        self.invalidate()
+
+    def executeMovePolygon(self, commands):
+        if len(commands) != 3:
+            raise Exception(COMMAND_GRAMMAR_ERROR)
+        (_id, dx, dy) = (int(commands[0]), float(commands[1]), float(commands[2]))
+        if _id in self.polygon_dict:
+            self.__movePolygon(_id, dx, dy)
+        else:
+            raise Exception(COMMAND_ID_NOT_FOUND)
+
+    def executeMovePoint(self, commands):
+        pass
 
     def __addPolygon(self, polygon_id, layer, additional, parent_id):
         polygon = [polygon_id, layer, 0, '']
@@ -176,7 +184,6 @@ class MapData(QObject):
         polygon[2] = vertex_num
         polygon[3] = vertex_string
 
-
     def __removePolygon(self, _id):
         if _id in self.polygon_dict:
             # remove children
@@ -187,6 +194,10 @@ class MapData(QObject):
             self.polygons = [polygon for polygon in self.polygons if polygon[0] != _id]
             for i in range(0, len(self.levels)):
                 self.levels[i] = [level for level in self.levels[i] if level[1] != _id]
+
+    def __movePolygon(self, polygon_id, dx, dy):
+        polygon = self.polygon_dict[polygon_id]
+        # TODO: move polygon
 
 
 def createChildDict(levels):   # 更新 self.child_dict

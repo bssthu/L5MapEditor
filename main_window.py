@@ -44,7 +44,6 @@ class MainWindow(QMainWindow):
         self.ui.graphics_view.scale(1, -1)   # invert y
         # data
         self.map_data = MapData()
-        self.map_data.updatePolygonList.connect(self.updatePolygonList)
         self.path = None
         # fsm
         self.__initFsm()
@@ -198,15 +197,6 @@ class MainWindow(QMainWindow):
         self.ui.graphics_view.scene().update()
 
     @pyqtSlot(list)
-    def updatePolygonList(self, polygons):
-        _id = self.selectedId()
-        self.fillTableWithPolygons(self.ui.polygon_table_widget, polygons)
-        self.ui.graphics_view.setPolygons(polygons, len(db_helper.getLayerNames()))
-        if len(polygons) > 0:
-            if not self.selectRowById(self.ui.polygon_table_widget, _id):
-                self.ui.polygon_table_widget.setCurrentCell(0, 0)
-
-    @pyqtSlot(list)
     def updateChildList(self, polygons):
         self.fillTableWithPolygons(self.ui.second_table_widget, polygons)
 
@@ -259,11 +249,20 @@ class MainWindow(QMainWindow):
     def execute(self, command):
         try:
             self.map_data.execute(command)
+            self.updatePolygonList(self.map_data.getPolygons())
         except Exception as e:
             self.showMessage(repr(e), '执行命令出错')
             return False
         else:
             return True
+
+    def updatePolygonList(self, polygons):
+        _id = self.selectedId()
+        self.fillTableWithPolygons(self.ui.polygon_table_widget, polygons)
+        self.ui.graphics_view.setPolygons(polygons, len(db_helper.getLayerNames()))
+        if len(polygons) > 0:
+            if not self.selectRowById(self.ui.polygon_table_widget, _id):
+                self.ui.polygon_table_widget.setCurrentCell(0, 0)
 
     def fillTableWithPolygons(self, table_widget, polygons):
         table_widget.clear()
@@ -301,6 +300,7 @@ class MainWindow(QMainWindow):
             try:
                 (polygons, levels) = db_helper.getTables(path)
                 self.map_data.set(polygons, levels)
+                self.updatePolygonList(self.map_data.getPolygons())
                 self.path = path
                 self.fsm_mgr.changeFsm('empty', 'normal')
             except sqlite3.Error as error:
