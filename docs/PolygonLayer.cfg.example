@@ -1,0 +1,21 @@
+{
+    "layer_name": [
+        "L0",
+        "L1",
+        "L2",
+        "L3",
+        "L4"
+    ],
+    "additional_name": {
+        "L1": [
+            "Unknown",
+            "TYPE1",
+            "TYPE2",
+            "TYPE3"
+        ],
+        "L2": [
+            "Unknown",
+            "TYPE1"
+        ]
+    }
+}

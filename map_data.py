@@ -39,12 +39,14 @@ class MapData(QObject):
                 'shape': self.executeRemovePolygon,
                 'pt': None
             },
-            'set': {
-                'pt': self.executeSetPoint
-            },
             'mov': {
                 'shape': self.executeMovePolygon,
                 'pt': self.executeMovePoint
+            },
+            'set': {
+                'pt': self.executeSetPoint,
+                'layer': None,
+                'additional': None
             }
         }
 
