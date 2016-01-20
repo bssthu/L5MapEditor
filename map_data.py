@@ -52,11 +52,6 @@ class MapData(QObject):
         self.polygons = polygons
         self.layers = layers
         self.updateBackupData()
-        # polygon 索引
-        self.polygon_dict = {}
-        for polygon in self.polygons:
-            polygon_id = polygon[0]
-            self.polygon_dict[polygon_id] = polygon
         # 更新信息
         self.invalidate()
 
@@ -65,6 +60,16 @@ class MapData(QObject):
 
     def getPolygons(self):
         return self.polygons
+
+    def invalidate(self):
+        # polygon 索引
+        self.polygon_dict = {}
+        for polygon in self.polygons:
+            polygon_id = polygon[0]
+            self.polygon_dict[polygon_id] = polygon
+        # 其他索引
+        self.child_dict = createChildDict(self.layers)
+        self.additional_dict = createAdditionalDict(self.layers)
 
     def updateBackupData(self):
         # 用于 撤销/重做
@@ -76,6 +81,7 @@ class MapData(QObject):
         self.polygons = copy.deepcopy(self.old_polygons)
         self.layers = copy.deepcopy(self.old_layers)
         self.command_history.clear()
+        self.invalidate()
 
     def redoCommandHistory(self):
         command_history = copy.deepcopy(self.command_history)
@@ -132,10 +138,6 @@ class MapData(QObject):
             # else it's the tree's problem
         else:
             raise Exception(COMMAND_UNRESOLVED)
-
-    def invalidate(self):
-        self.child_dict = createChildDict(self.layers)
-        self.additional_dict = createAdditionalDict(self.layers)
 
     def getChildListOfPolygon(self, polygon_id):
         # update children
@@ -219,7 +221,6 @@ class MapData(QObject):
         polygon = [polygon_id, layer, 0, []]
         self.polygons.append(polygon)
         self.polygons.sort(key=lambda p: polygon[0])
-        self.polygon_dict[polygon_id] = polygon
         # update self.layers, set parent info
         if layer >= 0:
             if len(self.layers[layer]) > 0:
