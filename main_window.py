@@ -79,6 +79,8 @@ class MainWindow(QMainWindow):
     def changeState(self, new_state):
         if new_state == self.fsm_mgr.getFsm('empty'):
             self.ui.save_action.setEnabled(False)
+            self.ui.undo_action.setEnabled(False)
+            self.ui.redo_action.setEnabled(False)
             self.ui.insert_action.setEnabled(False)
             self.ui.delete_action.setEnabled(False)
             self.ui.move_action.setEnabled(False)
@@ -87,6 +89,8 @@ class MainWindow(QMainWindow):
             self.ui.list2_type_label.setText('')
         if new_state == self.fsm_mgr.getFsm('normal'):
             self.ui.save_action.setEnabled(True)
+            self.ui.undo_action.setEnabled(True)
+            self.ui.redo_action.setEnabled(True)
             self.ui.insert_action.setEnabled(True)
             self.ui.delete_action.setEnabled(True)
             self.ui.move_action.setEnabled(True)
@@ -95,6 +99,8 @@ class MainWindow(QMainWindow):
             self.ui.list2_type_label.setText('children')
             self.ui.second_table_widget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         elif new_state == self.fsm_mgr.getFsm('insert'):
+            self.ui.undo_action.setEnabled(False)
+            self.ui.redo_action.setEnabled(False)
             self.ui.insert_action.setEnabled(True)
             self.ui.delete_action.setEnabled(False)
             self.ui.move_action.setEnabled(False)
@@ -102,6 +108,8 @@ class MainWindow(QMainWindow):
             self.ui.polygon_table_widget.setEnabled(True)
             self.ui.list2_type_label.setText('children')
         elif new_state == self.fsm_mgr.getFsm('move'):
+            self.ui.undo_action.setEnabled(False)
+            self.ui.redo_action.setEnabled(False)
             self.ui.insert_action.setEnabled(False)
             self.ui.delete_action.setEnabled(False)
             self.ui.move_action.setEnabled(True)
@@ -110,6 +118,8 @@ class MainWindow(QMainWindow):
             self.ui.list2_type_label.setText('points')
             self.ui.second_table_widget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         elif new_state == self.fsm_mgr.getFsm('move_point'):
+            self.ui.undo_action.setEnabled(False)
+            self.ui.redo_action.setEnabled(False)
             self.ui.insert_action.setEnabled(False)
             self.ui.delete_action.setEnabled(False)
             self.ui.move_action.setEnabled(True)
@@ -127,6 +137,28 @@ class MainWindow(QMainWindow):
     def on_save_action_triggered(self):
         if self.path is not None:
             self.save(self.path)
+
+    @pyqtSlot()
+    def on_undo_action_triggered(self):
+        try:
+            self.map_data.undo()
+            self.updatePolygonList(self.map_data.getPolygons())
+        except Exception as e:
+            self.showMessage(repr(e), '撤销操作出错')
+            return False
+        else:
+            return True
+
+    @pyqtSlot()
+    def on_redo_action_triggered(self):
+        try:
+            self.map_data.redo()
+            self.updatePolygonList(self.map_data.getPolygons())
+        except Exception as e:
+            self.showMessage(repr(e), '重做操作出错')
+            return False
+        else:
+            return True
 
     @pyqtSlot()
     def on_insert_action_triggered(self):
@@ -229,18 +261,20 @@ class MainWindow(QMainWindow):
         _id = self.map_data.getSpareId(parent_id)
         layer = self.ui.insert_layer_combo_box.currentIndex()
         additional = 0
-        self.execute('add shape %d %d %s %d' % (_id, layer, str(additional), parent_id))
+        commands = ['add shape %d %d %s %d' % (_id, layer, str(additional), parent_id)]
         for vertex in vertices:
-            self.execute('add pt %d %f %f' % (_id, vertex[0], vertex[1]))
+            commands.append('add pt %d %f %f' % (_id, vertex[0], vertex[1]))
+        self.execute(commands)
 
     @pyqtSlot(list)
     def updatePolygon(self, vertices):
         _id = self.selectedId()
+        commands = []
         for pt_id in range(0, len(vertices)):
             x = vertices[pt_id][0]
             y = vertices[pt_id][1]
-            self.execute('set pt %d %d %f %f' % (_id, pt_id, x, y))
-        #self.map_data.updatePolygon(_id, vertices)
+            commands.append('set pt %d %d %f %f' % (_id, pt_id, x, y))
+        self.execute(commands)
 
     @pyqtSlot(list)
     def updatePoints(self, points):
@@ -251,10 +285,10 @@ class MainWindow(QMainWindow):
             row = min(row_count - 1, max(0, row))
             self.ui.second_table_widget.setCurrentCell(row, 0)
 
-    def execute(self, command):
-        print(command)
+    def execute(self, commands):
+        print(commands)
         try:
-            self.map_data.execute(command)
+            self.map_data.execute(commands)
             self.updatePolygonList(self.map_data.getPolygons())
         except Exception as e:
             self.showMessage(repr(e), '执行命令出错')
@@ -304,8 +338,8 @@ class MainWindow(QMainWindow):
     def open(self, path, quiet=False):
         if os.path.exists(path):
             try:
-                (polygons, levels) = db_helper.getTables(path)
-                self.map_data.set(polygons, levels)
+                (polygons, layers) = db_helper.getTables(path)
+                self.map_data.set(polygons, layers)
                 self.updatePolygonList(self.map_data.getPolygons())
                 self.path = path
                 self.fsm_mgr.changeFsm('empty', 'normal')
@@ -322,8 +356,9 @@ class MainWindow(QMainWindow):
 
     def save(self, path):
         try:
-            (polygons, levels) = self.map_data.get()
-            db_helper.writeTables(path, polygons, levels)
+            (polygons, layers) = self.map_data.get()
+            db_helper.writeTables(path, polygons, layers)
+            self.map_data.updateBackupData()
         except sqlite3.Error as error:
             self.showMessage(repr(error))
 

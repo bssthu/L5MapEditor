@@ -8,6 +8,7 @@
 #
 
 
+import copy
 from PyQt5.QtCore import QObject
 
 
@@ -21,10 +22,14 @@ class MapData(QObject):
     def __init__(self):
         super().__init__()
         self.polygons = []
-        self.levels = []
+        self.layers = []
+        self.old_polygons = []
+        self.old_layers = []
         self.child_dict = {}
         self.additional_dict = {}
         self.polygon_dict = {}
+        self.command_history = []
+        self.command_history_revert = []
         self.command_tree = {
             'add': {
                 'shape': self.executeAddPolygon,
@@ -43,9 +48,10 @@ class MapData(QObject):
             }
         }
 
-    def set(self, polygons, levels):
+    def set(self, polygons, layers):
         self.polygons = polygons
-        self.levels = levels
+        self.layers = layers
+        self.updateBackupData()
         # polygon 索引
         self.polygon_dict = {}
         for polygon in self.polygons:
@@ -55,16 +61,61 @@ class MapData(QObject):
         self.invalidate()
 
     def get(self):
-        return self.polygons, self.levels
+        return self.polygons, self.layers
 
     def getPolygons(self):
         return self.polygons
 
-    def execute(self, command):
-        commands = command.strip().split(' ')
-        self.executeInTree(self.command_tree, commands)
+    def updateBackupData(self):
+        # 用于 撤销/重做
+        self.old_polygons = copy.deepcopy(self.polygons)
+        self.old_layers = copy.deepcopy(self.layers)
+        self.command_history.clear()
+
+    def revertAll(self):
+        self.polygons = copy.deepcopy(self.old_polygons)
+        self.layers = copy.deepcopy(self.old_layers)
+        self.command_history.clear()
+
+    def redoCommandHistory(self):
+        command_history = copy.deepcopy(self.command_history)
+        self.revertAll()
+        for commands in command_history:
+            self.execute(commands, is_redo=True)
+
+    def undo(self):
+        if len(self.command_history) > 0:
+            self.command_history_revert.append(self.command_history.pop())
+            self.redoCommandHistory()
+
+    def redo(self):
+        if len(self.command_history_revert) > 0:
+            self.command_history.append(self.command_history_revert.pop())
+            self.redoCommandHistory()
+
+    def execute(self, commands, is_redo=False):
+        try:
+            if isinstance(commands, str):
+                self.executeSingleCommand(commands)
+            else:
+                for command in commands:
+                    self.executeSingleCommand(command)
+        except Exception as e:
+            if not is_redo:
+                self.redoCommandHistory()
+            else:
+                raise Exception(repr(e) + '\n尝试恢复时出错')
+            raise e
+        else:
+            self.command_history.append(commands)
+            if not is_redo:
+                self.command_history_revert.clear()
         # notify
         self.invalidate()
+
+    def executeSingleCommand(self, command):
+        commands = command.strip().split(' ')
+        self.executeInTree(self.command_tree, commands)
 
     def executeInTree(self, command_tree, commands):
         tree = command_tree
@@ -83,8 +134,8 @@ class MapData(QObject):
             raise Exception(COMMAND_UNRESOLVED)
 
     def invalidate(self):
-        self.child_dict = createChildDict(self.levels)
-        self.additional_dict = createAdditionalDict(self.levels)
+        self.child_dict = createChildDict(self.layers)
+        self.additional_dict = createAdditionalDict(self.layers)
 
     def getChildListOfPolygon(self, polygon_id):
         # update children
@@ -169,17 +220,17 @@ class MapData(QObject):
         self.polygons.append(polygon)
         self.polygons.sort(key=lambda p: polygon[0])
         self.polygon_dict[polygon_id] = polygon
-        # update self.levels, set parent info
+        # update self.layers, set parent info
         if layer >= 0:
-            if len(self.levels[layer]) > 0:
-                _id = max(record[0] for record in self.levels[layer]) + 1
+            if len(self.layers[layer]) > 0:
+                _id = max(record[0] for record in self.layers[layer]) + 1
             else:
                 _id = 1
             if layer == 0:
                 record = (_id, polygon_id, additional)
             else:
                 record = (_id, polygon_id, additional, parent_id)
-            self.levels[layer].append(record)
+            self.layers[layer].append(record)
 
     def __appendPoint(self, polygon_id, x, y):
         polygon = self.polygon_dict[polygon_id]
@@ -195,8 +246,8 @@ class MapData(QObject):
                     self.__removePolygon(child_id)
             del self.polygon_dict[_id]
             self.polygons = [polygon for polygon in self.polygons if polygon[0] != _id]
-            for i in range(0, len(self.levels)):
-                self.levels[i] = [level for level in self.levels[i] if level[1] != _id]
+            for i in range(0, len(self.layers)):
+                self.layers[i] = [layer for layer in self.layers[i] if layer[1] != _id]
 
     def __setPoint(self, polygon_id, pt_id, x, y):
         polygon = self.polygon_dict[polygon_id]
@@ -211,19 +262,19 @@ class MapData(QObject):
             point[1] += dy
 
 
-def createChildDict(levels):   # 更新 self.child_dict
+def createChildDict(layers):   # 更新 self.child_dict
     child_dict = {}
-    for level in levels[1:]:
-        for record in level:
+    for layer in layers[1:]:
+        for record in layer:
             (polygon_id, parent_id) = (record[1], record[3])
             setParentOfChild(child_dict, polygon_id, parent_id)
     return child_dict
 
 
-def createAdditionalDict(levels):   # 更新 self.additional_dict
+def createAdditionalDict(layers):   # 更新 self.additional_dict
     additional_dict = {}
-    for level in levels:
-        for record in level:
+    for layer in layers:
+        for record in layer:
             (polygon_id, additional) = (record[1], record[2])
             additional_dict[polygon_id] = additional
     return additional_dict
