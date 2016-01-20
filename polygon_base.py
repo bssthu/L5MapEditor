@@ -20,7 +20,7 @@ class PolygonBase(QGraphicsWidget):
     def __init__(self):
         super().__init__()
         self.MAR = 50
-        self.vertices = []
+        self.points = []
         self.top_left = QPointF(float('Inf'), float('Inf'))
         self.bottom_right = QPointF(-float('Inf'), -float('Inf'))
         self.rect = QRectF()
@@ -28,13 +28,10 @@ class PolygonBase(QGraphicsWidget):
     def boundingRect(self):
         return self.rect
 
-    def generateMarginBoundingRectByTopLeftBottomRight(self):
-        self.rect = QRectF(self.top_left, self.bottom_right).adjusted(-self.MAR, -self.MAR, self.MAR, self.MAR)
-
     def updateBoundingRect(self, pt):
         self.top_left = QPointF(min(self.top_left.x(), pt.x()), min(self.top_left.y(), pt.y()))
         self.bottom_right = QPointF(max(self.bottom_right.x(), pt.x()), max(self.bottom_right.y(), pt.y()))
-        self.generateMarginBoundingRectByTopLeftBottomRight()
+        self.rect = QRectF(self.top_left, self.bottom_right).adjusted(-self.MAR, -self.MAR, self.MAR, self.MAR)
         self.prepareGeometryChange()
 
     def moveBoundingRect(self, offset):
@@ -43,12 +40,11 @@ class PolygonBase(QGraphicsWidget):
         self.rect.adjust(offset.x(), offset.y(), offset.x(), offset.y())
         self.prepareGeometryChange()
 
-    def getVertices(self):
-        return self.vertices
+    def getPoints(self):
+        return self.points
 
-    def getVerticesForDb(self):
-        vertices = []
-        vertices += ([vertex.x(), vertex.y()] for vertex in self.vertices)
+    def getVertices(self):
+        vertices = [[vertex.x(), vertex.y()] for vertex in self.points]
         return vertices
 
 
@@ -57,4 +53,19 @@ PolygonBase.close_polygon = True
 PolygonBase.highlight_selection = True
 PolygonBase.draw_grid = False
 PolygonBase.mark_points = True
+
+
+def getQtPoints(vertices):
+    return [QPointF(vertex[0], vertex[1]) for vertex in vertices]
+
+
+def getBoundingRect(points):
+    if len(points) > 0:
+        x_list = [point.x() for point in points]
+        y_list = [point.y() for point in points]
+        top_left = QPointF(min(x_list), min(y_list))
+        bottom_right = QPointF(max(x_list), max(y_list))
+        return QRectF(top_left, bottom_right)
+    else:
+        return QRectF()
 

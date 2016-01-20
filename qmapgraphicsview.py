@@ -11,6 +11,7 @@
 from PyQt5.QtWidgets import QGraphicsView
 from PyQt5.QtCore import QPointF
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
+import polygon_base
 from polygon_base import PolygonBase
 from polygon_item import PolygonItem
 from polygon_new import PolygonNew
@@ -62,13 +63,13 @@ class QMapGraphicsView(QGraphicsView):
         if self.selected_polygon is not None:
             offset = pt - self.move_base
             self.selected_polygon.applyOffset(offset)
-            self.pointsUpdated.emit(self.selected_polygon.getVertices())
+            self.pointsUpdated.emit(self.selected_polygon.getPoints())
 
     @pyqtSlot(QPointF)
     def resetMove(self):
         if self.selected_polygon is not None:
             self.selected_polygon.resetOffset()
-            self.pointsUpdated.emit(self.selected_polygon.getVertices())
+            self.pointsUpdated.emit(self.selected_polygon.getPoints())
 
     def scale(self, sx, sy):
         super().scale(sx, sy)
@@ -80,17 +81,15 @@ class QMapGraphicsView(QGraphicsView):
         self.scene().clear()
         for polygon in polygons:
             layer = polygon[1]
-            vertices = polygon[3]
             if layer < layer_num:
-                self.scene().addItem(PolygonItem(layer, vertices))
+                self.scene().addItem(PolygonItem(polygon))
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
     def setSelectedPolygon(self, polygon):   # 绘制选中的多边形
         if self.selected_polygon in self.scene().items():
             self.scene().removeItem(self.selected_polygon)
         if polygon is not None:
-            polygon_item = PolygonItem(polygon[1], polygon[3])
-            self.selected_polygon = PolygonSelect(polygon_item.getVertices(), polygon_item.boundingRect())
+            self.selected_polygon = PolygonSelect(polygon)
             self.selected_polygon.setScale(self.transform().m11())
             self.scene().addItem(self.selected_polygon)
         self.scene().invalidate()
@@ -146,7 +145,7 @@ class QMapGraphicsView(QGraphicsView):
 
     def endInsert(self):
         # 处理新多边形
-        vertices = self.new_polygon.getVerticesForDb()
+        vertices = self.new_polygon.getVertices()
         self.scene().removeItem(self.new_polygon)
         self.new_polygon = None
         if len(vertices) > 0:
@@ -159,7 +158,7 @@ class QMapGraphicsView(QGraphicsView):
 
     def beginMove(self):
         # data
-        self.pointsUpdated.emit(self.selected_polygon.getVertices())
+        self.pointsUpdated.emit(self.selected_polygon.getPoints())
         # signal
         self.leftClick.connect(self.setMoveMouseBasePoint)
         self.mouseMove.connect(self.setMoveMouseToPoint)
@@ -170,7 +169,7 @@ class QMapGraphicsView(QGraphicsView):
         # data
         if self.selected_polygon is not None:
             self.selected_polygon.confirmOffset()
-            vertices = self.selected_polygon.getVerticesForDb()
+            vertices = self.selected_polygon.getVertices()
             self.polygonUpdated.emit(vertices)
         # signal
         self.leftClick.disconnect(self.setMoveMouseBasePoint)

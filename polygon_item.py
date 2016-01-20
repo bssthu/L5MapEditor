@@ -11,35 +11,33 @@
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QPolygonF, QPen
 from polygon_base import PolygonBase, COLOR
+import polygon_base
 
 
 class PolygonItem(PolygonBase):
-    def __init__(self, layer, vertices):
+    def __init__(self, polygon):
         super().__init__()
-        self.layer = layer
-        x_list = []
-        y_list = []
-        for vertex in vertices:
-            self.vertices.append(QPointF(vertex[0], vertex[1]))
-            x_list.append(vertex[0])
-            y_list.append(vertex[1])
-        if len(self.vertices) > 0:
-            self.top_left = QPointF(min(x_list), min(y_list))
-            self.bottom_right = QPointF(max(x_list), max(y_list))
-            self.generateMarginBoundingRectByTopLeftBottomRight()
+        self.layer = polygon[1]
+        vertices = polygon[3]
+        self.points = polygon_base.getQtPoints(vertices)
+        if len(self.points) > 0:
+            self.rect = polygon_base.getBoundingRect(self.points)
+            self.top_left = self.rect.topLeft()
+            self.bottom_right = self.rect.topLeft()
+            self.rect.adjust(-self.MAR, -self.MAR, self.MAR, self.MAR)
         else:
             self.top_left = QPointF(float('Inf'), float('Inf'))
             self.bottom_right = QPointF(-float('Inf'), -float('Inf'))
             self.rect = QRectF()
 
     def paint(self, painter, option, widget):
-        if len(self.vertices) > 1:
+        if len(self.points) > 1:
             # init graphics
             pen = QPen(COLOR[self.layer])
             pen.setWidth(0)
             painter.setPen(pen)
             # draw
-            painter.drawPolyline(QPolygonF(self.vertices))
+            painter.drawPolyline(QPolygonF(self.points))
             if PolygonBase.close_polygon:
-                painter.drawLine(self.vertices[-1], self.vertices[0])
+                painter.drawLine(self.points[-1], self.points[0])
 

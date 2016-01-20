@@ -11,6 +11,7 @@
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPolygonF, QPen, QBrush
+import polygon_base
 from polygon_base import PolygonBase
 
 
@@ -20,16 +21,16 @@ M_SIZE = 15
 
 
 class PolygonSelect(PolygonBase):
-    def __init__(self, vertices, rect):
+    def __init__(self, polygon):
         super().__init__()
         self.MAR = 50
-        self.vertices = vertices
-        self.rect = rect
-        self.top_left = rect.topLeft() + QPointF(self.MAR, self.MAR)
-        self.bottom_right = rect.bottomRight() - QPointF(self.MAR, self.MAR)
+        self.points = polygon_base.getQtPoints(polygon[3])
+        self.rect = polygon_base.getBoundingRect(self.points)
+        self.top_left = self.rect.topLeft()
+        self.bottom_right = self.rect.bottomRight()
         self.dots_rect = self.rect
         self.offset = QPointF(0, 0)
-        self.old_vertices = vertices
+        self.old_points = self.points
         self.point_id = -1
 
     def paint(self, painter, option, widget):
@@ -39,27 +40,27 @@ class PolygonSelect(PolygonBase):
         pen.setStyle(Qt.DashDotLine)
         redPen = QPen(QColor(255, 0, 0))
         redPen.setWidth(0)
-        # current vertices
-        vertices = self.__applyOffset(self.vertices, self.offset)
-        if len(vertices) > 0:
+        # current points
+        points = self.__applyOffset(self.points, self.offset)
+        if len(points) > 0:
             # draw
             painter.setPen(pen)
-            painter.drawPolyline(QPolygonF(vertices))
+            painter.drawPolyline(QPolygonF(points))
             if PolygonBase.highlight_selection:
                 brush = QBrush(QColor(0, 0, 0, 64))
                 painter.fillRect(self.dots_rect, brush)
             if PolygonBase.close_polygon:
-                painter.drawLine(vertices[-1], vertices[0])
+                painter.drawLine(points[-1], points[0])
         scale = painter.transform().m11()
         if PolygonBase.mark_points:
-            if len(vertices) > 0:
-                painter.drawEllipse(vertices[0], L_SIZE / scale, L_SIZE / scale)
-            for vertex in vertices:
-                painter.drawEllipse(vertex, S_SIZE / scale, S_SIZE / scale)
+            if len(points) > 0:
+                painter.drawEllipse(points[0], L_SIZE / scale, L_SIZE / scale)
+            for point in points:
+                painter.drawEllipse(point, S_SIZE / scale, S_SIZE / scale)
         if self.point_id >= 0:
             painter.setPen(redPen)
-            if len(vertices) > 0:
-                painter.drawEllipse(vertices[self.point_id], M_SIZE / scale, M_SIZE / scale)
+            if len(points) > 0:
+                painter.drawEllipse(points[self.point_id], M_SIZE / scale, M_SIZE / scale)
 
     def setScale(self, scale):
         self.MAR = 20 / scale
@@ -72,27 +73,27 @@ class PolygonSelect(PolygonBase):
         self.offset = offset
 
     def applyOffset(self, offset):  # 移动到某处释放鼠标
-        self.vertices = self.__applyOffset(self.vertices, offset)
+        self.points = self.__applyOffset(self.points, offset)
         if not PolygonBase.move_point:
             self.moveBoundingRect(offset)
         self.offset = QPointF(0, 0)
 
-    def __applyOffset(self, vertices, offset):
-        vertices = vertices[:]
+    def __applyOffset(self, points, offset):
+        points = points[:]
         if PolygonBase.move_point:
             if self.point_id >= 0:
-                vertices[self.point_id] = vertices[self.point_id] + offset
-                self.updateBoundingRect(vertices[self.point_id])
+                points[self.point_id] = points[self.point_id] + offset
+                self.updateBoundingRect(points[self.point_id])
         else:
-            vertices = [vertex + offset for vertex in vertices]
-        return vertices
+            points = [point + offset for point in points]
+        return points
 
     def confirmOffset(self):        # 退出移动状态，保存
-        self.old_vertices = self.vertices
+        self.old_points = self.points
 
     def resetOffset(self):
         self.offset = QPointF(0, 0)
-        self.vertices = self.old_vertices
+        self.points = self.old_points
 
     def getOffset(self):
         return self.offset

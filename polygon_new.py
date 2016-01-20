@@ -30,22 +30,22 @@ class PolygonNew(PolygonBase):
         scale = 1
         # lines
         painter.setPen(pen)
-        if len(self.vertices) > 1:
-            painter.drawPolyline(QPolygonF(self.vertices))
+        if len(self.points) > 1:
+            painter.drawPolyline(QPolygonF(self.points))
         # point mark
         painter.setPen(pen)
         if PolygonBase.mark_points:
             scale = painter.transform().m11()
-            if len(self.vertices) > 0:
+            if len(self.points) > 0:
                 scale = painter.transform().m11()
-                painter.drawEllipse(self.vertices[0], L_SIZE / scale, L_SIZE / scale)
-            for vertex in self.vertices:
-                painter.drawEllipse(vertex, S_SIZE / scale, S_SIZE / scale)
+                painter.drawEllipse(self.points[0], L_SIZE / scale, L_SIZE / scale)
+            for point in self.points:
+                painter.drawEllipse(point, S_SIZE / scale, S_SIZE / scale)
         # pre add
         painter.setPen(red_pen)
         if self.mouse_point is not None:
-            if len(self.vertices) > 0:
-                painter.drawLine(self.vertices[-1], self.mouse_point)
+            if len(self.points) > 0:
+                painter.drawLine(self.points[-1], self.mouse_point)
             if PolygonBase.mark_points:
                 painter.drawEllipse(self.mouse_point, S_SIZE / scale, S_SIZE / scale)
 
@@ -55,11 +55,11 @@ class PolygonNew(PolygonBase):
 
     def addPoint(self, pt):
         self.mouse_point = None
-        self.vertices.append(QPointF(pt))
+        self.points.append(QPointF(pt))
         self.updateBoundingRect(pt)
 
     def removePoint(self):
-        if len(self.vertices) > 0:
-            self.vertices = self.vertices[:-1]
+        if len(self.points) > 0:
+            self.points = self.points[:-1]
         self.mouse_point = None
 

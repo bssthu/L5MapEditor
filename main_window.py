@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Module        : mainWindow.py
+# Module        : main_window.py
 # Author        : bssthu
 # Project       : L5MapEditor
 # Creation date : 2015-09-24
