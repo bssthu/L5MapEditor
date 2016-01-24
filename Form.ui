@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1020</width>
-    <height>683</height>
+    <height>750</height>
    </rect>
   </property>
   <property name="font">
@@ -43,81 +43,6 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="1" rowspan="8">
-     <widget class="QTableWidget" name="second_table_widget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>1</horstretch>
-        <verstretch>3</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1" colspan="3">
-     <layout class="QHBoxLayout" name="horizontal_layout">
-      <item>
-       <widget class="QLabel" name="list2_type_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-          <horstretch>1</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="text">
-         <string>children</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="insert_additional_label">
-        <property name="text">
-         <string>属性</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="insert_additional_combo_box"/>
-      </item>
-      <item>
-       <widget class="QLabel" name="insert_layer_label">
-        <property name="text">
-         <string>插入层</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="insert_layer_combo_box"/>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="3" rowspan="8">
-     <widget class="QMapGraphicsView" name="graphics_view">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>4</horstretch>
-        <verstretch>3</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <family>Microsoft YaHei UI</family>
-       </font>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0" rowspan="9">
-     <widget class="QTableWidget" name="polygon_table_widget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>1</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="4">
      <widget class="QLabel" name="zoom_icon_label">
       <property name="maximumSize">
@@ -134,6 +59,179 @@
       </property>
       <property name="scaledContents">
        <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3" rowspan="8">
+     <widget class="QMapGraphicsView" name="graphics_view">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>4</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="acceptDrops">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2" rowspan="8">
+     <widget class="QTableWidget" name="second_table_widget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3">
+     <layout class="QHBoxLayout" name="horizontal_layout">
+      <item>
+       <widget class="QFrame" name="frame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>3</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="insert_additional_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>属性</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="insert_additional_combo_box">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="insert_layer_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>插入层</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="insert_layer_combo_box">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="2">
+     <widget class="QLabel" name="list2_type_label">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <family>Microsoft YaHei UI</family>
+        <weight>50</weight>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: lightgray;
+border: 1px solid gray;
+padding: 2px 0px 2px 0px;</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="text">
+       <string>children</string>
+      </property>
+     </widget>
+    </item>
+    <item row="10" column="0" colspan="5">
+     <widget class="QTextBrowser" name="output_browser">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>3</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: transparent;</string>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="0" colspan="5">
+     <widget class="QLineEdit" name="command_edit"/>
+    </item>
+    <item row="9" column="0" colspan="5">
+     <widget class="QLabel" name="label_output">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: lightgray;
+border: 1px solid gray;
+padding: 2px 0px 2px 0px;</string>
+      </property>
+      <property name="text">
+       <string>输出</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" rowspan="8">
+     <widget class="QTableWidget" name="polygon_table_widget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>1</horstretch>
+        <verstretch>2</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_polygon">
+      <property name="styleSheet">
+       <string notr="true">background-color: lightgray;
+border: 1px solid gray;
+padding: 2px 0px 2px 0px;</string>
+      </property>
+      <property name="text">
+       <string>多边形</string>
       </property>
      </widget>
     </item>
