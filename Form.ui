@@ -30,62 +30,47 @@
   </property>
   <widget class="QWidget" name="central_widget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="4" rowspan="8">
-     <widget class="QSlider" name="scale_slider">
-      <property name="minimum">
-       <number>-40</number>
-      </property>
-      <property name="maximum">
-       <number>40</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="4">
-     <widget class="QLabel" name="zoom_icon_label">
-      <property name="maximumSize">
-       <size>
-        <width>22</width>
-        <height>22</height>
-       </size>
+    <item row="0" column="0">
+     <widget class="QLabel" name="polygon_label">
+      <property name="styleSheet">
+       <string notr="true">background-color: lightgray;
+border: 1px solid gray;
+padding: 2px 0px 2px 0px;</string>
       </property>
       <property name="text">
-       <string/>
-      </property>
-      <property name="pixmap">
-       <pixmap resource="resource.qrc">:/img/zoom.png</pixmap>
-      </property>
-      <property name="scaledContents">
-       <bool>true</bool>
+       <string>多边形</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="3" rowspan="8">
-     <widget class="QMapGraphicsView" name="graphics_view">
+    <item row="0" column="1">
+     <widget class="QLabel" name="list2_type_label">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>4</horstretch>
+       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+        <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="acceptDrops">
-       <bool>false</bool>
+      <property name="font">
+       <font>
+        <family>Microsoft YaHei UI</family>
+        <weight>50</weight>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: lightgray;
+border: 1px solid gray;
+padding: 2px 0px 2px 0px;</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="text">
+       <string>children</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="2" rowspan="8">
-     <widget class="QTableWidget" name="second_table_widget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>1</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="3">
+    <item row="0" column="2">
      <layout class="QHBoxLayout" name="horizontal_layout">
       <item>
        <widget class="QFrame" name="frame">
@@ -151,35 +136,87 @@
       </item>
      </layout>
     </item>
-    <item row="0" column="2">
-     <widget class="QLabel" name="list2_type_label">
+    <item row="0" column="3">
+     <widget class="QLabel" name="zoom_icon_label">
+      <property name="maximumSize">
+       <size>
+        <width>22</width>
+        <height>22</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="resource.qrc">:/img/zoom.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" rowspan="8">
+     <widget class="QTableWidget" name="polygon_table_widget">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-        <horstretch>0</horstretch>
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>1</horstretch>
+        <verstretch>2</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1" rowspan="8">
+     <widget class="QTableWidget" name="second_table_widget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>1</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="font">
-       <font>
-        <family>Microsoft YaHei UI</family>
-        <weight>50</weight>
-        <bold>false</bold>
-       </font>
+     </widget>
+    </item>
+    <item row="1" column="2" rowspan="8">
+     <widget class="QMapGraphicsView" name="graphics_view">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>4</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="acceptDrops">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3" rowspan="8">
+     <widget class="QSlider" name="scale_slider">
+      <property name="minimum">
+       <number>-40</number>
+      </property>
+      <property name="maximum">
+       <number>40</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="0" colspan="4">
+     <widget class="QLabel" name="output_label">
+      <property name="enabled">
+       <bool>true</bool>
       </property>
       <property name="styleSheet">
        <string notr="true">background-color: lightgray;
 border: 1px solid gray;
 padding: 2px 0px 2px 0px;</string>
       </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
       <property name="text">
-       <string>children</string>
+       <string>输出</string>
       </property>
      </widget>
     </item>
-    <item row="10" column="0" colspan="5">
+    <item row="10" column="0" colspan="4">
      <widget class="QTextBrowser" name="output_browser">
       <property name="enabled">
        <bool>true</bool>
@@ -195,45 +232,8 @@ padding: 2px 0px 2px 0px;</string>
       </property>
      </widget>
     </item>
-    <item row="11" column="0" colspan="5">
+    <item row="11" column="0" colspan="4">
      <widget class="QLineEdit" name="command_edit"/>
-    </item>
-    <item row="9" column="0" colspan="5">
-     <widget class="QLabel" name="label_output">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background-color: lightgray;
-border: 1px solid gray;
-padding: 2px 0px 2px 0px;</string>
-      </property>
-      <property name="text">
-       <string>输出</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0" rowspan="8">
-     <widget class="QTableWidget" name="polygon_table_widget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>1</horstretch>
-        <verstretch>2</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label_polygon">
-      <property name="styleSheet">
-       <string notr="true">background-color: lightgray;
-border: 1px solid gray;
-padding: 2px 0px 2px 0px;</string>
-      </property>
-      <property name="text">
-       <string>多边形</string>
-      </property>
-     </widget>
     </item>
    </layout>
   </widget>
