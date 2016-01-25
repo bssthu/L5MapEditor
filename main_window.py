@@ -23,6 +23,7 @@ import config_loader
 import db_helper
 from map_data import MapData
 from fsm_mgr import FsmMgr
+import log
 
 
 class MainWindow(QMainWindow):
@@ -55,6 +56,7 @@ class MainWindow(QMainWindow):
         self.ui.graphics_view.polygonCreated.connect(self.addPolygon)
         self.ui.graphics_view.polygonUpdated.connect(self.updatePolygon)
         self.ui.graphics_view.pointsUpdated.connect(self.updatePoints)
+        log.logger.onLog.connect(self.printToOutput)
         # open default database
         self.setAcceptDrops(True)
         self.open('default.sqlite', True)
@@ -292,8 +294,13 @@ class MainWindow(QMainWindow):
             row = min(row_count - 1, max(0, row))
             self.ui.second_table_widget.setCurrentCell(row, 0)
 
+    @pyqtSlot(str)
+    def printToOutput(self, msg):
+        print(msg)
+        self.ui.output_browser.append(msg)
+
     def execute(self, commands):
-        print(commands)
+        log.info(commands)
         try:
             self.map_data.execute(commands)
             self.updatePolygonList(self.map_data.getPolygons())

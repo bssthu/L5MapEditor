@@ -17,6 +17,7 @@ make install  # 在 build/ 路径生成 .exe 等，需要 cx_Freeze
 * [外部数据](docs/data.md)
 * [命令说明](docs/commands.md)
 * [开发规范](docs/spec.md)
+* [主要模块](docs/modules.md)
 
 ## License
 LGPLv3
