@@ -9,10 +9,12 @@
 
 
 from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt5.QtGui import QColor
+from PyQt5.QtCore import Qt
 
 
 class Log(QObject):
-    onLog = pyqtSignal(str)
+    onLog = pyqtSignal(str, QColor)
 
     def __init__(self):
         super().__init__()
@@ -20,22 +22,22 @@ class Log(QObject):
 
 def debug(msg):
     msg = str(msg)
-    logger.onLog.emit(msg)
+    logger.onLog.emit(msg, QColor(Qt.black))
 
 
 def info(msg):
     msg = str(msg)
-    logger.onLog.emit(msg)
+    logger.onLog.emit(msg, QColor(Qt.blue))
 
 
 def warning(msg):
     msg = str(msg)
-    logger.onLog.emit(msg)
+    logger.onLog.emit(msg, QColor(Qt.darkRed))
 
 
 def error(msg):
     msg = str(msg)
-    logger.onLog.emit(msg)
+    logger.onLog.emit(msg, QColor(Qt.red))
 
 
 logger = Log()

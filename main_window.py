@@ -12,7 +12,7 @@ import os
 import math
 import sqlite3
 from PyQt5 import QtWidgets
-from PyQt5.QtGui import QCursor
+from PyQt5.QtGui import QCursor, QTextDocument, QColor
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QGraphicsScene, QTableWidgetItem
@@ -146,7 +146,7 @@ class MainWindow(QMainWindow):
             self.map_data.undo()
             self.updatePolygonList(self.map_data.getPolygons())
         except Exception as e:
-            self.showMessage(repr(e), '撤销操作出错')
+            log.error('撤销操作出错: %s' % repr(e))
             return False
         else:
             return True
@@ -157,7 +157,7 @@ class MainWindow(QMainWindow):
             self.map_data.redo()
             self.updatePolygonList(self.map_data.getPolygons())
         except Exception as e:
-            self.showMessage(repr(e), '重做操作出错')
+            log.error('重做操作出错: %s' % repr(e))
             return False
         else:
             return True
@@ -294,18 +294,19 @@ class MainWindow(QMainWindow):
             row = min(row_count - 1, max(0, row))
             self.ui.second_table_widget.setCurrentCell(row, 0)
 
-    @pyqtSlot(str)
-    def printToOutput(self, msg):
+    @pyqtSlot(str, QColor)
+    def printToOutput(self, msg, color):
         print(msg)
+        self.ui.output_browser.setTextColor(color)
         self.ui.output_browser.append(msg)
 
     def execute(self, commands):
-        log.info(commands)
+        log.debug(commands)
         try:
             self.map_data.execute(commands)
             self.updatePolygonList(self.map_data.getPolygons())
         except Exception as e:
-            self.showMessage(repr(e), '执行命令出错')
+            log.error('执行命令出错: %s' % repr(e))
             return False
         else:
             return True
@@ -357,15 +358,15 @@ class MainWindow(QMainWindow):
                 self.updatePolygonList(self.map_data.getPolygons())
                 self.path = path
                 self.fsm_mgr.changeFsm('empty', 'normal')
+                log.debug('Open "%s".' % path)
             except sqlite3.Error as error:
-                if quiet:
-                    print(repr(error))
-                else:
+                log.error('Failed to open "%s".' % path)
+                log.error(repr(error))
+                if not quiet:
                     self.showMessage(repr(error))
         else:
-            if quiet:
-                print('File %s not exists.' % path)
-            else:
+            log.error('File %s not exists.' % path)
+            if not quiet:
                 self.showMessage('File %s not exists.' % path)
 
     def save(self, path):
@@ -373,7 +374,10 @@ class MainWindow(QMainWindow):
             (polygons, layers) = self.map_data.get()
             db_helper.writeTables(path, polygons, layers)
             self.map_data.updateBackupData()
+            log.debug('Save "%s".' % path)
         except sqlite3.Error as error:
+            log.error('Failed to save "%s".' % path)
+            log.error(repr(error))
             self.showMessage(repr(error))
 
     def selectedId(self):

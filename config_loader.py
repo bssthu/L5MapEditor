@@ -9,6 +9,7 @@
 
 
 import json
+import log
 
 
 LAYER_NAMES = ('L0', 'L1', 'L2', 'L3', 'L4')
@@ -47,5 +48,5 @@ def loadLayerNames():
             layer_name_json = json.loads(string)
             LAYER_NAMES = tuple(layer_name_json['layer_name'])
         except Exception as e:
-            print(repr(e))
+            log.error(repr(e))
 

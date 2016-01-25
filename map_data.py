@@ -118,12 +118,12 @@ class MapData(QObject):
             self.command_history.append(commands)
             if not is_redo:
                 self.command_history_revert.clear()
-        # notify
-        self.invalidate()
 
     def executeSingleCommand(self, command):
         commands = command.strip().split(' ')
         self.executeInTree(self.command_tree, commands)
+        # notify
+        self.invalidate()
 
     def executeInTree(self, command_tree, commands):
         tree = command_tree
