@@ -221,6 +221,13 @@ class MainWindow(QMainWindow):
     def on_mark_points_action_triggered(self):
         self.ui.graphics_view.markPoints(self.ui.mark_points_action.isChecked())
 
+    @pyqtSlot()
+    def on_command_edit_returnPressed(self):
+        commands = self.ui.command_edit.text().strip()
+        if commands != '':
+            self.execute(commands)
+        self.ui.command_edit.setText('')
+
     def lockUI(self):
         self.ui.tool_bar.setEnabled(False)
 
