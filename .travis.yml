@@ -1,0 +1,61 @@
+sudo: required
+dist: trusty
+
+language: python
+python:
+  - '3.4'
+
+services:
+  - docker
+
+env:
+  matrix:
+   - TASK="coverage"
+   - TASK="install"
+
+before_install:
+  - sudo apt-get update -y -qq
+  - if [[ "$TASK" == "coverage" ]]; then
+      pushd $HOME;
+      mkdir -p opt/ && cd opt;
+      curl -L -o sip.tar.gz http://sourceforge.net/projects/pyqt/files/sip/sip-4.17/sip-4.17.tar.gz;
+      tar --keep-newer-files -xf sip.tar.gz;
+      curl -L -o pyqt5.tar.gz http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.5.1/PyQt-gpl-5.5.1.tar.gz;
+      tar --keep-newer-files -xf pyqt5.tar.gz;
+      popd;
+    elif [[ "$TASK" == "install" ]]; then
+      docker pull bssthu/pyqt:py3.4-qt5.5.1;
+    fi
+
+install:
+  - if [[ "$TASK" == "coverage" ]]; then
+      sudo apt-get install -y -qq python3-dev qt5-default;
+      pip install -q coveralls;
+      pushd $HOME/opt;
+      cd sip-*;
+      python configure.py;
+      make && sudo make install;
+      cd ..;
+      cd PyQt*;
+      python configure.py -c --confirm-license --no-designer-plugin -e QtCore -e QtGui -e QtWidgets;
+      make && sudo make install;
+      popd;
+    elif [[ "$TASK" == "install" ]]; then
+      docker run --name pyqt_req -v $PWD:/opt/workspace bssthu/pyqt:py3.4-qt5.5.1 /bin/sh -c "
+        pip install -q -r requirements.txt;
+        pip install coveralls
+      ";
+      docker stop pyqt_req;
+      docker commit `docker ps -l -q` bssthu/pyqt:req;
+    fi
+
+script:
+  - if [[ "$TASK" == "coverage" ]]; then
+      python -c "import PyQt5";
+      make test;
+    elif [[ "$TASK" == "install" ]]; then
+      docker run -v $PWD:/opt/workspace bssthu/pyqt:req make install;
+    fi
+
+after_success:
+  - if [[ "$TASK" == "coverage" ]]; then coveralls; fi

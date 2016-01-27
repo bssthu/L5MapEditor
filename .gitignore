@@ -1,18 +1,26 @@
 *~
 .*.swp
 
+# python
 __pycache__/
 *.py[cod]
 
+# pyqt temp
 /build/
 resource_rc.py
 ui_Form.py
 
+# data
 *.db
 *.sqlite
 *.cfg
 *.log
 *.json
 
+# idea
 .idea/
 *.iml
+
+# coverage
+.coverage
+*egg-info/
