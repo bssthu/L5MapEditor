@@ -29,7 +29,7 @@ executables = [
 ]
 
 setup(name='L5MapEditor',
-      version='0.9',
+      version='0.10.0',
       description='MapEditor, bss, LGPLv3',
       options=options,
       executables=executables
