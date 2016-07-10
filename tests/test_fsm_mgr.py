@@ -9,7 +9,7 @@
 
 
 import unittest
-import fsm_mgr
+from editor import fsm_mgr
 
 
 class TestFsmMgr(unittest.TestCase):

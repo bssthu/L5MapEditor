@@ -11,8 +11,8 @@
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPolygonF, QPen, QBrush
-import polygon_base
-from polygon_base import PolygonBase
+from editor import polygon_base
+from editor.polygon_base import PolygonBase
 
 
 L_SIZE = 20

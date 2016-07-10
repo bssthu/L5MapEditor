@@ -9,7 +9,7 @@
 
 
 import sqlite3
-import config_loader
+from editor import config_loader
 
 
 def getTables(file_path):
@@ -57,3 +57,4 @@ def writeTables(file_path, polygons, layers):
             cur.execute(sql, record)
     conn.commit()
     conn.close()
+

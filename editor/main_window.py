@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Module        : main_window.py
+# Module        : main.py
 # Author        : bssthu
 # Project       : L5MapEditor
 # Creation date : 2015-09-24
@@ -12,18 +12,18 @@ import os
 import math
 import sqlite3
 from PyQt5 import QtWidgets
-from PyQt5.QtGui import QCursor, QTextDocument, QColor
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtGui import QCursor, QColor
+from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QGraphicsScene, QTableWidgetItem
 from PyQt5.QtWidgets import QFileDialog, QInputDialog
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QObject
-from ui_Form import Ui_MainWindow
-import config_loader
-import db_helper
-from map_data import MapData
-from fsm_mgr import FsmMgr
-import log
+from editor.ui_Form import Ui_MainWindow
+from editor import config_loader
+from editor import db_helper
+from editor.map_data import MapData
+from editor.fsm_mgr import FsmMgr
+from editor import log
 
 
 class MainWindow(QMainWindow):
@@ -410,12 +410,4 @@ class MainWindow(QMainWindow):
 
     def showMessage(self, msg, title='L5MapEditor'):
         QMessageBox.information(self, title, msg)
-
-
-if __name__ == '__main__':
-    import sys
-    app = QApplication(sys.argv)
-    w = MainWindow()
-    w.show()
-    sys.exit(app.exec_())
 

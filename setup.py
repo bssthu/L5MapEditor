@@ -25,7 +25,7 @@ options = {
 }
 
 executables = [
-    Executable('main_window.py', base=base, targetName='L5MapEditor.exe', icon='app.ico')
+    Executable('main.py', base=base, targetName='L5MapEditor.exe', icon='ui/app.ico')
 ]
 
 setup(name='L5MapEditor',

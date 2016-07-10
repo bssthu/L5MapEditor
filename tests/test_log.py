@@ -9,7 +9,7 @@
 
 
 import unittest
-import log
+from editor import log
 
 
 class TestLog(unittest.TestCase):

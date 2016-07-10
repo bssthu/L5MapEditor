@@ -11,11 +11,10 @@
 from PyQt5.QtWidgets import QGraphicsView
 from PyQt5.QtCore import QPointF
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
-import polygon_base
-from polygon_base import PolygonBase
-from polygon_item import PolygonItem
-from polygon_new import PolygonNew
-from polygon_select import PolygonSelect
+from editor.polygon_base import PolygonBase
+from editor.polygon_item import PolygonItem
+from editor.polygon_new import PolygonNew
+from editor.polygon_select import PolygonSelect
 
 
 class QMapGraphicsView(QGraphicsView):

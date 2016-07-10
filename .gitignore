@@ -24,3 +24,4 @@ ui_Form.py
 # coverage
 .coverage
 *egg-info/
+*.stackdump

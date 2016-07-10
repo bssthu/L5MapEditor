@@ -10,8 +10,8 @@
 
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QPolygonF, QPen
-from polygon_base import PolygonBase, COLOR
-import polygon_base
+from editor.polygon_base import PolygonBase, COLOR
+from editor import polygon_base
 
 
 class PolygonItem(PolygonBase):

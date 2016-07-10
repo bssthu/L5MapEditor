@@ -9,21 +9,21 @@ RCC = pyrcc5
 CLEANFILES = ui_*.py *_rc.py *~
 
 .PHONY: all
-all : ui_Form.py resource_rc.py
+all : editor/ui_Form.py editor/resource_rc.py
 
 .PHONY: install
 install : all
 	python setup.py build
 
-ui_Form.py : Form.ui
-	$(UIC) -o ui_Form.py Form.ui
+editor/ui_Form.py : ui/Form.ui
+	$(UIC) --from-imports -o editor/ui_Form.py ui/Form.ui
 
-resource_rc.py : resource.qrc
-	$(RCC) -o resource_rc.py resource.qrc
+editor/resource_rc.py : ui/resource.qrc
+	$(RCC) -o editor/resource_rc.py ui/resource.qrc
 
 .PHONY: clean
 clean:
-	rm -rf $(CLEANFILES)
+	cd editor; rm -rf $(CLEANFILES)
 
 .PHONY: test
 test:

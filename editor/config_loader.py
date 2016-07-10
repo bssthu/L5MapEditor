@@ -9,7 +9,7 @@
 
 
 import json
-import log
+from editor import log
 
 
 LAYER_NAMES = ('L0', 'L1', 'L2', 'L3', 'L4')
@@ -42,7 +42,7 @@ def getAdditionalName(layer, additional):
 
 def loadLayerNames():
     global LAYER_NAMES
-    with open('PolygonLayer.cfg', encoding='utf-8') as fp:
+    with open('conf/PolygonLayer.cfg', encoding='utf-8') as fp:
         try:
             string = ''.join(fp.readlines())
             layer_name_json = json.loads(string)

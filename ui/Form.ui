@@ -26,7 +26,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resource.qrc">
-    <normaloff>:/img/map.png</normaloff>:/img/map.png</iconset>
+    <normaloff>:/ui/img/map.png</normaloff>:/ui/img/map.png</iconset>
   </property>
   <widget class="QWidget" name="central_widget">
    <layout class="QGridLayout" name="gridLayout">
@@ -148,7 +148,7 @@ padding: 2px 0px 2px 0px;</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap resource="resource.qrc">:/img/zoom.png</pixmap>
+       <pixmap resource="resource.qrc">:/ui/img/zoom.png</pixmap>
       </property>
       <property name="scaledContents">
        <bool>true</bool>
@@ -283,7 +283,7 @@ padding: 2px 0px 2px 0px;</string>
   <action name="open_action">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/folder.png</normaloff>:/img/folder.png</iconset>
+     <normaloff>:/ui/img/folder.png</normaloff>:/ui/img/folder.png</iconset>
    </property>
    <property name="text">
     <string>打开</string>
@@ -298,7 +298,7 @@ padding: 2px 0px 2px 0px;</string>
   <action name="save_action">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/save.png</normaloff>:/img/save.png</iconset>
+     <normaloff>:/ui/img/save.png</normaloff>:/ui/img/save.png</iconset>
    </property>
    <property name="text">
     <string>保存</string>
@@ -316,7 +316,7 @@ padding: 2px 0px 2px 0px;</string>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/add.png</normaloff>:/img/add.png</iconset>
+     <normaloff>:/ui/img/add.png</normaloff>:/ui/img/add.png</iconset>
    </property>
    <property name="text">
     <string>插入(&amp;I)</string>
@@ -331,7 +331,7 @@ padding: 2px 0px 2px 0px;</string>
   <action name="delete_action">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/close.png</normaloff>:/img/close.png</iconset>
+     <normaloff>:/ui/img/close.png</normaloff>:/ui/img/close.png</iconset>
    </property>
    <property name="text">
     <string>删除(&amp;D)</string>
@@ -346,7 +346,7 @@ padding: 2px 0px 2px 0px;</string>
   <action name="about_action">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/info.png</normaloff>:/img/info.png</iconset>
+     <normaloff>:/ui/img/info.png</normaloff>:/ui/img/info.png</iconset>
    </property>
    <property name="text">
     <string>关于(&amp;A)</string>
@@ -361,7 +361,7 @@ padding: 2px 0px 2px 0px;</string>
   <action name="exit_action">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/exit.png</normaloff>:/img/exit.png</iconset>
+     <normaloff>:/ui/img/exit.png</normaloff>:/ui/img/exit.png</iconset>
    </property>
    <property name="text">
     <string>退出(&amp;X)</string>
@@ -379,7 +379,7 @@ padding: 2px 0px 2px 0px;</string>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/move.png</normaloff>:/img/move.png</iconset>
+     <normaloff>:/ui/img/move.png</normaloff>:/ui/img/move.png</iconset>
    </property>
    <property name="text">
     <string>移动(&amp;M)</string>
@@ -400,7 +400,7 @@ padding: 2px 0px 2px 0px;</string>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/closed_polygon.png</normaloff>:/img/closed_polygon.png</iconset>
+     <normaloff>:/ui/img/closed_polygon.png</normaloff>:/ui/img/closed_polygon.png</iconset>
    </property>
    <property name="text">
     <string>绘制封闭多边形</string>
@@ -415,7 +415,7 @@ padding: 2px 0px 2px 0px;</string>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/grid.png</normaloff>:/img/grid.png</iconset>
+     <normaloff>:/ui/img/grid.png</normaloff>:/ui/img/grid.png</iconset>
    </property>
    <property name="text">
     <string>显示网格</string>
@@ -427,7 +427,7 @@ padding: 2px 0px 2px 0px;</string>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/dot.png</normaloff>:/img/dot.png</iconset>
+     <normaloff>:/ui/img/dot.png</normaloff>:/ui/img/dot.png</iconset>
    </property>
    <property name="text">
     <string>拾取点</string>
@@ -442,7 +442,7 @@ padding: 2px 0px 2px 0px;</string>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/start_point.png</normaloff>:/img/start_point.png</iconset>
+     <normaloff>:/ui/img/start_point.png</normaloff>:/ui/img/start_point.png</iconset>
    </property>
    <property name="text">
     <string>标出点</string>
@@ -460,7 +460,7 @@ padding: 2px 0px 2px 0px;</string>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/highlight.png</normaloff>:/img/highlight.png</iconset>
+     <normaloff>:/ui/img/highlight.png</normaloff>:/ui/img/highlight.png</iconset>
    </property>
    <property name="text">
     <string>突出选中图形</string>
@@ -469,7 +469,7 @@ padding: 2px 0px 2px 0px;</string>
   <action name="undo_action">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/undo.png</normaloff>:/img/undo.png</iconset>
+     <normaloff>:/ui/img/undo.png</normaloff>:/ui/img/undo.png</iconset>
    </property>
    <property name="text">
     <string>撤销</string>
@@ -481,7 +481,7 @@ padding: 2px 0px 2px 0px;</string>
   <action name="redo_action">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/img/redo.png</normaloff>:/img/redo.png</iconset>
+     <normaloff>:/ui/img/redo.png</normaloff>:/ui/img/redo.png</iconset>
    </property>
    <property name="text">
     <string>重做</string>
@@ -495,7 +495,7 @@ padding: 2px 0px 2px 0px;</string>
   <customwidget>
    <class>QMapGraphicsView</class>
    <extends>QGraphicsView</extends>
-   <header>qmapgraphicsview.h</header>
+   <header>editor/qmapgraphicsview.h</header>
   </customwidget>
  </customwidgets>
  <resources>

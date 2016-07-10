@@ -1,0 +1,20 @@
+<RCC>
+    <qresource>
+    <file>../ui/img/folder.png</file>
+    <file>../ui/img/save.png</file>
+    <file>../ui/img/add.png</file>
+    <file>../ui/img/close.png</file>
+    <file>../ui/img/undo.png</file>
+    <file>../ui/img/redo.png</file>
+    <file>../ui/img/info.png</file>
+    <file>../ui/img/exit.png</file>
+    <file>../ui/img/map.png</file>
+    <file>../ui/img/zoom.png</file>
+    <file>../ui/img/move.png</file>
+    <file>../ui/img/closed_polygon.png</file>
+    <file>../ui/img/grid.png</file>
+    <file>../ui/img/highlight.png</file>
+    <file>../ui/img/dot.png</file>
+    <file>../ui/img/start_point.png</file>
+    </qresource>
+</RCC>
