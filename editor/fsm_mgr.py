@@ -4,7 +4,7 @@
 # Author        : bssthu
 # Project       : L5MapEditor
 # Creation date : 2015-09-30
-# Description   :
+# Description   : UI 状态转移
 #
 
 

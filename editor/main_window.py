@@ -62,6 +62,7 @@ class MainWindow(QMainWindow):
         self.open('default.sqlite', True)
 
     def __initFsm(self):
+        """初始化 UI 状态机"""
         self.fsm_mgr = FsmMgr()
         self.fsm_mgr.changeState.connect(self.changeState)
         self.fsm_mgr.getFsm('insert').enterState.connect(self.ui.graphics_view.beginInsert)
@@ -79,6 +80,7 @@ class MainWindow(QMainWindow):
 # slots
     @pyqtSlot(QObject)
     def changeState(self, new_state):
+        """UI 状态转移"""
         if new_state == self.fsm_mgr.getFsm('empty'):
             self.ui.save_action.setEnabled(False)
             self.ui.undo_action.setEnabled(False)
@@ -131,17 +133,20 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_open_action_triggered(self):
+        """点击“打开”按钮"""
         path = QFileDialog.getOpenFileName(self, '载入数据', '.', '数据库文档(*.sqlite)')[0]
         if path:
             self.open(path)
 
     @pyqtSlot()
     def on_save_action_triggered(self):
+        """点击“保存”按钮"""
         if self.path is not None:
             self.save(self.path)
 
     @pyqtSlot()
     def on_undo_action_triggered(self):
+        """点击“撤销”按钮"""
         try:
             self.map_data.undo()
             self.updatePolygonList(self.map_data.getPolygons())
@@ -153,6 +158,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_redo_action_triggered(self):
+        """点击“重做”按钮"""
         try:
             self.map_data.redo()
             self.updatePolygonList(self.map_data.getPolygons())
@@ -164,6 +170,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_insert_action_triggered(self):
+        """点击“插入”按钮"""
         if self.ui.insert_action.isChecked():
             if not self.fsm_mgr.changeFsm('normal', 'insert'):
                 self.ui.insert_action.setChecked(False)
@@ -173,6 +180,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_delete_action_triggered(self):
+        """点击“删除”按钮"""
         _id = self.selectedId()
         if _id >= 0:
             row = self.ui.polygon_table_widget.currentRow()
@@ -181,16 +189,19 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_about_action_triggered(self):
+        """点击“关于”按钮"""
         info = 'L5MapEditor by bssthu\n\n'   \
                 'https://github.com/bssthu/L5MapEditor'
         QMessageBox.about(self, '关于', info)
 
     @pyqtSlot()
     def on_exit_action_triggered(self):
+        """点击“退出”按钮"""
         exit()
 
     @pyqtSlot()
     def on_move_action_triggered(self):
+        """点击“移动”按钮"""
         state_name = 'move' if not self.ui.move_point_action.isChecked() else 'move_point'
         if self.ui.move_action.isChecked():
             if not self.fsm_mgr.changeFsm('normal', state_name):
@@ -201,6 +212,7 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_move_point_action_triggered(self):
+        """点击“拾取点”按钮"""
         self.ui.graphics_view.movePoint(self.ui.move_point_action.isChecked())
         if self.ui.move_point_action.isChecked():
             self.fsm_mgr.changeFsm('move', 'move_point')
@@ -209,63 +221,88 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_closed_polygon_action_triggered(self):
+        """点击“绘制封闭多边形”按钮"""
         self.ui.graphics_view.drawClosedPolygon(self.ui.closed_polygon_action.isChecked())
 
     @pyqtSlot()
     def on_highlight_action_triggered(self):
+        """点击“突出显示图形”按钮"""
         self.ui.graphics_view.highlightSelection(self.ui.highlight_action.isChecked())
 
     @pyqtSlot()
     def on_grid_action_triggered(self):
+        """点击“显示网格”按钮"""
         pass
 
     @pyqtSlot()
     def on_mark_points_action_triggered(self):
+        """点击“标出点”按钮"""
         self.ui.graphics_view.markPoints(self.ui.mark_points_action.isChecked())
 
     @pyqtSlot()
     def on_command_edit_returnPressed(self):
+        """输入命令后按下回车"""
         commands = self.ui.command_edit.text().strip()
         if commands != '':
+            # 执行命令
             self.execute(commands)
         self.ui.command_edit.setText('')
 
     def lockUI(self):
+        """锁定 UI"""
         self.ui.tool_bar.setEnabled(False)
 
     @pyqtSlot()
     def unlockUI(self):
+        """解锁 UI"""
         self.ui.tool_bar.setEnabled(True)
         self.ui.graphics_view.scene().update()
 
     @pyqtSlot(list)
     def updateChildList(self, polygons):
+        """更新 children 列表
+
+        Args:
+            polygons: 多边形 list
+        """
         self.fillTableWithPolygons(self.ui.second_table_widget, polygons)
 
     @pyqtSlot()
     def polygonSelectionChanged(self):
+        """在多边形列表中选择了多边形"""
         _id = self.selectedId()
         if _id >= 0:
             # draw polygon
             polygon = self.map_data.getPolygon(_id)
-            self.ui.graphics_view.setSelectedPolygon(polygon)
             # list children
             child_list = self.map_data.getChildListOfPolygon(_id)
-            self.updateChildList(child_list)
+        else:
+            # 选中了非法的多边形
+            polygon = None
+            child_list = []
+        self.ui.graphics_view.setSelectedPolygon(polygon)
+        self.updateChildList(child_list)
 
     @pyqtSlot()
     def secondSelectionChanged(self):
+        """在第二列选中"""
         if self.ui.move_action.isChecked():
             self.ui.graphics_view.selectPoint(self.ui.second_table_widget.currentRow())
 
     @pyqtSlot()
     def scaleSliderChanged(self):
+        """修改地图缩放比例"""
         scale = math.exp(self.ui.scale_slider.value() / 10)
         self.ui.graphics_view.resetTransform()
         self.ui.graphics_view.scale(scale, -scale)
 
     @pyqtSlot(list)
     def addPolygon(self, vertices):
+        """插入多边形
+
+        Args:
+            vertices: 多边形顶点 list, [[x1,y1], [x2,y2], ..., [xn,yn]]
+        """
         parent_id = self.selectedId()
         _id = self.map_data.getSpareId(parent_id)
         layer = self.ui.insert_layer_combo_box.currentIndex()
@@ -277,6 +314,11 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(list)
     def updatePolygon(self, vertices):
+        """修改当前选中的多边形的顶点坐标
+
+        Args:
+            vertices: 多边形顶点 list, [[x1,y1], [x2,y2], ..., [xn,yn]]
+        """
         _id = self.selectedId()
         commands = []
         for pt_id in range(0, len(vertices)):
@@ -287,6 +329,13 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(list)
     def updatePoints(self, points):
+        """更新第二列显示的点
+
+        编辑模式下，第二列显示当前图形的点的坐标。本方法用于更新第二列的显示。
+
+        Args:
+            points: 多边形顶点 list, [qpoint1, qpoint2, ..., qpointn]
+        """
         row = self.ui.second_table_widget.currentRow()
         self.fillTableWithPoints(self.ui.second_table_widget, points)
         row_count = self.ui.second_table_widget.rowCount()
@@ -296,11 +345,22 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(str, QColor)
     def printToOutput(self, msg, color):
+        """打印到输出窗口
+
+        Args:
+            msg: 输出内容
+            color: 输出颜色, QColor
+        """
         print(msg)
         self.ui.output_browser.setTextColor(color)
         self.ui.output_browser.append(msg)
 
     def execute(self, commands):
+        """执行命令
+
+        Args:
+            commands: 待执行命令
+        """
         log.debug(commands)
         try:
             self.map_data.execute(commands)
@@ -312,6 +372,11 @@ class MainWindow(QMainWindow):
             return True
 
     def updatePolygonList(self, polygons):
+        """更新多边形列表
+
+        Args:
+            polygons: 多边形 list
+        """
         _id = self.selectedId()
         self.fillTableWithPolygons(self.ui.polygon_table_widget, polygons)
         self.ui.graphics_view.setPolygons(polygons, len(config_loader.getLayerNames()))
@@ -320,6 +385,12 @@ class MainWindow(QMainWindow):
                 self.ui.polygon_table_widget.setCurrentCell(0, 0)
 
     def fillTableWithPolygons(self, table_widget, polygons):
+        """在控件中显示多边形
+
+        Args:
+            table_widget: 目标控件
+            polygons: 多边形 list
+        """
         table_widget.clear()
         table_widget.setRowCount(0)
         table_widget.setColumnCount(3)
@@ -340,6 +411,12 @@ class MainWindow(QMainWindow):
         table_widget.resizeColumnsToContents()
 
     def fillTableWithPoints(self, table_widget, points):
+        """在控件中显示点
+
+        Args:
+            table_widget: 目标控件
+            points: qpoint list
+        """
         table_widget.clear()
         table_widget.setRowCount(0)
         table_widget.setColumnCount(2)
@@ -351,6 +428,12 @@ class MainWindow(QMainWindow):
         table_widget.resizeColumnsToContents()
 
     def open(self, path, quiet=False):
+        """打开 sqlite 数据库文件
+
+        Args:
+            path: 文件路径
+            quiet: 报错不弹框
+        """
         if os.path.exists(path):
             try:
                 (polygons, layers) = db_helper.getTables(path)
@@ -370,6 +453,11 @@ class MainWindow(QMainWindow):
                 self.showMessage('File %s not exists.' % path)
 
     def save(self, path):
+        """保存 sqlite 数据库文件
+
+        Args:
+            path: 文件路径
+        """
         try:
             (polygons, layers) = self.map_data.get()
             db_helper.writeTables(path, polygons, layers)
@@ -381,6 +469,7 @@ class MainWindow(QMainWindow):
             self.showMessage(repr(error))
 
     def selectedId(self):
+        """选中的多边形的 id"""
         row = self.ui.polygon_table_widget.currentRow()
         item = self.ui.polygon_table_widget.item(row, 0)
         if item is not None:
@@ -389,6 +478,12 @@ class MainWindow(QMainWindow):
             return -1
 
     def selectRowById(self, table_widget, polygon_id):
+        """根据多边形的 id 选中行
+
+        Args:
+            table_widget: 目标控件
+            polygon_id: 多边形 id
+        """
         for row in range(0, table_widget.rowCount()):
             if table_widget.item(row, 0).text() == str(polygon_id):
                 table_widget.setCurrentCell(row, 0)

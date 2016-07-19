@@ -13,6 +13,11 @@ from editor import config_loader
 
 
 def getTables(file_path):
+    """从文件载入 sqlite 数据库
+
+    Args:
+        file_path: 数据库路径
+    """
     conn = sqlite3.connect(file_path)
     cur = conn.cursor()
     polygons = cur.execute('SELECT * FROM POLYGON').fetchall()
@@ -33,6 +38,13 @@ def getTables(file_path):
 
 
 def writeTables(file_path, polygons, layers):
+    """将结果写入 sqlite 数据库
+
+    Args:
+        file_path: 数据库路径
+        polygons: 多边形 list
+        layers: 多边形的 layer
+    """
     LAYER_NAMES = config_loader.getLayerNames()
     conn = sqlite3.connect(file_path)
     cur = conn.cursor()

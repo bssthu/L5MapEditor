@@ -17,6 +17,7 @@ ADDITIONAL_NAMES = {}
 
 
 def loadAll():
+    """载入配置文件"""
     loadLayerNames()
 
 
