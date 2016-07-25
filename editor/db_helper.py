@@ -10,6 +10,7 @@
 
 import sqlite3
 from editor import config_loader
+from editor.dao_polygon import create_dao_polygon_table
 
 
 def getTables(file_path):
@@ -22,6 +23,8 @@ def getTables(file_path):
     cur = conn.cursor()
     polygons = cur.execute('SELECT * FROM POLYGON').fetchall()
     polygons = [list(polygon) for polygon in polygons]
+    polygon_table = create_dao_polygon_table(polygons)
+    # TODO:
     for polygon in polygons:
         vertex_str = polygon[3].strip().strip(';')
         if vertex_str == '':
