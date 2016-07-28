@@ -19,8 +19,16 @@ COMMAND_ID_NOT_FOUND = 'ID不存在'
 
 
 class MapData(QObject):
-    def __init__(self):
+    """命令管理器"""
+
+    def __init__(self, polygon_table):
+        """构造函数
+
+        Args:
+            polygon_table: {polygon_id: DaoPolygon}
+        """
         super().__init__()
+        self.polygon_table = polygon_table
         self.polygons = []
         self.layers = []
         self.old_polygons = []
@@ -50,19 +58,6 @@ class MapData(QObject):
             }
         }
 
-    def set(self, polygons, layers):
-        self.polygons = polygons
-        self.layers = layers
-        self.updateBackupData()
-        # 更新信息
-        self.invalidate()
-
-    def get(self):
-        return self.polygons, self.layers
-
-    def getPolygons(self):
-        return self.polygons
-
     def invalidate(self):
         # polygon 索引
         self.polygon_dict = {}
@@ -75,31 +70,36 @@ class MapData(QObject):
 
     def updateBackupData(self):
         # 用于 撤销/重做
-        self.old_polygons = copy.deepcopy(self.polygons)
-        self.old_layers = copy.deepcopy(self.layers)
+        pass
+        # self.old_polygons = copy.deepcopy(self.polygons)
+        # self.old_layers = copy.deepcopy(self.layers)
         self.command_history.clear()
 
     def revertAll(self):
-        self.polygons = copy.deepcopy(self.old_polygons)
-        self.layers = copy.deepcopy(self.old_layers)
+        pass
+        # self.polygons = copy.deepcopy(self.old_polygons)
+        # self.layers = copy.deepcopy(self.old_layers)
         self.command_history.clear()
         self.invalidate()
 
     def redoCommandHistory(self):
-        command_history = copy.deepcopy(self.command_history)
-        self.revertAll()
-        for commands in command_history:
-            self.execute(commands, is_redo=True)
+        pass
+        # command_history = copy.deepcopy(self.command_history)
+        # self.revertAll()
+        # for commands in command_history:
+        #     self.execute(commands, is_redo=True)
 
     def undo(self):
-        if len(self.command_history) > 0:
-            self.command_history_revert.append(self.command_history.pop())
-            self.redoCommandHistory()
+        pass
+        # if len(self.command_history) > 0:
+        #     self.command_history_revert.append(self.command_history.pop())
+        #     self.redoCommandHistory()
 
     def redo(self):
-        if len(self.command_history_revert) > 0:
-            self.command_history.append(self.command_history_revert.pop())
-            self.redoCommandHistory()
+        pass
+        # if len(self.command_history_revert) > 0:
+        #     self.command_history.append(self.command_history_revert.pop())
+        #     self.redoCommandHistory()
 
     def execute(self, commands, is_redo=False):
         try:

@@ -156,7 +156,7 @@ padding: 2px 0px 2px 0px;</string>
      </widget>
     </item>
     <item row="1" column="0" rowspan="8">
-     <widget class="QTableWidget" name="polygon_table_widget">
+     <widget class="QPolygonTableWidget" name="polygon_table_widget">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>1</horstretch>
@@ -166,7 +166,7 @@ padding: 2px 0px 2px 0px;</string>
      </widget>
     </item>
     <item row="1" column="1" rowspan="8">
-     <widget class="QTableWidget" name="second_table_widget">
+     <widget class="QPolygonTableWidget" name="second_table_widget">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>1</horstretch>
@@ -496,6 +496,11 @@ padding: 2px 0px 2px 0px;</string>
    <class>QMapGraphicsView</class>
    <extends>QGraphicsView</extends>
    <header>editor/qmapgraphicsview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QPolygonTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>editor/qpolygontablewidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>

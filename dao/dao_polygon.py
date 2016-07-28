@@ -11,22 +11,6 @@
 from editor import log
 
 
-def create_dao_polygon_table(polygons):
-    """从来自数据库的数据 list 创建 Polygon 表
-
-    Args:
-        polygons: list of [polygon_id, layer, vertex_num, <str>vertices]
-
-    Returns:
-        polygon_table: {polygon_id, DaoPolygon}
-    """
-    polygon_table = {}
-    for polygon in polygons:
-        dao_polygon = DaoPolygon(polygon)
-        polygon_table[dao_polygon.polygon_id] = dao_polygon
-    return polygon_table
-
-
 class DaoPolygon:
     """一个 Polygon
 
@@ -34,7 +18,7 @@ class DaoPolygon:
         polygon_id: 多边形的 id
         layer: 多边形所属层
         vertex_num: 该多边形的顶点数量
-
+        vertices: 顶点
     """
     def __init__(self, polygon):
         """构造函数
@@ -42,6 +26,7 @@ class DaoPolygon:
         Args:
             polygon: [polygon_id, layer, vertex_num, <str>vertices]
         """
+
         self.polygon_id = polygon[0]
         self.layer = polygon[1]
         vertex_str_list = polygon[3].strip().strip(';')
@@ -58,6 +43,12 @@ class DaoPolygon:
         if self.vertex_num != polygon[2]:
             log.debug('polygon %d: expect %d vertices, find %d.' % (self.polygon_id, polygon[2], self.vertex_num))
 
+        # other attr
+        self.name = ''
+        self.additional = 0
+        self.parent = None
+        self.children = []
+
     def to_list(self):
         """转换为 list, 准备写回数据库
 
@@ -66,6 +57,14 @@ class DaoPolygon:
         """
         vertex_str = ';'.join(('%f,%f' % (pt.x, pt.y) for pt in self.vertices))
         return [self.polygon_id, self.layer, self.vertex_num, vertex_str]
+
+    def delete(self):
+        """递归删除所有 children，以及自身"""
+        deleted_id = []
+        for child in self.children:
+            deleted_id.extend(child.delete())
+        deleted_id.extend(self.polygon_id)
+        return deleted_id
 
 
 class DaoPoint:

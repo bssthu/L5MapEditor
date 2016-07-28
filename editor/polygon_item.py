@@ -17,8 +17,8 @@ from editor import polygon_base
 class PolygonItem(PolygonBase):
     def __init__(self, polygon):
         super().__init__()
-        self.layer = polygon[1]
-        vertices = polygon[3]
+        self.layer = polygon.layer
+        vertices = polygon.vertices
         self.points = polygon_base.getQtPoints(vertices)
         if len(self.points) > 0:
             self.rect = polygon_base.getBoundingRect(self.points)

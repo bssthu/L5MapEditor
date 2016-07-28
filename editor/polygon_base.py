@@ -56,7 +56,7 @@ PolygonBase.mark_points = True
 
 
 def getQtPoints(vertices):
-    return [QPointF(vertex[0], vertex[1]) for vertex in vertices]
+    return [QPointF(vertex.x, vertex.y) for vertex in vertices]
 
 
 def getBoundingRect(points):

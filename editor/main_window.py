@@ -8,22 +8,24 @@
 #
 
 
-import os
 import math
+import os
 import sqlite3
+
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import pyqtSlot, Qt, QObject
 from PyQt5.QtGui import QCursor, QColor
+from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtWidgets import QGraphicsScene, QTableWidgetItem
-from PyQt5.QtWidgets import QFileDialog, QInputDialog
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QObject
-from editor.ui_Form import Ui_MainWindow
+
+from dao.db_helper import DbHelper
 from editor import config_loader
-from editor import db_helper
-from editor.map_data import MapData
-from editor.fsm_mgr import FsmMgr
 from editor import log
+from editor.fsm_mgr import FsmMgr
+from editor.map_data import MapData
+from editor.ui_Form import Ui_MainWindow
 
 
 class MainWindow(QMainWindow):
@@ -45,7 +47,8 @@ class MainWindow(QMainWindow):
         self.ui.insert_layer_combo_box.addItems(config_loader.getLayerNames())
         self.ui.graphics_view.scale(1, -1)   # invert y
         # data
-        self.map_data = MapData()
+        self.db_helper = DbHelper()
+        self.map_data = MapData(self.db_helper.polygon_table)
         self.path = None
         # fsm
         self.__initFsm()
@@ -149,7 +152,7 @@ class MainWindow(QMainWindow):
         """点击“撤销”按钮"""
         try:
             self.map_data.undo()
-            self.updatePolygonList(self.map_data.getPolygons())
+            self.updatePolygonList()
         except Exception as e:
             log.error('撤销操作出错: %s' % repr(e))
             return False
@@ -161,7 +164,7 @@ class MainWindow(QMainWindow):
         """点击“重做”按钮"""
         try:
             self.map_data.redo()
-            self.updatePolygonList(self.map_data.getPolygons())
+            self.updatePolygonList()
         except Exception as e:
             log.error('重做操作出错: %s' % repr(e))
             return False
@@ -259,13 +262,13 @@ class MainWindow(QMainWindow):
         self.ui.graphics_view.scene().update()
 
     @pyqtSlot(list)
-    def updateChildList(self, polygons):
+    def updateChildList(self, polygon_table):
         """更新 children 列表
 
         Args:
-            polygons: 多边形 list
+            polygon_table: 多边形表
         """
-        self.fillTableWithPolygons(self.ui.second_table_widget, polygons)
+        self.ui.second_table_widget.fillWithPolygons(polygon_table)
 
     @pyqtSlot()
     def polygonSelectionChanged(self):
@@ -275,13 +278,14 @@ class MainWindow(QMainWindow):
             # draw polygon
             polygon = self.map_data.getPolygon(_id)
             # list children
-            child_list = self.map_data.getChildListOfPolygon(_id)
+            child_list = self.db_helper.get_children_table_by_id(_id)
         else:
             # 选中了非法的多边形
             polygon = None
-            child_list = []
+            child_list = {}
         self.ui.graphics_view.setSelectedPolygon(polygon)
         self.updateChildList(child_list)
+        return
 
     @pyqtSlot()
     def secondSelectionChanged(self):
@@ -337,7 +341,7 @@ class MainWindow(QMainWindow):
             points: 多边形顶点 list, [qpoint1, qpoint2, ..., qpointn]
         """
         row = self.ui.second_table_widget.currentRow()
-        self.fillTableWithPoints(self.ui.second_table_widget, points)
+        self.ui.second_table_widget.fillWithPoints(points)
         row_count = self.ui.second_table_widget.rowCount()
         if row_count > 0:
             row = min(row_count - 1, max(0, row))
@@ -364,68 +368,22 @@ class MainWindow(QMainWindow):
         log.debug(commands)
         try:
             self.map_data.execute(commands)
-            self.updatePolygonList(self.map_data.getPolygons())
+            self.updatePolygonList()
         except Exception as e:
             log.error('执行命令出错: %s' % repr(e))
             return False
         else:
             return True
 
-    def updatePolygonList(self, polygons):
-        """更新多边形列表
-
-        Args:
-            polygons: 多边形 list
-        """
+    def updatePolygonList(self):
+        """更新多边形列表"""
+        polygon_table = self.db_helper.polygon_table
         _id = self.selectedId()
-        self.fillTableWithPolygons(self.ui.polygon_table_widget, polygons)
-        self.ui.graphics_view.setPolygons(polygons, len(config_loader.getLayerNames()))
-        if len(polygons) > 0:
+        self.ui.polygon_table_widget.fillWithPolygons(polygon_table)
+        self.ui.graphics_view.setPolygons(polygon_table, len(config_loader.getLayerNames()))
+        if len(polygon_table) > 0:
             if not self.selectRowById(self.ui.polygon_table_widget, _id):
                 self.ui.polygon_table_widget.setCurrentCell(0, 0)
-
-    def fillTableWithPolygons(self, table_widget, polygons):
-        """在控件中显示多边形
-
-        Args:
-            table_widget: 目标控件
-            polygons: 多边形 list
-        """
-        table_widget.clear()
-        table_widget.setRowCount(0)
-        table_widget.setColumnCount(3)
-        table_widget.setHorizontalHeaderLabels(('id', 'layer', 'type'))
-        if len(polygons) > 0:
-            for row in range(0, len(polygons)):
-                table_widget.insertRow(row)
-                # id
-                _id = polygons[row][0]
-                table_widget.setItem(row, 0, QTableWidgetItem(str(_id)))
-                # layer
-                layer_id = polygons[row][1]
-                layer_name = config_loader.getLayerName(layer_id)
-                table_widget.setItem(row, 1, QTableWidgetItem(layer_name))
-                # type
-                type = self.map_data.getAdditionalOfPolygon(_id)
-                table_widget.setItem(row, 2, QTableWidgetItem(str(type)))
-        table_widget.resizeColumnsToContents()
-
-    def fillTableWithPoints(self, table_widget, points):
-        """在控件中显示点
-
-        Args:
-            table_widget: 目标控件
-            points: qpoint list
-        """
-        table_widget.clear()
-        table_widget.setRowCount(0)
-        table_widget.setColumnCount(2)
-        table_widget.setHorizontalHeaderLabels(('x', 'y'))
-        for row in range(0, len(points)):
-            table_widget.insertRow(row)
-            table_widget.setItem(row, 0, QTableWidgetItem(str(points[row].x())))
-            table_widget.setItem(row, 1, QTableWidgetItem(str(points[row].y())))
-        table_widget.resizeColumnsToContents()
 
     def open(self, path, quiet=False):
         """打开 sqlite 数据库文件
@@ -436,9 +394,9 @@ class MainWindow(QMainWindow):
         """
         if os.path.exists(path):
             try:
-                (polygons, layers) = db_helper.getTables(path)
-                self.map_data.set(polygons, layers)
-                self.updatePolygonList(self.map_data.getPolygons())
+                self.db_helper.load_tables(path)
+                self.map_data.invalidate()
+                self.updatePolygonList()
                 self.path = path
                 self.fsm_mgr.changeFsm('empty', 'normal')
                 log.debug('Open "%s".' % path)
@@ -460,7 +418,7 @@ class MainWindow(QMainWindow):
         """
         try:
             (polygons, layers) = self.map_data.get()
-            db_helper.writeTables(path, polygons, layers)
+            self.db_helper.write_to_file(path, polygons, layers)
             self.map_data.updateBackupData()
             log.debug('Save "%s".' % path)
         except sqlite3.Error as error:
