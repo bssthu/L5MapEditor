@@ -110,7 +110,7 @@ class DbHelper:
         """
         if polygon_id in self.polygon_table.keys():
             # delete recursive
-            deleted_id_list = self.polygon_table[polygon_id].delete()
+            deleted_id_list = self.polygon_table[polygon_id].traversal_post_order()
             # remove from dict
             for deleted_id in deleted_id_list:
                 if deleted_id in self.polygon_table.keys():

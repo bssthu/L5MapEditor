@@ -84,11 +84,59 @@ class DaoPolygon:
         vertex_str = ';'.join(('%f,%f' % (pt.x, pt.y) for pt in self.vertices))
         return [self.polygon_id, self.layer, self.vertex_num, vertex_str]
 
-    def delete(self):
-        """递归删除所有 children，以及自身"""
+    def move(self, dx, dy, v_id=None):
+        """整体平移或平移某点
+
+        Args:
+            dx: x 方向偏移
+            dy: y 方向偏移
+            v_id: 待移动点的索引, None 表示整体平移
+        """
+        if v_id is None:
+            # 整体平移
+            for vertex in self.vertices:
+                vertex.move(dx, dy)
+        else:
+            # 移动某点
+            self.vertices[v_id].move(dx, dy)
+
+    def add_vertex(self, x, y, v_id=-1):
+        """插入顶点
+
+        Args:
+            x: 新点 x 坐标
+            y: 新点 x 坐标
+            v_id: 新点插入位置，原 v_id 对应点后移。若 v_id 为负，则插入到最后。
+        """
+        if v_id >= 0:
+            # 从中间插入点
+            self.vertices[v_id:v_id] = DaoPoint(x, y)
+        elif v_id < 0:
+            # 从最后插入点
+            self.vertices.append(DaoPoint(x, y))
+        self.vertex_num = len(self.vertices)
+
+    def remove_vertex(self, v_id):
+        """删除顶点
+
+        Args:
+            v_id: 待删顶点索引，其后点前移
+        """
+        if 0 <= v_id < self.vertex_num:
+            del self.vertices[v_id]
+        self.vertex_num = len(self.vertices)
+
+    def traversal_post_order(self):
+        """后续遍历递归
+
+        可用于删除所有 children，以及自身
+
+        Returns:
+            list of 后续遍历得到的多边形索引
+        """
         deleted_id = []
         for child in self.children:
-            deleted_id.extend(child.delete())
+            deleted_id.extend(child.traversal_post_order())
         deleted_id.extend(self.polygon_id)
         return deleted_id
 
@@ -98,4 +146,14 @@ class DaoPoint:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+    def move(self, dx, dy):
+        """移动
+
+        Args:
+            dx: x 方向偏移
+            dy: y 方向偏移
+        """
+        self.x += dx
+        self.y += dy
 
