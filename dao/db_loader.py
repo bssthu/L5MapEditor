@@ -8,7 +8,32 @@
 #
 
 
+import sqlite3
+
 from dao.dao_polygon import DaoPolygon
+from editor import config_loader
+
+
+def load_from_sqlite(file_path):
+    """从文件载入 sqlite 数据库
+
+    Args:
+        file_path: 数据库路径
+    """
+    # open sqlite
+    conn = sqlite3.connect(file_path)
+    cur = conn.cursor()
+    # load polygons
+    polygons = cur.execute('SELECT * FROM POLYGON').fetchall()
+    polygons = [list(polygon) for polygon in polygons]
+    # load layers
+    layers = []
+    for NAME in config_loader.getLayerNames():
+        layer = cur.execute('SELECT * FROM %s' % NAME).fetchall()
+        layer = [list(record) for record in layer]
+        layers.append(layer)
+    conn.close()
+    return create_dao_polygon_table(polygons, layers)
 
 
 def create_dao_polygon_table(polygons, layers):
@@ -53,6 +78,37 @@ def create_dao_polygon_table(polygons, layers):
     return polygon_table
 
 
-def export_dao_polygon_table(polygon_table):
-    pass
+def write_to_sqlite(file_path, polygon_table):
+    """将结果写入 sqlite 数据库
 
+    Args:
+        file_path: 数据库路径
+        polygon_table: {polygon_id: DaoPolygon}
+    """
+    LAYER_NAMES = config_loader.getLayerNames()
+    conn = sqlite3.connect(file_path)
+    cur = conn.cursor()
+    # clear
+    cur.execute('DELETE FROM POLYGON')
+    for NAME in LAYER_NAMES:
+        cur.execute('DELETE FROM %s' % NAME)
+    # insert polygon table
+    sql = 'INSERT INTO POLYGON (_id, layer, vertex_Num, vertices) VALUES (?,?,?,?)'
+    for polygon in polygon_table.values():
+        cur.execute(sql, polygon.to_list())
+    # insert layer table
+    layer_id = [0] * len(LAYER_NAMES)
+    for polygon in polygon_table.values():
+        layer = polygon.layer
+        if layer < len(LAYER_NAMES):
+            layer_id[layer] += 1
+            if layer == 0:
+                sql = 'INSERT INTO %s VALUES (?,?,?)' % LAYER_NAMES[0]
+                record = (layer_id[layer], polygon.polygon_id, polygon.name)
+                cur.execute(sql, record)
+            else:
+                sql = 'INSERT INTO %s VALUES (?,?,?,?)' % LAYER_NAMES[layer]
+                record = (layer_id[layer], polygon.polygon_id, polygon.additional, polygon.parent.polygon_id)
+                cur.execute(sql, record)
+    conn.commit()
+    conn.close()

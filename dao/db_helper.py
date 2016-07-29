@@ -8,10 +8,8 @@
 #
 
 
-import sqlite3
-
 import dao.db_loader as db_loader
-from editor import config_loader
+from dao.dao_polygon import DaoPolygon
 
 
 class DbHelper:
@@ -26,53 +24,19 @@ class DbHelper:
         """
         # clear
         self.clear()
-        # load sqlite
-        conn = sqlite3.connect(file_path)
-        cur = conn.cursor()
-        polygons = cur.execute('SELECT * FROM POLYGON').fetchall()
-        polygons = [list(polygon) for polygon in polygons]
-        layers = []
-        for NAME in config_loader.getLayerNames():
-            layer = cur.execute('SELECT * FROM %s' % NAME).fetchall()
-            layer = [list(record) for record in layer]
-            layers.append(layer)
-        conn.close()
         # parse data
-        new_polygon_table = db_loader.create_dao_polygon_table(polygons, layers)
+        new_polygon_table = db_loader.load_from_sqlite(file_path)
         self.polygon_table.clear()
         for k, v in new_polygon_table.items():
             self.polygon_table[k] = v
 
-    def write_to_file(self, file_path, polygons, layers):
+    def write_to_file(self, file_path):
         """将结果写入 sqlite 数据库
 
         Args:
             file_path: 数据库路径
         """
-        LAYER_NAMES = config_loader.getLayerNames()
-        conn = sqlite3.connect(file_path)
-        cur = conn.cursor()
-        # clear
-        cur.execute('DELETE FROM POLYGON')
-        for NAME in LAYER_NAMES:
-            cur.execute('DELETE FROM %s' % NAME)
-        # insert
-        sql = 'INSERT INTO POLYGON (_id, layer, vertex_Num, vertices) VALUES (?,?,?,?)'
-        for polygon in polygons:
-            polygon_copy = polygon[0:3]
-            vertex_str = ';\n'.join('%f,%f' % (vertex[0], vertex[1]) for vertex in polygon[3])
-            polygon_copy.append(vertex_str)
-            polygon_copy += polygon[4:]
-            cur.execute(sql, polygon_copy)
-        sql = 'INSERT INTO %s VALUES (?,?,?)' % LAYER_NAMES[0]
-        for record in layers[0]:
-            cur.execute(sql, record)
-        for i in range(1, len(layers)):
-            sql = 'INSERT INTO %s VALUES (?,?,?,?)' % LAYER_NAMES[i]
-            for record in layers[i]:
-                cur.execute(sql, record)
-        conn.commit()
-        conn.close()
+        db_loader.write_to_sqlite(file_path, self.polygon_table)
 
     def get_polygon_by_id(self, polygon_id):
         """根据多边形 id 获取多边形
@@ -115,4 +79,34 @@ class DbHelper:
             for deleted_id in deleted_id_list:
                 if deleted_id in self.polygon_table.keys():
                     del self.polygon_table[deleted_id]
+
+    def add_l0_polygon(self, polygon_id, name):
+        """插入新的空多边形，L0层
+
+        Args:
+            polygon_id: 多边形 id
+            name: L0 名字
+        """
+        if polygon_id not in self.polygon_table.keys():
+            polygon = DaoPolygon([polygon_id, 0, 0, ''])
+            polygon.layer = 0
+            polygon.name = name
+            self.polygon_table[polygon_id] = polygon
+
+    def add_lp_polygon(self, polygon_id, layer, additional, parent_id):
+        """插入新的空多边形，其他层
+
+        Args:
+            polygon_id: 多边形 id
+            layer: 层号
+            additional: 类型
+            parent_id: parent 编号
+        """
+        if polygon_id not in self.polygon_table.keys():
+            polygon = DaoPolygon([polygon_id, layer, 0, ''])
+            polygon.layer = layer
+            polygon.additional = additional
+            self.polygon_table[polygon_id] = polygon
+            if parent_id in self.polygon_table.keys():
+                polygon.set_parent(self.polygon_table[parent_id])
 

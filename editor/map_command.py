@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Module        : map_data.py
+# Module        : map_command.py
 # Author        : bssthu
 # Project       : L5MapEditor
 # Creation date : 2015-09-24
@@ -19,17 +19,18 @@ COMMAND_GRAMMAR_ERROR = '语法错误'
 COMMAND_ID_NOT_FOUND = 'ID不存在'
 
 
-class MapData(QObject):
+class MapCommand(QObject):
     """命令管理器"""
 
-    def __init__(self, polygon_table):
+    def __init__(self, db_helper):
         """构造函数
 
         Args:
-            polygon_table: {polygon_id: DaoPolygon}
+            db_helper: DbHelper
         """
         super().__init__()
-        self.polygon_dict = polygon_table
+        self.db_helper = db_helper
+        self.polygon_dict = db_helper.polygon_table
         self.old_polygons = []
         self.command_history = []
         self.command_history_revert = []
@@ -135,49 +136,66 @@ class MapData(QObject):
         return _id
 
     def executeAddPolygon(self, commands):
+        checkCommandsLength(commands, (3, 4))
         if len(commands) == 3:
-            (_id, layer, additional) = (int(commands[0]), int(commands[1]), commands[2])
-            parent_id = None
+            # L0 层
+            (_id, layer, name) = (int(commands[0]), int(commands[1]), commands[2])
+            if layer != 0:
+                raise Exception(COMMAND_GRAMMAR_ERROR)
+            if _id not in self.polygon_dict.keys():
+                # 插入多边形
+                self.db_helper.add_l0_polygon(_id, name)
         elif len(commands) == 4:
+            # 其他层
             (_id, layer, additional, parent_id) = \
                 (int(commands[0]), int(commands[1]), int(commands[2]), int(commands[3]))
+            if layer <= 0:
+                raise Exception(COMMAND_GRAMMAR_ERROR)
+            if _id not in self.polygon_dict.keys():
+                # 插入边形
+                self.db_helper.add_lp_polygon(_id, layer, additional, parent_id)
         else:
             raise Exception(COMMAND_GRAMMAR_ERROR)
-        # add
-        self.__addPolygon(_id, layer, additional, parent_id)
 
     def executeAddPoint(self, commands):
-        if len(commands) != 3:
-            raise Exception(COMMAND_GRAMMAR_ERROR)
+        checkCommandsLength(commands, 3)
         (_id, x, y) = (int(commands[0]), float(commands[1]), float(commands[2]))
         if _id in self.polygon_dict.keys():
-            self.__appendPoint(_id, x, y)
+            self.polygon_dict[_id].add_vertex(x, y)
         else:
             raise Exception(COMMAND_ID_NOT_FOUND)
 
     def executeRemovePolygon(self, commands):
-        if len(commands) != 1:
-            raise Exception(COMMAND_GRAMMAR_ERROR)
+        checkCommandsLength(commands, 1)
         _id = int(commands[0])
-        self.__removePolygon(_id)
+        if _id in self.polygon_dict.keys():
+            self.db_helper.delete_by_id(_id)
+        else:
+            raise Exception(COMMAND_ID_NOT_FOUND)
 
     def executeSetPoint(self, commands):
-        if len(commands) != 4:
-            raise Exception(COMMAND_GRAMMAR_ERROR)
+        checkCommandsLength(commands, 4)
         (_id, pt_id, x, y) = (int(commands[0]), int(commands[1]), float(commands[2]), float(commands[3]))
-        self.__setPoint(_id, pt_id, x, y)
+        if _id in self.polygon_dict.keys():
+            self.polygon_dict[_id].set_vertex(x, y, pt_id)
+        else:
+            raise Exception(COMMAND_ID_NOT_FOUND)
 
     def executeMovePolygon(self, commands):
-        if len(commands) != 3:
-            raise Exception(COMMAND_GRAMMAR_ERROR)
+        checkCommandsLength(commands, 3)
         (_id, dx, dy) = (int(commands[0]), float(commands[1]), float(commands[2]))
-        if _id in self.polygon_dict:
-            self.__movePolygon(_id, dx, dy)
+        if _id in self.polygon_dict.keys():
+            self.polygon_dict[_id].move(dx, dy)
         else:
             raise Exception(COMMAND_ID_NOT_FOUND)
 
     def executeMovePoint(self, commands):
-        pass
+        checkCommandsLength(commands, 3)
+        (_id, pt_id, dx, dy) = (int(commands[0]), int(commands[1]), float(commands[2]), float(commands[3]))
+        if _id in self.polygon_dict.keys():
+            self.polygon_dict[_id].move(dx, dy, pt_id)
+        else:
+            raise Exception(COMMAND_ID_NOT_FOUND)
 
     def __addPolygon(self, polygon_id, layer, additional, parent_id):
         polygon = DaoPolygon([polygon_id, layer, 0, ''])
@@ -188,33 +206,19 @@ class MapData(QObject):
         # 更新多边形表
         self.polygon_dict[polygon_id] = polygon
 
-    def __appendPoint(self, polygon_id, x, y):
-        polygon = self.polygon_dict[polygon_id]
-        polygon.vertices.append(DaoPoint(x, y))
-        polygon.vertex_num += 1
 
-    def __removePolygon(self, _id):
-        if _id in self.polygon_dict:
-            # remove children
-            if _id in self.child_dict:
-                for child_id in self.child_dict[_id]:
-                    self.__removePolygon(child_id)
-            del self.polygon_dict[_id]
-            self.polygons = [polygon for polygon in self.polygons if polygon[0] != _id]
-            for i in range(0, len(self.layers)):
-                self.layers[i] = [layer for layer in self.layers[i] if layer[1] != _id]
+def checkCommandsLength(commands, expected_argc):
+    """检查命令语法（参数个数）
 
-    def __setPoint(self, polygon_id, pt_id, x, y):
-        polygon = self.polygon_dict[polygon_id]
-        point = polygon[3][pt_id]
-        point[0] = x
-        point[1] = y
-
-    def __movePolygon(self, polygon_id, dx, dy):
-        polygon = self.polygon_dict[polygon_id]
-        for point in polygon[3]:
-            point[0] += dx
-            point[1] += dy
+    Args:
+        commands: 命令拆分得到的 list
+        expected_argc: 正确的参数个数
+    """
+    if isinstance(expected_argc, list) or isinstance(expected_argc, tuple):
+        if len(commands) not in expected_argc:
+            raise Exception(COMMAND_GRAMMAR_ERROR)
+    elif len(commands) != expected_argc:
+        raise Exception(COMMAND_GRAMMAR_ERROR)
 
 
 def setParentOfChild(child_dict, child_id, parent_id):

@@ -26,23 +26,24 @@ class QPolygonTableWidget(QTableWidget):
         self.clear()
         self.setRowCount(0)
         self.setColumnCount(3)
-        self.setHorizontalHeaderLabels(('id', 'layer', 'type'))
-        if len(polygon_table.items()) > 0:
-            row = 0
-            for polygon_id in sorted(polygon_table.keys()):
-                polygon = polygon_table[polygon_id]
-                self.insertRow(row)
-                # id
-                _id = polygon.polygon_id
-                self.setItem(row, 0, QTableWidgetItem(str(_id)))
-                # layer
-                layer_id = polygon.layer
-                layer_name = config_loader.getLayerName(layer_id)
-                self.setItem(row, 1, QTableWidgetItem(layer_name))
-                # additional
-                additional = polygon.additional
-                self.setItem(row, 2, QTableWidgetItem(str(additional)))
-                row += 1
+        if polygon_table is not None:
+            self.setHorizontalHeaderLabels(('id', 'layer', 'type'))
+            if len(polygon_table.items()) > 0:
+                row = 0
+                for polygon_id in sorted(polygon_table.keys()):
+                    polygon = polygon_table[polygon_id]
+                    self.insertRow(row)
+                    # id
+                    _id = polygon.polygon_id
+                    self.setItem(row, 0, QTableWidgetItem(str(_id)))
+                    # layer
+                    layer_id = polygon.layer
+                    layer_name = config_loader.getLayerName(layer_id)
+                    self.setItem(row, 1, QTableWidgetItem(layer_name))
+                    # additional
+                    additional = polygon.additional
+                    self.setItem(row, 2, QTableWidgetItem(str(additional)))
+                    row += 1
         self.resizeColumnsToContents()
 
     def fillWithPoints(self, points):

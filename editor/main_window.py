@@ -24,7 +24,7 @@ from dao.db_helper import DbHelper
 from editor import config_loader
 from editor import log
 from editor.fsm_mgr import FsmMgr
-from editor.map_data import MapData
+from editor.map_command import MapCommand
 from editor.ui_Form import Ui_MainWindow
 
 
@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         self.ui.graphics_view.scale(1, -1)   # invert y
         # data
         self.db_helper = DbHelper()
-        self.map_data = MapData(self.db_helper.polygon_table)
+        self.map_data = MapCommand(self.db_helper)
         self.path = None
         # fsm
         self.__initFsm()
@@ -311,7 +311,10 @@ class MainWindow(QMainWindow):
         _id = self.map_data.getSpareId(parent_id)
         layer = self.ui.insert_layer_combo_box.currentIndex()
         additional = 0
-        commands = ['add shape %d %d %s %d' % (_id, layer, str(additional), parent_id)]
+        if layer == 0:
+            commands = ['add shape %d %d %s' % (_id, layer, str(additional))]
+        else:
+            commands = ['add shape %d %d %s %d' % (_id, layer, str(additional), parent_id)]
         for vertex in vertices:
             commands.append('add pt %d %f %f' % (_id, vertex[0], vertex[1]))
         self.execute(commands)
@@ -417,8 +420,7 @@ class MainWindow(QMainWindow):
             path: 文件路径
         """
         try:
-            (polygons, layers) = self.map_data.get()
-            self.db_helper.write_to_file(path, polygons, layers)
+            self.db_helper.write_to_file(path)
             self.map_data.updateBackupData()
             log.debug('Save "%s".' % path)
         except sqlite3.Error as error:

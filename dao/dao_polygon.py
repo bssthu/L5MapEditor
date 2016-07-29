@@ -19,6 +19,10 @@ class DaoPolygon:
         layer: 多边形所属层
         vertex_num: 该多边形的顶点数量
         vertices: 顶点
+        name: L0 名字
+        additional: 类型
+        parent: parent 指针
+        children: list of child 指针
     """
     def __init__(self, polygon):
         """构造函数
@@ -126,6 +130,17 @@ class DaoPolygon:
             del self.vertices[v_id]
         self.vertex_num = len(self.vertices)
 
+    def set_vertex(self, x, y, v_id):
+        """设置顶点坐标
+
+        Args:
+            x: 新的 x 坐标
+            y: 新的 x 坐标
+            v_id: 顶点的索引
+        """
+        if 0 <= v_id < self.vertex_num:
+            self.vertices[v_id].set(x, y)
+
     def traversal_post_order(self):
         """后续遍历递归
 
@@ -137,13 +152,23 @@ class DaoPolygon:
         deleted_id = []
         for child in self.children:
             deleted_id.extend(child.traversal_post_order())
-        deleted_id.extend(self.polygon_id)
+        deleted_id.append(self.polygon_id)
         return deleted_id
 
 
 class DaoPoint:
     """Polygon 中的一个点"""
     def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def set(self, x, y):
+        """移动
+
+        Args:
+            x: 新的 x 坐标
+            y: 新的 y 坐标
+        """
         self.x = x
         self.y = y
 
