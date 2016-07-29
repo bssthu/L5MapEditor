@@ -10,6 +10,7 @@
 
 import copy
 from PyQt5.QtCore import QObject
+from dao.dao_polygon import DaoPolygon, DaoPoint
 
 
 COMMAND_UNRESOLVED = '无法解析的命令'
@@ -28,14 +29,8 @@ class MapData(QObject):
             polygon_table: {polygon_id: DaoPolygon}
         """
         super().__init__()
-        self.polygon_table = polygon_table
-        self.polygons = []
-        self.layers = []
+        self.polygon_dict = polygon_table
         self.old_polygons = []
-        self.old_layers = []
-        self.child_dict = {}
-        self.additional_dict = {}
-        self.polygon_dict = {}
         self.command_history = []
         self.command_history_revert = []
         self.command_tree = {
@@ -59,14 +54,7 @@ class MapData(QObject):
         }
 
     def invalidate(self):
-        # polygon 索引
-        self.polygon_dict = {}
-        for polygon in self.polygons:
-            polygon_id = polygon[0]
-            self.polygon_dict[polygon_id] = polygon
-        # 其他索引
-        self.child_dict = createChildDict(self.layers)
-        self.additional_dict = createAdditionalDict(self.layers)
+        pass
 
     def updateBackupData(self):
         # 用于 撤销/重做
@@ -141,46 +129,18 @@ class MapData(QObject):
         else:
             raise Exception(COMMAND_UNRESOLVED)
 
-    def getChildListOfPolygon(self, polygon_id):
-        # update children
-        children = []
-        if polygon_id in self.child_dict:
-            children = [self.polygon_dict[child_id] for child_id in self.child_dict[polygon_id]]
-        # get the polygon
-        return children
-
-    def getAdditionalOfPolygon(self, polygon_id):
-        if polygon_id in self.additional_dict:
-            return self.additional_dict[polygon_id]
-        else:
-            return None
-
-    def getPolygon(self, polygon_id):
-        # get the polygon
-        if polygon_id in self.polygon_dict:
-            return self.polygon_dict[polygon_id]
-        else:
-            return None
-
     def getSpareId(self, _id):
-        while _id in self.polygon_dict:
+        while _id in self.polygon_dict.keys():
             _id += 1
         return _id
-
-    def updatePolygon(self, _id, vertices):     # 更新某个多边形的数据
-        for polygon in self.polygons:
-            if polygon[0] == _id:
-                polygon[2] = len(vertices)
-                polygon[3] = vertices
-                self.polygon_dict[_id] = polygon
-                break
 
     def executeAddPolygon(self, commands):
         if len(commands) == 3:
             (_id, layer, additional) = (int(commands[0]), int(commands[1]), commands[2])
             parent_id = None
         elif len(commands) == 4:
-            (_id, layer, additional, parent_id) = (int(commands[0]), int(commands[1]), int(commands[2]), int(commands[3]))
+            (_id, layer, additional, parent_id) = \
+                (int(commands[0]), int(commands[1]), int(commands[2]), int(commands[3]))
         else:
             raise Exception(COMMAND_GRAMMAR_ERROR)
         # add
@@ -190,7 +150,7 @@ class MapData(QObject):
         if len(commands) != 3:
             raise Exception(COMMAND_GRAMMAR_ERROR)
         (_id, x, y) = (int(commands[0]), float(commands[1]), float(commands[2]))
-        if _id in self.polygon_dict:
+        if _id in self.polygon_dict.keys():
             self.__appendPoint(_id, x, y)
         else:
             raise Exception(COMMAND_ID_NOT_FOUND)
@@ -220,26 +180,18 @@ class MapData(QObject):
         pass
 
     def __addPolygon(self, polygon_id, layer, additional, parent_id):
-        polygon = [polygon_id, layer, 0, []]
-        self.polygons.append(polygon)
-        self.polygons.sort(key=lambda p: polygon[0])
-        # update self.layers, set parent info
-        if layer >= 0:
-            if len(self.layers[layer]) > 0:
-                _id = max(record[0] for record in self.layers[layer]) + 1
-            else:
-                _id = 1
-            if layer == 0:
-                record = (_id, polygon_id, additional)
-            else:
-                record = (_id, polygon_id, additional, parent_id)
-            self.layers[layer].append(record)
+        polygon = DaoPolygon([polygon_id, layer, 0, ''])
+        polygon.layer = layer
+        polygon.additional = additional
+        if parent_id is not None:
+            polygon.set_parent(self.polygon_dict[parent_id])
+        # 更新多边形表
+        self.polygon_dict[polygon_id] = polygon
 
     def __appendPoint(self, polygon_id, x, y):
         polygon = self.polygon_dict[polygon_id]
-        vertex_num = int(polygon[2])
-        polygon[2] = vertex_num + 1
-        polygon[3].append([x, y])
+        polygon.vertices.append(DaoPoint(x, y))
+        polygon.vertex_num += 1
 
     def __removePolygon(self, _id):
         if _id in self.polygon_dict:
@@ -263,24 +215,6 @@ class MapData(QObject):
         for point in polygon[3]:
             point[0] += dx
             point[1] += dy
-
-
-def createChildDict(layers):   # 更新 self.child_dict
-    child_dict = {}
-    for layer in layers[1:]:
-        for record in layer:
-            (polygon_id, parent_id) = (record[1], record[3])
-            setParentOfChild(child_dict, polygon_id, parent_id)
-    return child_dict
-
-
-def createAdditionalDict(layers):   # 更新 self.additional_dict
-    additional_dict = {}
-    for layer in layers:
-        for record in layer:
-            (polygon_id, additional) = (record[1], record[2])
-            additional_dict[polygon_id] = additional
-    return additional_dict
 
 
 def setParentOfChild(child_dict, child_id, parent_id):

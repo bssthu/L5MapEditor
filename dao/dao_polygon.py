@@ -27,7 +27,7 @@ class DaoPolygon:
             polygon: [polygon_id, layer, vertex_num, <str>vertices]
         """
 
-        self.polygon_id = polygon[0]
+        self.polygon_id = int(polygon[0])
         self.layer = polygon[1]
         vertex_str_list = polygon[3].strip().strip(';')
         if vertex_str_list == '':
@@ -48,6 +48,32 @@ class DaoPolygon:
         self.additional = 0
         self.parent = None
         self.children = []
+
+    def set_parent(self, parent):
+        """设置 parent, 同时更新 parent 的 children 表
+
+        Args:
+            parent: parent DaoPolygon
+        """
+        # goodbye to old parent
+        if (self.parent is not None) and (self in self.parent.children):
+            self.parent.children.remove(self)
+        # write new parent
+        self.parent = parent
+        # tell new parent
+        if parent and self not in parent.children:
+            parent.children.append(self)
+
+    def add_child(self, child):
+        """添加 child, 同时更新 child 的 parent 表
+
+        不检查 child
+
+        Args:
+            child: child DaoPolygon
+        """
+        if child not in self.children:
+            child.set_parent(self)
 
     def to_list(self):
         """转换为 list, 准备写回数据库

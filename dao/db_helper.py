@@ -38,7 +38,10 @@ class DbHelper:
             layers.append(layer)
         conn.close()
         # parse data
-        self.polygon_table = db_loader.create_dao_polygon_table(polygons, layers)
+        new_polygon_table = db_loader.create_dao_polygon_table(polygons, layers)
+        self.polygon_table.clear()
+        for k, v in new_polygon_table.items():
+            self.polygon_table[k] = v
 
     def write_to_file(self, file_path, polygons, layers):
         """将结果写入 sqlite 数据库

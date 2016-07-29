@@ -24,7 +24,7 @@ class PolygonSelect(PolygonBase):
     def __init__(self, polygon):
         super().__init__()
         self.MAR = 50
-        self.points = polygon_base.getQtPoints(polygon[3])
+        self.points = polygon_base.getQtPoints(polygon.vertices)
         self.rect = polygon_base.getBoundingRect(self.points)
         self.top_left = self.rect.topLeft()
         self.bottom_right = self.rect.bottomRight()

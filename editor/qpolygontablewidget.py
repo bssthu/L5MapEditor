@@ -61,3 +61,25 @@ class QPolygonTableWidget(QTableWidget):
             self.setItem(row, 1, QTableWidgetItem(str(points[row].y())))
         self.resizeColumnsToContents()
 
+    def getSelectedId(self):
+        """当前选中的多边形"""
+        row = self.currentRow()
+        item = self.item(row, 0)
+        if item is not None:
+            return int(item.text())
+        else:
+            return -1
+
+    def selectId(self, polygon_id):
+        """根据多边形 id 选中一列
+
+        Args:
+            polygon_id: 多边形 id
+        """
+        for row in range(0, self.rowCount()):
+            if self.item(row, 0).text() == str(polygon_id):
+                self.setCurrentCell(row, 0)
+                return True
+        self.setCurrentCell(-1, -1)
+        return False
+

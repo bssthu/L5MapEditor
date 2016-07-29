@@ -76,9 +76,9 @@ class QMapGraphicsView(QGraphicsView):
             self.selected_polygon.setScale(sx)
         self.scene().invalidate()
 
-    def setPolygons(self, polgyon_table, layer_num):
+    def setPolygons(self, polygon_table, layer_num):
         self.scene().clear()
-        for polygon in polgyon_table.values():
+        for polygon in polygon_table.values():
             if polygon.layer < layer_num:
                 self.scene().addItem(PolygonItem(polygon))
         self.scene().setSceneRect(self.scene().itemsBoundingRect())

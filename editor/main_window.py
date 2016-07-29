@@ -276,7 +276,7 @@ class MainWindow(QMainWindow):
         _id = self.selectedId()
         if _id >= 0:
             # draw polygon
-            polygon = self.map_data.getPolygon(_id)
+            polygon = self.db_helper.get_polygon_by_id(_id)
             # list children
             child_list = self.db_helper.get_children_table_by_id(_id)
         else:
@@ -382,7 +382,7 @@ class MainWindow(QMainWindow):
         self.ui.polygon_table_widget.fillWithPolygons(polygon_table)
         self.ui.graphics_view.setPolygons(polygon_table, len(config_loader.getLayerNames()))
         if len(polygon_table) > 0:
-            if not self.selectRowById(self.ui.polygon_table_widget, _id):
+            if not self.selectRowById(_id):
                 self.ui.polygon_table_widget.setCurrentCell(0, 0)
 
     def open(self, path, quiet=False):
@@ -428,25 +428,15 @@ class MainWindow(QMainWindow):
 
     def selectedId(self):
         """选中的多边形的 id"""
-        row = self.ui.polygon_table_widget.currentRow()
-        item = self.ui.polygon_table_widget.item(row, 0)
-        if item is not None:
-            return int(item.text())
-        else:
-            return -1
+        return self.ui.polygon_table_widget.getSelectedId()
 
-    def selectRowById(self, table_widget, polygon_id):
+    def selectRowById(self, polygon_id):
         """根据多边形的 id 选中行
 
         Args:
-            table_widget: 目标控件
             polygon_id: 多边形 id
         """
-        for row in range(0, table_widget.rowCount()):
-            if table_widget.item(row, 0).text() == str(polygon_id):
-                table_widget.setCurrentCell(row, 0)
-                return True
-        return False
+        return self.ui.polygon_table_widget.selectId(polygon_id)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
