@@ -8,7 +8,17 @@
 #
 
 
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, QObject
+from PyQt5.QtCore import pyqtSignal, QObject
+
+
+# 可能的 state 转移路线, key 为原 state, value 为可能的目标 state 集合
+possible_state_transfer = {
+    'empty': ['normal'],
+    'normal': ['empty', 'insert', 'move', 'move_point'],
+    'insert': ['normal'],
+    'move': ['normal', 'move_point'],
+    'move_point': ['normal', 'move']
+}
 
 
 class FsmMgr(QObject):
@@ -16,65 +26,38 @@ class FsmMgr(QObject):
 
     def __init__(self):
         super().__init__()
-        self.__fsms = {
+        self.__fsm_map = {
             'normal': self.FsmNormal(),
             'empty': self.FsmEmpty(),
             'insert': self.FsmInsert(),
             'move': self.FsmMove(),
             'move_point': self.FsmMovePoint()
         }
-        self.state = self.__fsms['empty']
+        self.state = self.__fsm_map['empty']
 
-    def getCurrentState(self):
+    def get_current_state(self):
         return self.state
 
-    def getFsm(self, name):
-        return self.__fsms[name.lower()]
+    def get_fsm(self, name):
+        return self.__fsm_map[name.lower()]
 
-    def changeFsm(self, curr_name, new_name):
-        if self.getFsm(curr_name) != self.state:
+    def change_fsm(self, curr_name, new_name):
+        """如果可以，转移状态
+
+        Args:
+            curr_name: 当前 state 名称
+            new_name: 请求转移到的 state 名称
+        """
+        if self.get_fsm(curr_name) != self.state:
             return False
         new_name = new_name.lower()
-        new_state = self.getFsm(new_name)
-        if self.state == self.getFsm('empty'):
-            if new_state == self.getFsm('normal'):  # empty => normal
-                self.__setFsm(new_state)
-                return True
-        # normal => empty / insert / move / move_point
-        elif self.state == self.getFsm('normal'):
-            if new_state == self.getFsm('insert'):  # normal => insert
-                self.__setFsm(new_state)
-                return True
-            elif new_state == self.getFsm('move'):  # normal => move
-                self.__setFsm(new_state)
-                return True
-            elif new_state == self.getFsm('move_point'):  # normal => move_point
-                self.__setFsm(new_state)
-                return True
-        # insert => normal
-        elif self.state == self.getFsm('insert'):
-            if new_state == self.getFsm('normal'):  # insert => normal
-                self.__setFsm(new_state)
-                return True
-        # move => normal / move_point
-        elif self.state == self.getFsm('move'):
-            if new_state == self.getFsm('normal'):  # move => normal
-                self.__setFsm(new_state)
-                return True
-            elif new_state == self.getFsm('move_point'):  # move => move_point
-                self.__setFsm(new_state)
-                return True
-        # move_point => normal / move
-        elif self.state == self.getFsm('move_point'):
-            if new_state == self.getFsm('normal'):  # move_point => normal
-                self.__setFsm(new_state)
-                return True
-            elif new_state == self.getFsm('move'):  # move_point => move
-                self.__setFsm(new_state)
-                return True
+        if new_name in possible_state_transfer[curr_name]:
+            new_state = self.get_fsm(new_name)
+            self.__set_fsm(new_state)
+            return True
         return False
 
-    def __setFsm(self, new_state):
+    def __set_fsm(self, new_state):
         self.state.exitState.emit()
         new_state.enterState.emit()
         self.state.transferToState.emit(str(new_state))
@@ -105,4 +88,3 @@ class FsmMgr(QObject):
     class FsmMovePoint(BaseFsm):
         def __str__(self):
             return 'move_point'
-

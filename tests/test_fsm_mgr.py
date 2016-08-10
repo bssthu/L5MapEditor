@@ -16,8 +16,7 @@ class TestFsmMgr(unittest.TestCase):
     def setUp(self):
         self.fsm = fsm_mgr.FsmMgr()
 
-    def testGetFsm(self):
+    def test_get_fsm(self):
         fsm_names = ('normal', 'empty', 'insert', 'move', 'move_point')
         for fsm_name in fsm_names:
-            self.assertEqual(fsm_name, str(self.fsm.getFsm(fsm_name)))
-
+            self.assertEqual(fsm_name, str(self.fsm.get_fsm(fsm_name)))

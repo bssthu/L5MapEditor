@@ -28,22 +28,22 @@ class PolygonBase(QGraphicsWidget):
     def boundingRect(self):
         return self.rect
 
-    def updateBoundingRect(self, pt):
+    def update_bounding_rect(self, pt):
         self.top_left = QPointF(min(self.top_left.x(), pt.x()), min(self.top_left.y(), pt.y()))
         self.bottom_right = QPointF(max(self.bottom_right.x(), pt.x()), max(self.bottom_right.y(), pt.y()))
         self.rect = QRectF(self.top_left, self.bottom_right).adjusted(-self.MAR, -self.MAR, self.MAR, self.MAR)
         self.prepareGeometryChange()
 
-    def moveBoundingRect(self, offset):
+    def move_bounding_rect(self, offset):
         self.top_left += offset
         self.bottom_right += offset
         self.rect.adjust(offset.x(), offset.y(), offset.x(), offset.y())
         self.prepareGeometryChange()
 
-    def getPoints(self):
+    def get_points(self):
         return self.points
 
-    def getVertices(self):
+    def get_vertices(self):
         vertices = [[vertex.x(), vertex.y()] for vertex in self.points]
         return vertices
 
@@ -55,11 +55,11 @@ PolygonBase.draw_grid = False
 PolygonBase.mark_points = True
 
 
-def getQtPoints(vertices):
+def get_qt_points(vertices):
     return [QPointF(vertex.x, vertex.y) for vertex in vertices]
 
 
-def getBoundingRect(points):
+def get_bounding_rect(points):
     if len(points) > 0:
         x_list = [point.x() for point in points]
         y_list = [point.y() for point in points]
@@ -68,4 +68,3 @@ def getBoundingRect(points):
         return QRectF(top_left, bottom_right)
     else:
         return QRectF()
-

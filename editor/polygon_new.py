@@ -22,7 +22,7 @@ class PolygonNew(PolygonBase):
         super().__init__()
         self.mouse_point = None
 
-    def paint(self, painter, option, widget):
+    def paint(self, painter, option, widget=None):
         pen = QPen(QColor(0, 0, 0))
         pen.setWidth(0)
         red_pen = QPen(QColor(255, 0, 0))
@@ -49,17 +49,16 @@ class PolygonNew(PolygonBase):
             if PolygonBase.mark_points:
                 painter.drawEllipse(self.mouse_point, S_SIZE / scale, S_SIZE / scale)
 
-    def preAddPoint(self, pt):
+    def pre_add_point(self, pt):
         self.mouse_point = QPointF(pt)
-        self.updateBoundingRect(pt)
+        self.update_bounding_rect(pt)
 
-    def addPoint(self, pt):
+    def add_point(self, pt):
         self.mouse_point = None
         self.points.append(QPointF(pt))
-        self.updateBoundingRect(pt)
+        self.update_bounding_rect(pt)
 
-    def removePoint(self):
+    def remove_point(self):
         if len(self.points) > 0:
             self.points = self.points[:-1]
         self.mouse_point = None
-

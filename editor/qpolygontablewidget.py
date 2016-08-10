@@ -17,7 +17,7 @@ class QPolygonTableWidget(QTableWidget):
     def __init__(self, parent):
         super().__init__(parent)
 
-    def fillWithPolygons(self, polygon_table):
+    def fill_with_polygons(self, polygon_table):
         """在控件中显示多边形
 
         Args:
@@ -38,7 +38,7 @@ class QPolygonTableWidget(QTableWidget):
                     self.setItem(row, 0, QTableWidgetItem(str(_id)))
                     # layer
                     layer_id = polygon.layer
-                    layer_name = config_loader.getLayerName(layer_id)
+                    layer_name = config_loader.get_layer_name(layer_id)
                     self.setItem(row, 1, QTableWidgetItem(layer_name))
                     # additional
                     additional = polygon.additional
@@ -46,7 +46,7 @@ class QPolygonTableWidget(QTableWidget):
                     row += 1
         self.resizeColumnsToContents()
 
-    def fillWithPoints(self, points):
+    def fill_with_points(self, points):
         """在控件中显示点
 
         Args:
@@ -62,7 +62,7 @@ class QPolygonTableWidget(QTableWidget):
             self.setItem(row, 1, QTableWidgetItem(str(points[row].y())))
         self.resizeColumnsToContents()
 
-    def getSelectedId(self):
+    def get_selected_id(self):
         """当前选中的多边形"""
         row = self.currentRow()
         item = self.item(row, 0)
@@ -71,7 +71,7 @@ class QPolygonTableWidget(QTableWidget):
         else:
             return -1
 
-    def selectId(self, polygon_id):
+    def select_id(self, polygon_id):
         """根据多边形 id 选中一列
 
         Args:
@@ -83,4 +83,3 @@ class QPolygonTableWidget(QTableWidget):
                 return True
         self.setCurrentCell(-1, -1)
         return False
-

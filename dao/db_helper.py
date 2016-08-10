@@ -109,4 +109,3 @@ class DbHelper:
             self.polygon_table[polygon_id] = polygon
             if parent_id in self.polygon_table.keys():
                 polygon.set_parent(self.polygon_table[parent_id])
-

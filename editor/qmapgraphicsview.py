@@ -34,41 +34,41 @@ class QMapGraphicsView(QGraphicsView):
 
 # slots
     @pyqtSlot(QPointF)
-    def addPoint(self, pt):
-        self.new_polygon.addPoint(pt)
+    def add_point(self, pt):
+        self.new_polygon.add_point(pt)
 
     @pyqtSlot(QPointF)
-    def preAddPoint(self, pt):      # 按住鼠标并移动到点
-        self.new_polygon.preAddPoint(pt)
+    def pre_add_point(self, pt):      # 按住鼠标并移动到点
+        self.new_polygon.pre_add_point(pt)
         self.scene().invalidate()
 
     @pyqtSlot()
-    def removePoint(self):          # 右键移除最新添加的点
-        self.new_polygon.removePoint()
+    def remove_point(self):          # 右键移除最新添加的点
+        self.new_polygon.remove_point()
 
     @pyqtSlot(QPointF)
-    def setMoveMouseBasePoint(self, pt):    # 移动起点
+    def set_move_mouse_base_point(self, pt):    # 移动起点
         self.move_base = pt
 
     @pyqtSlot(QPointF)
-    def setMoveMouseToPoint(self, pt):  # 移动到的点，左键按住
+    def set_move_mouse_to_point(self, pt):  # 移动到的点，左键按住
         if self.selected_polygon is not None:
             offset = pt - self.move_base
-            self.selected_polygon.setOffset(offset)
+            self.selected_polygon.set_offset(offset)
             self.scene().invalidate()
 
     @pyqtSlot(QPointF)
-    def finishMove(self, pt):       # 移动到的点，松开左键
+    def finish_move(self, pt):       # 移动到的点，松开左键
         if self.selected_polygon is not None:
             offset = pt - self.move_base
-            self.selected_polygon.applyOffset(offset)
-            self.pointsUpdated.emit(self.selected_polygon.getPoints())
+            self.selected_polygon.apply_offset(offset)
+            self.pointsUpdated.emit(self.selected_polygon.get_points())
 
     @pyqtSlot(QPointF)
-    def resetMove(self):
+    def reset_move(self):
         if self.selected_polygon is not None:
-            self.selected_polygon.resetOffset()
-            self.pointsUpdated.emit(self.selected_polygon.getPoints())
+            self.selected_polygon.reset_offset()
+            self.pointsUpdated.emit(self.selected_polygon.get_points())
 
     def scale(self, sx, sy):
         super().scale(sx, sy)
@@ -76,14 +76,14 @@ class QMapGraphicsView(QGraphicsView):
             self.selected_polygon.setScale(sx)
         self.scene().invalidate()
 
-    def setPolygons(self, polygon_table, layer_num):
+    def set_polygons(self, polygon_table, layer_num):
         self.scene().clear()
         for polygon in polygon_table.values():
             if polygon.layer < layer_num:
                 self.scene().addItem(PolygonItem(polygon))
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
-    def setSelectedPolygon(self, polygon):   # 绘制选中的多边形
+    def set_selected_polygon(self, polygon):   # 绘制选中的多边形
         if self.selected_polygon in self.scene().items():
             self.scene().removeItem(self.selected_polygon)
         if polygon is not None:
@@ -92,26 +92,70 @@ class QMapGraphicsView(QGraphicsView):
             self.scene().addItem(self.selected_polygon)
         self.scene().invalidate()
 
-    def movePoint(self, allow=True):
+    def move_point(self, allow=True):
         PolygonBase.move_point = allow
 
-    def selectPoint(self, point_id):
-        self.selected_polygon.setPointId(point_id)
+    def select_point(self, point_id):
+        self.selected_polygon.set_point_id(point_id)
         self.scene().invalidate()
 
-    def drawClosedPolygon(self, allow=True):
+    def draw_closed_polygon(self, allow=True):
         PolygonBase.close_polygon = allow
         self.scene().invalidate()
 
-    def highlightSelection(self, allow=True):
+    def highlight_selection(self, allow=True):
         PolygonBase.highlight_selection = allow
         self.scene().invalidate()
 
-    def markPoints(self, allow=True):
+    def mark_points(self, allow=True):
         PolygonBase.mark_points = allow
         self.scene().invalidate()
 
-    def mousePressEvent(self, event):
+    def begin_insert(self):
+        # data
+        self.new_polygon = PolygonNew()
+        self.scene().addItem(self.new_polygon)
+        # signal
+        self.leftUp.connect(self.add_point)
+        self.leftClick.connect(self.pre_add_point)
+        self.mouseMove.connect(self.pre_add_point)
+        self.rightClick.connect(self.remove_point)
+
+    def end_insert(self):
+        # 处理新多边形
+        vertices = self.new_polygon.get_vertices()
+        self.scene().removeItem(self.new_polygon)
+        self.new_polygon = None
+        if len(vertices) > 0:
+            self.polygonCreated.emit(vertices)
+        # signal
+        self.leftUp.disconnect(self.add_point)
+        self.leftClick.disconnect(self.pre_add_point)
+        self.mouseMove.disconnect(self.pre_add_point)
+        self.rightClick.disconnect(self.remove_point)
+
+    def begin_move(self):
+        # data
+        self.pointsUpdated.emit(self.selected_polygon.get_points())
+        # signal
+        self.leftClick.connect(self.set_move_mouse_base_point)
+        self.mouseMove.connect(self.set_move_mouse_to_point)
+        self.leftUp.connect(self.finish_move)
+        self.rightClick.connect(self.reset_move)
+
+    def end_move(self):
+        # data
+        if self.selected_polygon is not None:
+            self.selected_polygon.confirm_offset()
+            vertices = self.selected_polygon.get_vertices()
+            self.polygonUpdated.emit(vertices)
+        # signal
+        self.leftClick.disconnect(self.set_move_mouse_base_point)
+        self.mouseMove.disconnect(self.set_move_mouse_to_point)
+        self.leftUp.disconnect(self.finish_move)
+        self.rightClick.disconnect(self.reset_move)
+
+    def mousePressEvent(self, event):       # 鼠标按下
         button = event.button()
         pt = self.mapToScene(event.pos())
         if button == Qt.LeftButton:
@@ -120,58 +164,13 @@ class QMapGraphicsView(QGraphicsView):
             self.rightClick.emit()
         self.scene().invalidate()
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event):        # 鼠标移动
         pt = self.mapToScene(event.pos())
         if event.buttons() == Qt.LeftButton:
             self.mouseMove.emit(pt)
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event):     # 鼠标释放
         button = event.button()
         pt = self.mapToScene(event.pos())
         if button == Qt.LeftButton:
             self.leftUp.emit(pt)
-
-    def beginInsert(self):
-        # data
-        self.new_polygon = PolygonNew()
-        self.scene().addItem(self.new_polygon)
-        # signal
-        self.leftUp.connect(self.addPoint)
-        self.leftClick.connect(self.preAddPoint)
-        self.mouseMove.connect(self.preAddPoint)
-        self.rightClick.connect(self.removePoint)
-
-    def endInsert(self):
-        # 处理新多边形
-        vertices = self.new_polygon.getVertices()
-        self.scene().removeItem(self.new_polygon)
-        self.new_polygon = None
-        if len(vertices) > 0:
-            self.polygonCreated.emit(vertices)
-        # signal
-        self.leftUp.disconnect(self.addPoint)
-        self.leftClick.disconnect(self.preAddPoint)
-        self.mouseMove.disconnect(self.preAddPoint)
-        self.rightClick.disconnect(self.removePoint)
-
-    def beginMove(self):
-        # data
-        self.pointsUpdated.emit(self.selected_polygon.getPoints())
-        # signal
-        self.leftClick.connect(self.setMoveMouseBasePoint)
-        self.mouseMove.connect(self.setMoveMouseToPoint)
-        self.leftUp.connect(self.finishMove)
-        self.rightClick.connect(self.resetMove)
-
-    def endMove(self):
-        # data
-        if self.selected_polygon is not None:
-            self.selected_polygon.confirmOffset()
-            vertices = self.selected_polygon.getVertices()
-            self.polygonUpdated.emit(vertices)
-        # signal
-        self.leftClick.disconnect(self.setMoveMouseBasePoint)
-        self.mouseMove.disconnect(self.setMoveMouseToPoint)
-        self.leftUp.disconnect(self.finishMove)
-        self.rightClick.disconnect(self.resetMove)
-

@@ -19,9 +19,9 @@ class PolygonItem(PolygonBase):
         super().__init__()
         self.layer = polygon.layer
         vertices = polygon.vertices
-        self.points = polygon_base.getQtPoints(vertices)
+        self.points = polygon_base.get_qt_points(vertices)
         if len(self.points) > 0:
-            self.rect = polygon_base.getBoundingRect(self.points)
+            self.rect = polygon_base.get_bounding_rect(self.points)
             self.top_left = self.rect.topLeft()
             self.bottom_right = self.rect.topLeft()
             self.rect.adjust(-self.MAR, -self.MAR, self.MAR, self.MAR)
@@ -30,7 +30,7 @@ class PolygonItem(PolygonBase):
             self.bottom_right = QPointF(-float('Inf'), -float('Inf'))
             self.rect = QRectF()
 
-    def paint(self, painter, option, widget):
+    def paint(self, painter, option, widget=None):
         if len(self.points) > 1:
             # init graphics
             pen = QPen(COLOR[self.layer])
@@ -40,4 +40,3 @@ class PolygonItem(PolygonBase):
             painter.drawPolyline(QPolygonF(self.points))
             if PolygonBase.close_polygon:
                 painter.drawLine(self.points[-1], self.points[0])
-

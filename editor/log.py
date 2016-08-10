@@ -41,4 +41,3 @@ def error(msg):
 
 
 logger = Log()
-

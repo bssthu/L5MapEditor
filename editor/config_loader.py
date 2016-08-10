@@ -16,24 +16,24 @@ LAYER_NAMES = ('L0', 'L1', 'L2', 'L3', 'L4')
 ADDITIONAL_NAMES = {}
 
 
-def loadAll():
+def load_all():
     """载入配置文件"""
-    loadLayerNames()
+    load_layer_names()
 
 
-def getLayerNames():
+def get_layer_names():
     return LAYER_NAMES
 
 
-def getLayerName(_id):
+def get_layer_name(_id):
     if 0 <= _id < len(LAYER_NAMES):
         return LAYER_NAMES[_id]
     else:
         return str(_id)
 
 
-def getAdditionalName(layer, additional):
-    layer_name = getLayerName(layer)
+def get_additional_name(layer, additional):
+    layer_name = get_layer_name(layer)
     if layer_name in ADDITIONAL_NAMES:
         NAMES = ADDITIONAL_NAMES[layer_name]
         if additional in range(0, len(NAMES)):
@@ -41,7 +41,7 @@ def getAdditionalName(layer, additional):
     return str(additional)
 
 
-def loadLayerNames():
+def load_layer_names():
     global LAYER_NAMES
     with open('conf/PolygonLayer.cfg', encoding='utf-8') as fp:
         try:
@@ -50,4 +50,3 @@ def loadLayerNames():
             LAYER_NAMES = tuple(layer_name_json['layer_name'])
         except Exception as e:
             log.error(repr(e))
-

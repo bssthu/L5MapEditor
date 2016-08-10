@@ -21,4 +21,3 @@ class TestLog(unittest.TestCase):
         log.info('info')
         log.warning('warning')
         log.error('error')
-

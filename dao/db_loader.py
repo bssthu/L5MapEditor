@@ -28,7 +28,7 @@ def load_from_sqlite(file_path):
     polygons = [list(polygon) for polygon in polygons]
     # load layers
     layers = []
-    for NAME in config_loader.getLayerNames():
+    for NAME in config_loader.get_layer_names():
         layer = cur.execute('SELECT * FROM %s' % NAME).fetchall()
         layer = [list(record) for record in layer]
         layers.append(layer)
@@ -85,7 +85,7 @@ def write_to_sqlite(file_path, polygon_table):
         file_path: 数据库路径
         polygon_table: {polygon_id: DaoPolygon}
     """
-    LAYER_NAMES = config_loader.getLayerNames()
+    LAYER_NAMES = config_loader.get_layer_names()
     conn = sqlite3.connect(file_path)
     cur = conn.cursor()
     # clear

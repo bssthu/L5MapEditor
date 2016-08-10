@@ -181,4 +181,3 @@ class DaoPoint:
         """
         self.x += dx
         self.y += dy
-
