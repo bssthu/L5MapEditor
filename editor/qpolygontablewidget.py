@@ -16,6 +16,7 @@ class QPolygonTableWidget(QTableWidget):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.is_polygon = True
 
     def fill_with_polygons(self, polygon_table):
         """在控件中显示多边形
@@ -23,6 +24,7 @@ class QPolygonTableWidget(QTableWidget):
         Args:
             polygon_table: 多边形表
         """
+        self.clear_selection()
         self.clear()
         self.setRowCount(0)
         self.setColumnCount(3)
@@ -45,6 +47,7 @@ class QPolygonTableWidget(QTableWidget):
                     self.setItem(row, 2, QTableWidgetItem(str(additional)))
                     row += 1
         self.resizeColumnsToContents()
+        self.is_polygon = True
 
     def fill_with_points(self, points):
         """在控件中显示点
@@ -52,6 +55,7 @@ class QPolygonTableWidget(QTableWidget):
         Args:
             points: qpoint list
         """
+        self.clear_selection()
         self.clear()
         self.setRowCount(0)
         self.setColumnCount(2)
@@ -61,6 +65,7 @@ class QPolygonTableWidget(QTableWidget):
             self.setItem(row, 0, QTableWidgetItem(str(points[row].x())))
             self.setItem(row, 1, QTableWidgetItem(str(points[row].y())))
         self.resizeColumnsToContents()
+        self.is_polygon = False
 
     def get_selected_id(self):
         """当前选中的多边形"""
@@ -81,5 +86,9 @@ class QPolygonTableWidget(QTableWidget):
             if self.item(row, 0).text() == str(polygon_id):
                 self.setCurrentCell(row, 0)
                 return True
-        self.setCurrentCell(-1, -1)
+        self.clear_selection()
         return False
+
+    def clear_selection(self):
+        """清除选择"""
+        self.setCurrentCell(-1, -1)

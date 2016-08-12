@@ -18,6 +18,7 @@ from PyQt5.QtGui import QCursor, QColor
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QTreeWidgetItem
 from PyQt5.QtWidgets import QMessageBox
 
 from dao.db_helper import DbHelper
@@ -55,6 +56,7 @@ class MainWindow(QMainWindow):
         self.__init_fsm()
         # other signals/slots
         self.ui.polygon_table_widget.itemSelectionChanged.connect(self.polygon_selection_changed)
+        self.ui.polygon_table_widget.itemClicked.connect(self.polygon_selection_clicked)
         self.ui.second_table_widget.itemSelectionChanged.connect(self.second_selection_changed)
         self.ui.scale_slider.valueChanged.connect(self.scale_slider_changed)
         self.ui.graphics_view.polygonCreated.connect(self.add_polygon)
@@ -269,6 +271,10 @@ class MainWindow(QMainWindow):
         """
         self.ui.second_table_widget.fill_with_polygons(polygon_table)
 
+    @pyqtSlot(QTreeWidgetItem)
+    def polygon_selection_clicked(self, item):
+        self.polygon_selection_changed()
+
     @pyqtSlot()
     def polygon_selection_changed(self):
         """在多边形列表中选择了多边形"""
@@ -291,6 +297,11 @@ class MainWindow(QMainWindow):
         """在第二列选中"""
         if self.ui.move_action.isChecked():
             self.ui.graphics_view.select_point(self.ui.second_table_widget.currentRow())
+        if self.ui.second_table_widget.is_polygon:
+            _id = self.ui.second_table_widget.get_selected_id()
+            polygon = self.db.get_polygon_by_id(_id)
+            if polygon is not None:
+                self.ui.graphics_view.set_selected_polygon(polygon)
 
     @pyqtSlot()
     def scale_slider_changed(self):
