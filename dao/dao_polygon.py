@@ -155,6 +155,16 @@ class DaoPolygon:
         deleted_id.append(self.polygon_id)
         return deleted_id
 
+    def get_com(self):
+        """顶点的平均值"""
+        ax, ay = 0.0, 0.0
+        for pt in self.vertices:
+            ax += pt.x
+            ay += pt.y
+        ax /= self.vertex_num
+        ay /= self.vertex_num
+        return ax, ay
+
 
 class DaoPoint:
     """Polygon 中的一个点"""

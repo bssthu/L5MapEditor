@@ -18,7 +18,7 @@ from PyQt5.QtGui import QCursor, QColor
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtWidgets import QTreeWidgetItem
+from PyQt5.QtWidgets import QTableWidgetItem
 from PyQt5.QtWidgets import QMessageBox
 
 from dao.db_helper import DbHelper
@@ -55,9 +55,12 @@ class MainWindow(QMainWindow):
         # fsm
         self.__init_fsm()
         # other signals/slots
+        self.command_handler.gotoPolygon.connect(self.goto_polygon)
         self.ui.polygon_table_widget.itemSelectionChanged.connect(self.polygon_selection_changed)
         self.ui.polygon_table_widget.itemClicked.connect(self.polygon_selection_clicked)
+        self.ui.polygon_table_widget.polygonActivated.connect(self.goto_polygon)
         self.ui.second_table_widget.itemSelectionChanged.connect(self.second_selection_changed)
+        self.ui.second_table_widget.polygonActivated.connect(self.goto_polygon)
         self.ui.scale_slider.valueChanged.connect(self.scale_slider_changed)
         self.ui.graphics_view.polygonCreated.connect(self.add_polygon)
         self.ui.graphics_view.polygonUpdated.connect(self.update_polygon)
@@ -244,7 +247,7 @@ class MainWindow(QMainWindow):
         self.ui.graphics_view.mark_points(self.ui.mark_points_action.isChecked())
 
     @pyqtSlot()
-    def on_command_edit_return_pressed(self):
+    def on_command_edit_returnPressed(self):
         """输入命令后按下回车"""
         commands = self.ui.command_edit.text().strip()
         if commands != '':
@@ -271,7 +274,7 @@ class MainWindow(QMainWindow):
         """
         self.ui.second_table_widget.fill_with_polygons(polygon_table)
 
-    @pyqtSlot(QTreeWidgetItem)
+    @pyqtSlot(QTableWidgetItem)
     def polygon_selection_clicked(self, item):
         self.polygon_selection_changed()
 
@@ -328,6 +331,15 @@ class MainWindow(QMainWindow):
         for vertex in vertices:
             commands.append('add pt %d %f %f' % (_id, vertex[0], vertex[1]))
         self.execute(commands)
+
+    @pyqtSlot('PyQt_PyObject')
+    def goto_polygon(self, _id):
+        """视角聚焦到多边形中心
+
+        Args:
+            _id: 目标多边形 id
+        """
+        self.ui.graphics_view.center_on_polyon(self.db.get_polygon_by_id(_id))
 
     @pyqtSlot(list)
     def update_polygon(self, vertices):

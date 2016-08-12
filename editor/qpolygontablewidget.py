@@ -9,14 +9,17 @@
 
 
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from editor import config_loader
 
 
 class QPolygonTableWidget(QTableWidget):
+    polygonActivated = pyqtSignal('PyQt_PyObject')  # int
 
     def __init__(self, parent):
         super().__init__(parent)
         self.is_polygon = True
+        self.itemActivated.connect(self.on_item_activated)
 
     def fill_with_polygons(self, polygon_table):
         """在控件中显示多边形
@@ -92,3 +95,8 @@ class QPolygonTableWidget(QTableWidget):
     def clear_selection(self):
         """清除选择"""
         self.setCurrentCell(-1, -1)
+
+    @pyqtSlot(QTableWidgetItem)
+    def on_item_activated(self, item):
+        if self.is_polygon:
+            self.polygonActivated.emit(self.get_selected_id())

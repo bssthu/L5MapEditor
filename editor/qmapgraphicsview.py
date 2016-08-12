@@ -134,6 +134,17 @@ class QMapGraphicsView(QGraphicsView):
         self.mouseMove.disconnect(self.pre_add_point)
         self.rightClick.disconnect(self.remove_point)
 
+    def center_on_polyon(self, polygon):
+        """视野中心移到多边形重心"""
+        if polygon is not None:
+            ax, ay = polygon.get_com()
+            center_of_mass = QPointF(ax, ay)
+            self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            self.centerOn(center_of_mass)
+            self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+            self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+
     def begin_move(self):
         # data
         self.pointsUpdated.emit(self.selected_polygon.get_points())

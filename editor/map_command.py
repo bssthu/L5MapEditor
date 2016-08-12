@@ -9,7 +9,7 @@
 
 
 import copy
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, pyqtSignal
 from dao.dao_polygon import DaoPolygon, DaoPoint
 
 
@@ -21,6 +21,8 @@ COMMAND_ID_NOT_FOUND = 'ID不存在'
 
 class MapCommand(QObject):
     """命令管理器"""
+
+    gotoPolygon = pyqtSignal('PyQt_PyObject')   # int, 但类型不能写 int, 转换到 c++ 后不够长
 
     def __init__(self, db_helper):
         """构造函数
@@ -50,6 +52,9 @@ class MapCommand(QObject):
                 'pt': self.execute_set_point,
                 'layer': None,
                 'additional': None
+            },
+            'goto': {
+                'shape': self.execute_goto_polygon
             }
         }
         self.reset_backup_data()
@@ -185,12 +190,17 @@ class MapCommand(QObject):
             raise Exception(COMMAND_ID_NOT_FOUND)
 
     def execute_move_point(self, commands):
-        check_commands_length(commands, 3)
+        check_commands_length(commands, 4)
         (_id, pt_id, dx, dy) = (int(commands[0]), int(commands[1]), float(commands[2]), float(commands[3]))
         if _id in self.db.polygon_table.keys():
             self.db.polygon_table[_id].move(dx, dy, pt_id)
         else:
             raise Exception(COMMAND_ID_NOT_FOUND)
+
+    def execute_goto_polygon(self, commands):
+        check_commands_length(commands, 1)
+        _id = int(commands[0])
+        self.gotoPolygon.emit(_id)
 
     def __add_polygon(self, polygon_id, layer, additional, parent_id):
         polygon = DaoPolygon([polygon_id, layer, 0, ''])
