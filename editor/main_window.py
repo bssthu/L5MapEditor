@@ -42,13 +42,14 @@ class MainWindow(QMainWindow):
         self.ui.polygon_table_widget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.ui.polygon_table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.polygon_table_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.ui.second_table_widget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.ui.second_table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.ui.second_table_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.ui.insert_layer_combo_box.addItems(config_loader.get_layer_names())
         self.ui.graphics_view.scale(1, -1)   # invert y
         # data
-        self.db_helper = DbHelper()
-        self.map_data = MapCommand(self.db_helper)
+        self.db = DbHelper()
+        self.command_handler = MapCommand(self.db)
         self.path = None
         # fsm
         self.__init_fsm()
@@ -104,7 +105,6 @@ class MainWindow(QMainWindow):
             self.ui.graphics_view.setCursor(QCursor(Qt.ArrowCursor))
             self.ui.polygon_table_widget.setEnabled(True)
             self.ui.list2_type_label.setText('children')
-            self.ui.second_table_widget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         elif new_state == self.fsm_mgr.get_fsm('insert'):
             self.ui.undo_action.setEnabled(False)
             self.ui.redo_action.setEnabled(False)
@@ -123,7 +123,6 @@ class MainWindow(QMainWindow):
             self.ui.graphics_view.setCursor(QCursor(Qt.DragMoveCursor))
             self.ui.polygon_table_widget.setEnabled(False)
             self.ui.list2_type_label.setText('points')
-            self.ui.second_table_widget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         elif new_state == self.fsm_mgr.get_fsm('move_point'):
             self.ui.undo_action.setEnabled(False)
             self.ui.redo_action.setEnabled(False)
@@ -151,7 +150,7 @@ class MainWindow(QMainWindow):
     def on_undo_action_triggered(self):
         """点击“撤销”按钮"""
         try:
-            self.map_data.undo()
+            self.command_handler.undo()
             self.update_polygon_list()
         except Exception as e:
             log.error('撤销操作出错: %s' % repr(e))
@@ -163,7 +162,7 @@ class MainWindow(QMainWindow):
     def on_redo_action_triggered(self):
         """点击“重做”按钮"""
         try:
-            self.map_data.redo()
+            self.command_handler.redo()
             self.update_polygon_list()
         except Exception as e:
             log.error('重做操作出错: %s' % repr(e))
@@ -193,8 +192,8 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def on_about_action_triggered(self):
         """点击“关于”按钮"""
-        info = 'L5MapEditor by bssthu\n\n'   \
-                'https://github.com/bssthu/L5MapEditor'
+        info = 'L5MapEditor by bssthu\n\n' \
+               'https://github.com/bssthu/L5MapEditor'
         QMessageBox.about(self, '关于', info)
 
     @pyqtSlot()
@@ -276,9 +275,9 @@ class MainWindow(QMainWindow):
         _id = self.selected_id()
         if _id >= 0:
             # draw polygon
-            polygon = self.db_helper.get_polygon_by_id(_id)
+            polygon = self.db.get_polygon_by_id(_id)
             # list children
-            child_list = self.db_helper.get_children_table_by_id(_id)
+            child_list = self.db.get_children_table_by_id(_id)
         else:
             # 选中了非法的多边形
             polygon = None
@@ -308,7 +307,7 @@ class MainWindow(QMainWindow):
             vertices: 多边形顶点 list, [[x1,y1], [x2,y2], ..., [xn,yn]]
         """
         parent_id = self.selected_id()
-        _id = self.map_data.get_spare_id(parent_id)
+        _id = self.command_handler.get_spare_id(parent_id)
         layer = self.ui.insert_layer_combo_box.currentIndex()
         additional = 0
         if layer == 0:
@@ -370,7 +369,7 @@ class MainWindow(QMainWindow):
         """
         log.debug(commands)
         try:
-            self.map_data.execute(commands)
+            self.command_handler.execute(commands)
             self.update_polygon_list()
         except Exception as e:
             log.error('执行命令出错: %s' % repr(e))
@@ -380,7 +379,7 @@ class MainWindow(QMainWindow):
 
     def update_polygon_list(self):
         """更新多边形列表"""
-        polygon_table = self.db_helper.polygon_table
+        polygon_table = self.db.polygon_table
         _id = self.selected_id()
         self.ui.polygon_table_widget.fill_with_polygons(polygon_table)
         self.ui.graphics_view.set_polygons(polygon_table, len(config_loader.get_layer_names()))
@@ -397,8 +396,8 @@ class MainWindow(QMainWindow):
         """
         if os.path.exists(path):
             try:
-                self.db_helper.load_tables(path)
-                self.map_data.invalidate()
+                self.db.load_tables(path)
+                self.command_handler.reset_backup_data()
                 self.update_polygon_list()
                 self.path = path
                 self.fsm_mgr.change_fsm('empty', 'normal')
@@ -420,8 +419,8 @@ class MainWindow(QMainWindow):
             path: 文件路径
         """
         try:
-            self.db_helper.write_to_file(path)
-            self.map_data.update_backup_data()
+            self.db.write_to_file(path)
+            self.command_handler.reset_backup_data()
             log.debug('Save "%s".' % path)
         except sqlite3.Error as error:
             log.error('Failed to save "%s".' % path)

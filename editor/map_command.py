@@ -29,9 +29,8 @@ class MapCommand(QObject):
             db_helper: DbHelper
         """
         super().__init__()
-        self.db_helper = db_helper
-        self.polygon_dict = db_helper.polygon_table
-        self.old_polygons = []
+        self.db = db_helper
+        self.old_polygon_table = {}
         self.command_history = []
         self.command_history_revert = []
         self.command_tree = {
@@ -53,42 +52,40 @@ class MapCommand(QObject):
                 'additional': None
             }
         }
+        self.reset_backup_data()
 
     def invalidate(self):
         pass
 
-    def update_backup_data(self):
-        # 用于 撤销/重做
-        pass
-        # self.old_polygons = copy.deepcopy(self.polygons)
-        # self.old_layers = copy.deepcopy(self.layers)
+    def reset_backup_data(self):
+        """备份当前数据，用于 撤销/重做"""
+        self.old_polygon_table = copy.deepcopy(self.db.polygon_table)
         self.command_history.clear()
 
     def revert_all(self):
-        pass
-        # self.polygons = copy.deepcopy(self.old_polygons)
-        # self.layers = copy.deepcopy(self.old_layers)
+        """还原到备份的数据，清空命令列表"""
+        self.db.polygon_table = copy.deepcopy(self.old_polygon_table)
         self.command_history.clear()
-        self.invalidate()
 
     def redo_command_history(self):
-        pass
-        # command_history = copy.deepcopy(self.command_history)
-        # self.revertAll()
-        # for commands in command_history:
-        #     self.execute(commands, is_redo=True)
+        """按照 command_history 中的命令还原数据
+
+        用于命令执行失败后的恢复。
+        """
+        command_history = copy.deepcopy(self.command_history)
+        self.revert_all()
+        for commands in command_history:
+            self.execute(commands, is_redo=True)
 
     def undo(self):
-        pass
-        # if len(self.command_history) > 0:
-        #     self.command_history_revert.append(self.command_history.pop())
-        #     self.redoCommandHistory()
+        if len(self.command_history) > 0:
+            self.command_history_revert.append(self.command_history.pop())
+            self.redo_command_history()
 
     def redo(self):
-        pass
-        # if len(self.command_history_revert) > 0:
-        #     self.command_history.append(self.command_history_revert.pop())
-        #     self.redoCommandHistory()
+        if len(self.command_history_revert) > 0:
+            self.command_history.append(self.command_history_revert.pop())
+            self.redo_command_history()
 
     def execute(self, commands, is_redo=False):
         try:
@@ -111,8 +108,6 @@ class MapCommand(QObject):
     def execute_single_command(self, command):
         commands = command.strip().split(' ')
         self.execute_tree(self.command_tree, commands)
-        # notify
-        self.invalidate()
 
     def execute_tree(self, command_tree, commands):
         tree = command_tree
@@ -131,7 +126,7 @@ class MapCommand(QObject):
             raise Exception(COMMAND_UNRESOLVED)
 
     def get_spare_id(self, _id):
-        while _id in self.polygon_dict.keys():
+        while _id in self.db.polygon_table.keys():
             _id += 1
         return _id
 
@@ -142,58 +137,58 @@ class MapCommand(QObject):
             (_id, layer, name) = (int(commands[0]), int(commands[1]), commands[2])
             if layer != 0:
                 raise Exception(COMMAND_GRAMMAR_ERROR)
-            if _id not in self.polygon_dict.keys():
+            if _id not in self.db.polygon_table.keys():
                 # 插入多边形
-                self.db_helper.add_l0_polygon(_id, name)
+                self.db.add_l0_polygon(_id, name)
         elif len(commands) == 4:
             # 其他层
             (_id, layer, additional, parent_id) = \
                 (int(commands[0]), int(commands[1]), int(commands[2]), int(commands[3]))
             if layer <= 0:
                 raise Exception(COMMAND_GRAMMAR_ERROR)
-            if _id not in self.polygon_dict.keys():
+            if _id not in self.db.polygon_table.keys():
                 # 插入边形
-                self.db_helper.add_lp_polygon(_id, layer, additional, parent_id)
+                self.db.add_lp_polygon(_id, layer, additional, parent_id)
         else:
             raise Exception(COMMAND_GRAMMAR_ERROR)
 
     def execute_add_point(self, commands):
         check_commands_length(commands, 3)
         (_id, x, y) = (int(commands[0]), float(commands[1]), float(commands[2]))
-        if _id in self.polygon_dict.keys():
-            self.polygon_dict[_id].add_vertex(x, y)
+        if _id in self.db.polygon_table.keys():
+            self.db.polygon_table[_id].add_vertex(x, y)
         else:
             raise Exception(COMMAND_ID_NOT_FOUND)
 
     def execute_remove_polygon(self, commands):
         check_commands_length(commands, 1)
         _id = int(commands[0])
-        if _id in self.polygon_dict.keys():
-            self.db_helper.delete_by_id(_id)
+        if _id in self.db.polygon_table.keys():
+            self.db.delete_by_id(_id)
         else:
             raise Exception(COMMAND_ID_NOT_FOUND)
 
     def execute_set_point(self, commands):
         check_commands_length(commands, 4)
         (_id, pt_id, x, y) = (int(commands[0]), int(commands[1]), float(commands[2]), float(commands[3]))
-        if _id in self.polygon_dict.keys():
-            self.polygon_dict[_id].set_vertex(x, y, pt_id)
+        if _id in self.db.polygon_table.keys():
+            self.db.polygon_table[_id].set_vertex(x, y, pt_id)
         else:
             raise Exception(COMMAND_ID_NOT_FOUND)
 
     def execute_move_polygon(self, commands):
         check_commands_length(commands, 3)
         (_id, dx, dy) = (int(commands[0]), float(commands[1]), float(commands[2]))
-        if _id in self.polygon_dict.keys():
-            self.polygon_dict[_id].move(dx, dy)
+        if _id in self.db.polygon_table.keys():
+            self.db.polygon_table[_id].move(dx, dy)
         else:
             raise Exception(COMMAND_ID_NOT_FOUND)
 
     def execute_move_point(self, commands):
         check_commands_length(commands, 3)
         (_id, pt_id, dx, dy) = (int(commands[0]), int(commands[1]), float(commands[2]), float(commands[3]))
-        if _id in self.polygon_dict.keys():
-            self.polygon_dict[_id].move(dx, dy, pt_id)
+        if _id in self.db.polygon_table.keys():
+            self.db.polygon_table[_id].move(dx, dy, pt_id)
         else:
             raise Exception(COMMAND_ID_NOT_FOUND)
 
@@ -202,9 +197,9 @@ class MapCommand(QObject):
         polygon.layer = layer
         polygon.additional = additional
         if parent_id is not None:
-            polygon.set_parent(self.polygon_dict[parent_id])
+            polygon.set_parent(self.db.polygon_table[parent_id])
         # 更新多边形表
-        self.polygon_dict[polygon_id] = polygon
+        self.db.polygon_table[polygon_id] = polygon
 
 
 def check_commands_length(commands, expected_argc):
