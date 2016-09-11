@@ -36,17 +36,30 @@ class FsmMgr(QObject):
         self.state = self.__fsm_map['empty']
 
     def get_current_state(self):
+        """获取当前状态对象
+
+        Returns:
+            state (BaseFsm): 当前状态
+        """
         return self.state
 
     def get_fsm(self, name):
+        """根据名字获取状态对象
+
+        Args:
+            name (str): state 名称
+
+        Returns:
+            state (BaseFsm): 当前状态
+        """
         return self.__fsm_map[name.lower()]
 
     def change_fsm(self, curr_name, new_name):
         """如果可以，转移状态
 
         Args:
-            curr_name: 当前 state 名称
-            new_name: 请求转移到的 state 名称
+            curr_name (str): 当前 state 名称
+            new_name (str): 请求转移到的 state 名称
         """
         if self.get_fsm(curr_name) != self.state:
             return False
@@ -58,6 +71,11 @@ class FsmMgr(QObject):
         return False
 
     def __set_fsm(self, new_state):
+        """切换状态
+
+        Args:
+            new_state (BaseFsm): 当前 state 名称
+        """
         self.state.exitState.emit()
         new_state.enterState.emit()
         self.state.transferToState.emit(str(new_state))

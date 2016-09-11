@@ -13,6 +13,7 @@ mov pt              # 移动多边形的某个顶点
 set pt              # 修改某个顶点的坐标
 set layer           # 修改多边形的 layer 信息
 set additional      # 修改多边形的附加信息
+goto shape          # 视角中心移到某个多边形中心
 ```
 
 ### 使用示例
@@ -35,4 +36,6 @@ set pt 2 0 0.0 0.0
 set layer 2 3
 # set additional polygon_id layer
 set additional 2 3
+# goto shape polygon_id
+goto shape 1
 ```

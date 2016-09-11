@@ -15,6 +15,7 @@ from editor.polygon_base import PolygonBase
 from editor.polygon_item import PolygonItem
 from editor.polygon_new import PolygonNew
 from editor.polygon_select import PolygonSelect
+from dao.dao_polygon import DaoPolygon
 
 
 class QMapGraphicsView(QGraphicsView):
@@ -77,13 +78,24 @@ class QMapGraphicsView(QGraphicsView):
         self.scene().invalidate()
 
     def set_polygons(self, polygon_table, layer_num):
+        """设置多边形
+
+        Args:
+            polygon_table (dict[int, DaoPolygon]): 多边形表
+            layer_num (int): layer 总数
+        """
         self.scene().clear()
         for polygon in polygon_table.values():
             if polygon.layer < layer_num:
                 self.scene().addItem(PolygonItem(polygon))
         self.scene().setSceneRect(self.scene().itemsBoundingRect())
 
-    def set_selected_polygon(self, polygon):   # 绘制选中的多边形
+    def set_selected_polygon(self, polygon):
+        """绘制选中的多边形
+
+        Args:
+            polygon (DaoPolygon): 列表中选中的多边形
+        """
         if self.selected_polygon in self.scene().items():
             self.scene().removeItem(self.selected_polygon)
         if polygon is not None:
@@ -93,25 +105,53 @@ class QMapGraphicsView(QGraphicsView):
         self.scene().invalidate()
 
     def move_point(self, allow=True):
+        """开始或停止移动点
+
+        Args:
+            allow (bool): 是否移动
+        """
         PolygonBase.move_point = allow
 
     def select_point(self, point_id):
+        """选中一个点
+
+        Args:
+            point_id (int): 选中的点的 id
+        """
         self.selected_polygon.set_point_id(point_id)
         self.scene().invalidate()
 
     def draw_closed_polygon(self, allow=True):
+        """是否画封闭的多边形
+
+        即最后一个点是否连到第一个点
+
+        Args:
+            allow (bool): 是否封闭
+        """
         PolygonBase.close_polygon = allow
         self.scene().invalidate()
 
     def highlight_selection(self, allow=True):
+        """是否突出显示选中的多边形（阴影覆盖）
+
+        Args:
+            allow (bool): 是否突出显示
+        """
         PolygonBase.highlight_selection = allow
         self.scene().invalidate()
 
     def mark_points(self, allow=True):
+        """是否突出显示选中的点
+
+        Args:
+            allow (bool): 是否突出显示
+        """
         PolygonBase.mark_points = allow
         self.scene().invalidate()
 
     def begin_insert(self):
+        """开始插入多边形流程"""
         # data
         self.new_polygon = PolygonNew()
         self.scene().addItem(self.new_polygon)
@@ -122,6 +162,7 @@ class QMapGraphicsView(QGraphicsView):
         self.rightClick.connect(self.remove_point)
 
     def end_insert(self):
+        """结束插入多边形流程"""
         # 处理新多边形
         vertices = self.new_polygon.get_vertices()
         self.scene().removeItem(self.new_polygon)
@@ -134,8 +175,12 @@ class QMapGraphicsView(QGraphicsView):
         self.mouseMove.disconnect(self.pre_add_point)
         self.rightClick.disconnect(self.remove_point)
 
-    def center_on_polyon(self, polygon):
-        """视野中心移到多边形重心"""
+    def center_on_polygon(self, polygon):
+        """视野中心移到多边形重心
+
+        Args:
+            polygon (DaoPolygon): 目标多边形
+        """
         if polygon is not None:
             ax, ay = polygon.get_com()
             center_of_mass = QPointF(ax, ay)
@@ -146,6 +191,7 @@ class QMapGraphicsView(QGraphicsView):
             self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
     def begin_move(self):
+        """开始移动流程"""
         # data
         self.pointsUpdated.emit(self.selected_polygon.get_points())
         # signal
@@ -155,6 +201,7 @@ class QMapGraphicsView(QGraphicsView):
         self.rightClick.connect(self.reset_move)
 
     def end_move(self):
+        """结束移动流程"""
         # data
         if self.selected_polygon is not None:
             self.selected_polygon.confirm_offset()

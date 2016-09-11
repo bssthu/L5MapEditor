@@ -10,7 +10,7 @@
 
 import copy
 from PyQt5.QtCore import QObject, pyqtSignal
-from dao.dao_polygon import DaoPolygon, DaoPoint
+from dao.db_helper import DbHelper
 
 
 COMMAND_UNRESOLVED = '无法解析的命令'
@@ -28,7 +28,7 @@ class MapCommand(QObject):
         """构造函数
 
         Args:
-            db_helper: DbHelper
+            db_helper (DbHelper): DbHelper
         """
         super().__init__()
         self.db = db_helper
@@ -93,6 +93,12 @@ class MapCommand(QObject):
             self.redo_command_history()
 
     def execute(self, commands, is_redo=False):
+        """执行命令
+
+        Args:
+            commands (str | list[str]): 命令或命令列表
+            is_redo (bool): 是否是在重试，重试时出异常就不再恢复并重试
+        """
         try:
             if isinstance(commands, str):
                 self.execute_single_command(commands)
@@ -103,7 +109,7 @@ class MapCommand(QObject):
             if not is_redo:
                 self.redo_command_history()
             else:
-                raise Exception(repr(e) + '\n尝试恢复时出错')
+                raise CommandNotValidException(repr(e) + '\n尝试恢复时出错')
             raise e
         else:
             self.command_history.append(commands)
@@ -111,13 +117,24 @@ class MapCommand(QObject):
                 self.command_history_revert.clear()
 
     def execute_single_command(self, command):
+        """执行一条命令
+
+        Args:
+            command (str): 命令
+        """
         commands = command.strip().split(' ')
         self.execute_tree(self.command_tree, commands)
 
     def execute_tree(self, command_tree, commands):
+        """执行一条命令
+
+        Args:
+            command_tree (dict): 函数指针
+            commands (list[str]): 分词后的命令
+        """
         tree = command_tree
         if len(commands) == 0:
-            raise Exception(COMMAND_UNFINISHED)
+            raise CommandNotValidException(COMMAND_UNFINISHED)
         command_name = commands[0].lower()
         if command_name in tree:
             leaf = command_tree[command_name]
@@ -128,20 +145,33 @@ class MapCommand(QObject):
                 leaf(*[commands[1:]])
             # else it's the tree's problem
         else:
-            raise Exception(COMMAND_UNRESOLVED)
+            raise CommandNotValidException(COMMAND_UNRESOLVED)
 
     def get_spare_id(self, _id):
+        """获得一个还没有被用的 id
+
+        Args:
+            _id (int): 当前 id
+
+        Returns:
+            new_id (int): 新的没有在使用的 id
+        """
         while _id in self.db.polygon_table.keys():
             _id += 1
         return _id
 
     def execute_add_polygon(self, commands):
+        """添加多边形命令
+
+        Args:
+            commands (list[str]): [_id, layer, name] 或 [_id, layer, additional, parent_id]
+        """
         check_commands_length(commands, (3, 4))
         if len(commands) == 3:
             # L0 层
             (_id, layer, name) = (int(commands[0]), int(commands[1]), commands[2])
             if layer != 0:
-                raise Exception(COMMAND_GRAMMAR_ERROR)
+                raise CommandNotValidException(COMMAND_GRAMMAR_ERROR)
             if _id not in self.db.polygon_table.keys():
                 # 插入多边形
                 self.db.add_l0_polygon(_id, name)
@@ -150,84 +180,107 @@ class MapCommand(QObject):
             (_id, layer, additional, parent_id) = \
                 (int(commands[0]), int(commands[1]), int(commands[2]), int(commands[3]))
             if layer <= 0:
-                raise Exception(COMMAND_GRAMMAR_ERROR)
+                raise CommandNotValidException(COMMAND_GRAMMAR_ERROR)
             if _id not in self.db.polygon_table.keys():
                 # 插入边形
                 self.db.add_lp_polygon(_id, layer, additional, parent_id)
         else:
-            raise Exception(COMMAND_GRAMMAR_ERROR)
+            raise CommandNotValidException(COMMAND_GRAMMAR_ERROR)
 
     def execute_add_point(self, commands):
+        """添加顶点命令
+
+        新顶点作为多边形的最后一个顶点
+
+        Args:
+            commands (list[str]): [_id, x, y]
+        """
         check_commands_length(commands, 3)
         (_id, x, y) = (int(commands[0]), float(commands[1]), float(commands[2]))
         if _id in self.db.polygon_table.keys():
             self.db.polygon_table[_id].add_vertex(x, y)
         else:
-            raise Exception(COMMAND_ID_NOT_FOUND)
+            raise CommandNotValidException(COMMAND_ID_NOT_FOUND)
 
     def execute_remove_polygon(self, commands):
+        """删除多边形命令
+
+        Args:
+            commands (list[str]): [_id]
+        """
         check_commands_length(commands, 1)
         _id = int(commands[0])
         if _id in self.db.polygon_table.keys():
             self.db.delete_by_id(_id)
         else:
-            raise Exception(COMMAND_ID_NOT_FOUND)
+            raise CommandNotValidException(COMMAND_ID_NOT_FOUND)
 
     def execute_set_point(self, commands):
+        """修改顶点命令
+
+        Args:
+            commands (list[str]): [_id, pt_id, x, y]
+        """
         check_commands_length(commands, 4)
         (_id, pt_id, x, y) = (int(commands[0]), int(commands[1]), float(commands[2]), float(commands[3]))
         if _id in self.db.polygon_table.keys():
             self.db.polygon_table[_id].set_vertex(x, y, pt_id)
         else:
-            raise Exception(COMMAND_ID_NOT_FOUND)
+            raise CommandNotValidException(COMMAND_ID_NOT_FOUND)
 
     def execute_move_polygon(self, commands):
+        """移动多边形命令
+
+        Args:
+            commands (list[str]): [_id, dx, dy]
+        """
         check_commands_length(commands, 3)
         (_id, dx, dy) = (int(commands[0]), float(commands[1]), float(commands[2]))
         if _id in self.db.polygon_table.keys():
             self.db.polygon_table[_id].move(dx, dy)
         else:
-            raise Exception(COMMAND_ID_NOT_FOUND)
+            raise CommandNotValidException(COMMAND_ID_NOT_FOUND)
 
     def execute_move_point(self, commands):
+        """移动顶点命令
+
+        Args:
+            commands (list[str]): [_id, pt_id, dx, dy]
+        """
         check_commands_length(commands, 4)
         (_id, pt_id, dx, dy) = (int(commands[0]), int(commands[1]), float(commands[2]), float(commands[3]))
         if _id in self.db.polygon_table.keys():
             self.db.polygon_table[_id].move(dx, dy, pt_id)
         else:
-            raise Exception(COMMAND_ID_NOT_FOUND)
+            raise CommandNotValidException(COMMAND_ID_NOT_FOUND)
 
     def execute_goto_polygon(self, commands):
+        """视角跳转到多边形命令
+
+        Args:
+            commands (list[str]): [_id]
+        """
         check_commands_length(commands, 1)
         _id = int(commands[0])
         self.gotoPolygon.emit(_id)
-
-    def __add_polygon(self, polygon_id, layer, additional, parent_id):
-        polygon = DaoPolygon([polygon_id, layer, 0, ''])
-        polygon.layer = layer
-        polygon.additional = additional
-        if parent_id is not None:
-            polygon.set_parent(self.db.polygon_table[parent_id])
-        # 更新多边形表
-        self.db.polygon_table[polygon_id] = polygon
 
 
 def check_commands_length(commands, expected_argc):
     """检查命令语法（参数个数）
 
     Args:
-        commands: 命令拆分得到的 list
-        expected_argc: 正确的参数个数
+        commands (list[str]): 命令拆分得到的 list
+        expected_argc (list[int] | tuple[int] | int): 正确的参数个数
+
+    Raises:
+        CommandNotValidException: 命令检查不通过
     """
     if isinstance(expected_argc, list) or isinstance(expected_argc, tuple):
         if len(commands) not in expected_argc:
-            raise Exception(COMMAND_GRAMMAR_ERROR)
+            raise CommandNotValidException(COMMAND_GRAMMAR_ERROR)
     elif len(commands) != expected_argc:
-        raise Exception(COMMAND_GRAMMAR_ERROR)
+        raise CommandNotValidException(COMMAND_GRAMMAR_ERROR)
 
 
-def set_parent_of_child(child_dict, child_id, parent_id):
-    if parent_id != child_id:
-        if parent_id not in child_dict:
-            child_dict[parent_id] = []
-        child_dict[parent_id].append(child_id)
+class CommandNotValidException(Exception):
+    pass

@@ -20,7 +20,7 @@ class DbHelper:
         """从文件载入 sqlite 数据库
 
         Args:
-            file_path: 数据库路径
+            file_path (str): 数据库路径
         """
         # clear
         self.clear()
@@ -34,7 +34,7 @@ class DbHelper:
         """将结果写入 sqlite 数据库
 
         Args:
-            file_path: 数据库路径
+            file_path (str): 数据库路径
         """
         db_loader.write_to_sqlite(file_path, self.polygon_table)
 
@@ -42,10 +42,10 @@ class DbHelper:
         """根据多边形 id 获取多边形
 
         Args:
-            polygon_id: 多边形 id
+            polygon_id (int): 多边形 id
 
         Returns:
-            多边形对象 或 None
+            return (DaoPolygon | None): 多边形对象 或 None
         """
         return self.polygon_table[polygon_id] if polygon_id in self.polygon_table.keys() else None
 
@@ -53,7 +53,7 @@ class DbHelper:
         """根据多边形 id 获取 children dict
 
         Args:
-            polygon_id: 多边形 id
+            polygon_id (int): 多边形 id
 
         Returns:
             当前多边形的 children 多边形 dict ，若无此 polygon_id 则返回 None
@@ -70,7 +70,7 @@ class DbHelper:
         """根据多边形 id 删除多边形（及其 children）
 
         Args:
-            polygon_id: 多边形 id
+            polygon_id (int): 多边形 id
         """
         if polygon_id in self.polygon_table.keys():
             # delete recursive
@@ -84,8 +84,8 @@ class DbHelper:
         """插入新的空多边形，L0层
 
         Args:
-            polygon_id: 多边形 id
-            name: L0 名字
+            polygon_id (int): 多边形 id
+            name (str): L0 名字
         """
         if polygon_id not in self.polygon_table.keys():
             polygon = DaoPolygon([polygon_id, 0, 0, ''])
@@ -97,10 +97,10 @@ class DbHelper:
         """插入新的空多边形，其他层
 
         Args:
-            polygon_id: 多边形 id
-            layer: 层号
-            additional: 类型
-            parent_id: parent 编号
+            polygon_id (int): 多边形 id
+            layer (int): 层号
+            additional (int): 类型
+            parent_id (int): parent 编号
         """
         if polygon_id not in self.polygon_table.keys():
             polygon = DaoPolygon([polygon_id, layer, 0, ''])

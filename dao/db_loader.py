@@ -18,7 +18,7 @@ def load_from_sqlite(file_path):
     """从文件载入 sqlite 数据库
 
     Args:
-        file_path: 数据库路径
+        file_path (str): 数据库路径
     """
     # open sqlite
     conn = sqlite3.connect(file_path)
@@ -40,11 +40,11 @@ def create_dao_polygon_table(polygons, layers):
     """从来自数据库的数据 list 创建 Polygon 表
 
     Args:
-        polygons: list of [polygon_id, layer, vertex_num, <str>vertices]
-        layers: list of list of record
+        polygons (list): list of [polygon_id, layer, vertex_num, <str>vertices]
+        layers (list[list]): list of list of record
 
     Returns:
-        polygon_table: {polygon_id: DaoPolygon}
+        polygon_table (dict[int, DaoPolygon]): {polygon_id: DaoPolygon}
     """
 
     # create table
@@ -82,8 +82,8 @@ def write_to_sqlite(file_path, polygon_table):
     """将结果写入 sqlite 数据库
 
     Args:
-        file_path: 数据库路径
-        polygon_table: {polygon_id: DaoPolygon}
+        file_path (str): 数据库路径
+        polygon_table (dict[int, DaoPolygon]): {polygon_id: DaoPolygon}
     """
     LAYER_NAMES = config_loader.get_layer_names()
     conn = sqlite3.connect(file_path)

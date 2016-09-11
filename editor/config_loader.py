@@ -22,10 +22,23 @@ def load_all():
 
 
 def get_layer_names():
+    """获取 layer 名称列表
+
+    Returns:
+        layer_names (list[str]): layer 名称列表
+    """
     return LAYER_NAMES
 
 
 def get_layer_name(_id):
+    """获取 layer 名称
+
+    Args:
+        _id (int): layer id
+
+    Returns:
+        layer_name (str): layer 名称
+    """
     if 0 <= _id < len(LAYER_NAMES):
         return LAYER_NAMES[_id]
     else:
@@ -33,6 +46,15 @@ def get_layer_name(_id):
 
 
 def get_additional_name(layer, additional):
+    """获取 additional 对应的名称
+
+    Args:
+        layer (int): layer id
+        additional (int): additional id
+
+    Returns:
+        additional_name (str): additional 名称
+    """
     layer_name = get_layer_name(layer)
     if layer_name in ADDITIONAL_NAMES:
         NAMES = ADDITIONAL_NAMES[layer_name]

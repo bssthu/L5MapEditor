@@ -318,7 +318,7 @@ class MainWindow(QMainWindow):
         """插入多边形
 
         Args:
-            vertices: 多边形顶点 list, [[x1,y1], [x2,y2], ..., [xn,yn]]
+            vertices (list[list[float]]): 多边形顶点 list, [[x1,y1], [x2,y2], ..., [xn,yn]]
         """
         parent_id = self.selected_id()
         _id = self.command_handler.get_spare_id(parent_id)
@@ -337,16 +337,16 @@ class MainWindow(QMainWindow):
         """视角聚焦到多边形中心
 
         Args:
-            _id: 目标多边形 id
+            _id (int): 目标多边形 id
         """
-        self.ui.graphics_view.center_on_polyon(self.db.get_polygon_by_id(_id))
+        self.ui.graphics_view.center_on_polygon(self.db.get_polygon_by_id(_id))
 
     @pyqtSlot(list)
     def update_polygon(self, vertices):
         """修改当前选中的多边形的顶点坐标
 
         Args:
-            vertices: 多边形顶点 list, [[x1,y1], [x2,y2], ..., [xn,yn]]
+            vertices (list[list[float]]): 多边形顶点 list, [[x1,y1], [x2,y2], ..., [xn,yn]]
         """
         _id = self.selected_id()
         commands = []
@@ -363,7 +363,7 @@ class MainWindow(QMainWindow):
         编辑模式下，第二列显示当前图形的点的坐标。本方法用于更新第二列的显示。
 
         Args:
-            points: 多边形顶点 list, [qpoint1, qpoint2, ..., qpointn]
+            points (list[QPointF]): 多边形顶点 list, [qpoint1, qpoint2, ..., qpointn]
         """
         row = self.ui.second_table_widget.currentRow()
         self.ui.second_table_widget.fill_with_points(points)
@@ -377,8 +377,8 @@ class MainWindow(QMainWindow):
         """打印到输出窗口
 
         Args:
-            msg: 输出内容
-            color: 输出颜色, QColor
+            msg (str): 输出内容
+            color (QColor): 输出颜色
         """
         print(msg)
         self.ui.output_browser.setTextColor(color)
@@ -388,7 +388,7 @@ class MainWindow(QMainWindow):
         """执行命令
 
         Args:
-            commands: 待执行命令
+            commands (str): 待执行命令
         """
         log.debug(commands)
         try:
@@ -414,8 +414,8 @@ class MainWindow(QMainWindow):
         """打开 sqlite 数据库文件
 
         Args:
-            path: 文件路径
-            quiet: 报错不弹框
+            path (str): 文件路径
+            quiet (bool): 报错不弹框
         """
         if os.path.exists(path):
             try:
@@ -439,7 +439,7 @@ class MainWindow(QMainWindow):
         """保存 sqlite 数据库文件
 
         Args:
-            path: 文件路径
+            path (str): 文件路径
         """
         try:
             self.db.write_to_file(path)
@@ -458,7 +458,7 @@ class MainWindow(QMainWindow):
         """根据多边形的 id 选中行
 
         Args:
-            polygon_id: 多边形 id
+            polygon_id (int): 多边形 id
         """
         return self.ui.polygon_table_widget.select_id(polygon_id)
 

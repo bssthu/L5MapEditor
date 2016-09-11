@@ -50,15 +50,26 @@ class PolygonNew(PolygonBase):
                 painter.drawEllipse(self.mouse_point, S_SIZE / scale, S_SIZE / scale)
 
     def pre_add_point(self, pt):
+        """按住鼠标，准备添加新点
+
+        Args:
+            pt (QPointF): 新点
+        """
         self.mouse_point = QPointF(pt)
         self.update_bounding_rect(pt)
 
     def add_point(self, pt):
+        """释放鼠标，添加新点
+
+        Args:
+            pt (QPointF): 新点
+        """
         self.mouse_point = None
         self.points.append(QPointF(pt))
         self.update_bounding_rect(pt)
 
     def remove_point(self):
+        """删除最后一个点"""
         if len(self.points) > 0:
             self.points = self.points[:-1]
         self.mouse_point = None

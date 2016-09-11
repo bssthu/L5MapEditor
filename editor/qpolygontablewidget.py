@@ -25,7 +25,7 @@ class QPolygonTableWidget(QTableWidget):
         """在控件中显示多边形
 
         Args:
-            polygon_table: 多边形表
+            polygon_table (dict[int, DaoPolygon]): 多边形表
         """
         self.clear_selection()
         self.clear()
@@ -33,7 +33,7 @@ class QPolygonTableWidget(QTableWidget):
         self.setColumnCount(3)
         if polygon_table is not None:
             self.setHorizontalHeaderLabels(('id', 'layer', 'type'))
-            if len(polygon_table.items()) > 0:
+            if len(polygon_table) > 0:
                 row = 0
                 for polygon_id in sorted(polygon_table.keys()):
                     polygon = polygon_table[polygon_id]
@@ -56,7 +56,7 @@ class QPolygonTableWidget(QTableWidget):
         """在控件中显示点
 
         Args:
-            points: qpoint list
+            points (list[QPointF]): qpoint list
         """
         self.clear_selection()
         self.clear()
@@ -83,7 +83,7 @@ class QPolygonTableWidget(QTableWidget):
         """根据多边形 id 选中一列
 
         Args:
-            polygon_id: 多边形 id
+            polygon_id (int): 多边形 id
         """
         for row in range(0, self.rowCount()):
             if self.item(row, 0).text() == str(polygon_id):

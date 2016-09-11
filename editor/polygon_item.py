@@ -16,10 +16,14 @@ from editor import polygon_base
 
 class PolygonItem(PolygonBase):
     def __init__(self, polygon):
+        """构造函数
+
+        Args:
+            polygon (DaoPolygon): 多边形对象
+        """
         super().__init__()
         self.layer = polygon.layer
-        vertices = polygon.vertices
-        self.points = polygon_base.get_qt_points(vertices)
+        self.points = polygon_base.get_qt_points(polygon.vertices)
         if len(self.points) > 0:
             self.rect = polygon_base.get_bounding_rect(self.points)
             self.top_left = self.rect.topLeft()
