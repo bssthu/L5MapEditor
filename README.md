@@ -25,4 +25,4 @@ make install  # 在 build/ 路径生成 .exe 等，需要 cx_Freeze
 * [主要模块](docs/modules.md)
 
 ## License
-LGPLv3
+LGPL-3.0

@@ -13,6 +13,12 @@ from dao.dao_polygon import DaoPolygon
 
 
 class DbHelper:
+    """数据库管理工具
+
+    Attributes:
+        polygon_table (dict[int, DaoPolygon]): 多边形表
+    """
+
     def __init__(self):
         self.polygon_table = {}
 
@@ -56,7 +62,7 @@ class DbHelper:
             polygon_id (int): 多边形 id
 
         Returns:
-            当前多边形的 children 多边形 dict ，若无此 polygon_id 则返回 None
+            return (dict[int, DaoPolygon] | None): 当前多边形的 children 多边形 dict, 若无此 polygon_id 则返回 None
         """
         return {child.polygon_id: child for child in self.polygon_table[polygon_id].children} \
             if polygon_id in self.polygon_table.keys() else None
@@ -75,9 +81,12 @@ class DbHelper:
         if polygon_id in self.polygon_table.keys():
             # delete recursive
             deleted_id_list = self.polygon_table[polygon_id].traversal_post_order()
-            # remove from dict
+            # remove from dict and tree
             for deleted_id in deleted_id_list:
                 if deleted_id in self.polygon_table.keys():
+                    # from tree
+                    self.polygon_table[deleted_id].set_parent(None)
+                    # from dict
                     del self.polygon_table[deleted_id]
 
     def add_l0_polygon(self, polygon_id, name):

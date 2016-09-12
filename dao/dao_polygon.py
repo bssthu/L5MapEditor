@@ -15,14 +15,14 @@ class DaoPolygon:
     """一个 Polygon
 
     Attributes:
-        polygon_id: 多边形的 id
-        layer: 多边形所属层
-        vertex_num: 该多边形的顶点数量
-        vertices: 顶点
-        name: L0 名字
-        additional: 类型
-        parent: parent 指针
-        children: list of child 指针
+        polygon_id (int): 多边形的 id
+        layer (int): 多边形所属层
+        vertex_num (int): 该多边形的顶点数量
+        vertices (list): 顶点
+        name (str): L0 名字
+        additional (int): 类型
+        parent (DaoPolygon): parent 指针
+        children (list[DaoPolygon]): list of child 指针
     """
     def __init__(self, polygon):
         """构造函数
@@ -33,7 +33,6 @@ class DaoPolygon:
 
         self.polygon_id = int(polygon[0])
         self.layer = polygon[1]
-        a = polygon[1]
         vertex_str_list = polygon[3].strip().strip(';')
         if vertex_str_list == '':
             self.vertices = []
@@ -58,7 +57,7 @@ class DaoPolygon:
         """设置 parent, 同时更新 parent 的 children 表
 
         Args:
-            parent (DaoPolygon): parent DaoPolygon
+            parent (DaoPolygon | None): parent DaoPolygon
         """
         # goodbye to old parent
         if (self.parent is not None) and (self in self.parent.children):
@@ -95,7 +94,7 @@ class DaoPolygon:
         Args:
             dx (int): x 方向偏移
             dy (int): y 方向偏移
-            v_id (int): 待移动点的索引, None 表示整体平移
+            v_id (int | None): 待移动点的索引, None 表示整体平移
         """
         if v_id is None:
             # 整体平移
@@ -115,7 +114,7 @@ class DaoPolygon:
         """
         if v_id >= 0:
             # 从中间插入点
-            self.vertices[v_id:v_id] = DaoPoint(x, y)
+            self.vertices[v_id:v_id] = [DaoPoint(x, y), ]
         elif v_id < 0:
             # 从最后插入点
             self.vertices.append(DaoPoint(x, y))
@@ -158,6 +157,8 @@ class DaoPolygon:
 
     def get_com(self):
         """顶点的平均值"""
+        if self.vertex_num <= 0:
+            return 0.0, 0.0
         ax, ay = 0.0, 0.0
         for pt in self.vertices:
             ax += pt.x
