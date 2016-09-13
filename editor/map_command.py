@@ -35,7 +35,12 @@ class MapCommand(QObject):
         self.old_polygon_table = {}
         self.command_history = []
         self.command_history_revert = []
-        self.command_tree = {
+        self.command_tree = self.init_command_tree()
+        self.reset_backup_data()
+
+    def init_command_tree(self):
+        """初始化命令树"""
+        return {
             'add': {
                 'shape': self.execute_add_polygon,
                 'pt': self.execute_add_point
@@ -57,10 +62,6 @@ class MapCommand(QObject):
                 'shape': self.execute_goto_polygon
             }
         }
-        self.reset_backup_data()
-
-    def invalidate(self):
-        pass
 
     def reset_backup_data(self):
         """备份当前数据，用于 撤销/重做"""
@@ -93,18 +94,14 @@ class MapCommand(QObject):
             self.redo_command_history()
 
     def execute(self, commands, is_redo=False):
-        """执行命令
+        """执行命令及异常恢复
 
         Args:
             commands (str | list[str]): 命令或命令列表
             is_redo (bool): 是否是在重试，重试时出异常就不再恢复并重试
         """
         try:
-            if isinstance(commands, str):
-                self.execute_single_command(commands)
-            else:
-                for command in commands:
-                    self.execute_single_command(command)
+            self.execute_commands(commands)
         except Exception as e:
             if not is_redo:
                 self.redo_command_history()
@@ -115,6 +112,18 @@ class MapCommand(QObject):
             self.command_history.append(commands)
             if not is_redo:
                 self.command_history_revert.clear()
+
+    def execute_commands(self, commands):
+        """执行命令
+
+        Args:
+            commands (str | list[str]): 命令或命令列表
+        """
+        if isinstance(commands, str):
+            self.execute_single_command(commands)
+        else:
+            for command in commands:
+                self.execute_single_command(command)
 
     def execute_single_command(self, command):
         """执行一条命令

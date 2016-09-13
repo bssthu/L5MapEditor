@@ -135,14 +135,14 @@ class TestDaoPolygon(unittest.TestCase):
                          self.polygon2.traversal_post_order())
 
     def test_get_com(self):
-        self.assertAlmostEqual((2.25, 3.25), self.polygon1.get_com(), 0.1)
-        self.assertAlmostEqual((7.75, 7.75), self.polygon2.get_com(), 0.1)
-        self.assertAlmostEqual((4.0, 5.5), self.polygon3.get_com(), 0.1)
+        self.assertEqual((2.25, 3.25), self.polygon1.get_com())
+        self.assertEqual((7.75, 7.75), self.polygon2.get_com())
+        self.assertEqual((4.0, 5.5), self.polygon3.get_com())
         # 异常的 DaoPolygon
         polygon4 = DaoPolygon([4, 3, 0, '1,2'])
-        self.assertAlmostEqual((1.0, 2.0), polygon4.get_com(), 0.1)
+        self.assertEqual((1.0, 2.0), polygon4.get_com())
         polygon5 = DaoPolygon([4, 3, 2, ''])
-        self.assertAlmostEqual((0.0, 0.0), polygon5.get_com(), 0.1)
+        self.assertEqual((0.0, 0.0), polygon5.get_com())
 
     @staticmethod
     def vertex_str_to_float(vertex_str_list):

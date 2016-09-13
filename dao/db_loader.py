@@ -19,6 +19,9 @@ def load_from_sqlite(file_path):
 
     Args:
         file_path (str): 数据库路径
+
+    Returns:
+        polygon_table (dict[int, DaoPolygon]): 多边形表
     """
     # open sqlite
     conn = sqlite3.connect(file_path)

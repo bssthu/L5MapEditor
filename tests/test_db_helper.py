@@ -9,6 +9,7 @@
 
 
 import unittest
+from unittest.mock import patch
 from dao.db_loader import *
 from dao.db_helper import DbHelper
 
@@ -31,6 +32,17 @@ class TestDbHelper(unittest.TestCase):
         self.polygon_table = create_dao_polygon_table(self.polygons, self.layers)
         self.helper = DbHelper()
         self.helper.polygon_table = self.polygon_table
+
+    @patch('dao.db_loader.load_from_sqlite')
+    def test_load(self, mock_load):
+        mock_load.return_value = {1: DaoPolygon(self.polygons[0])}
+        self.helper.load_tables('')
+        self.assertEqual(1, mock_load.call_count)
+
+    @patch('dao.db_loader.write_to_sqlite')
+    def test_save(self, mock_save):
+        self.helper.write_to_file('')
+        self.assertEqual(1, mock_save.call_count)
 
     def test_create_dao_polygon_table(self):
         # 测试能否从来自数据库的数据 list 创建 Polygon 表
