@@ -15,7 +15,7 @@ from dao.db_loader import create_dao_polygon_table
 from dao.db_helper import DbHelper
 
 
-class TestFsmMgr(unittest.TestCase):
+class TestMapCommand(unittest.TestCase):
     def setUp(self):
         polygons = [
             [1, 2, 1, '1,2'],

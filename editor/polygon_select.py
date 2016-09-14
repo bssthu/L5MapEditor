@@ -28,7 +28,7 @@ class PolygonSelect(PolygonBase):
             polygon (DaoPolygon): 多边形对象
         """
         super().__init__()
-        self.MAR = 50
+        self.MAR = 20
         self.points = polygon_base.get_qt_points(polygon.vertices)
         self.rect = polygon_base.get_bounding_rect(self.points)
         self.top_left = self.rect.topLeft()
