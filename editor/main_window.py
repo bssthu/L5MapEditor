@@ -141,7 +141,8 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def on_open_action_triggered(self):
         """点击“打开”按钮"""
-        path = QFileDialog.getOpenFileName(self, '载入数据', '.', '数据库文档(*.sqlite)')[0]
+        file_filter = '数据库文档(*.sqlite);;其他文档(*.*)'
+        path = QFileDialog.getOpenFileName(self, '载入数据', '.', file_filter)[0]
         if path:
             self.open(path)
 
