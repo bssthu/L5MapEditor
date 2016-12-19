@@ -9,7 +9,7 @@
 
 
 from PyQt5.QtCore import QRectF, QPointF
-from PyQt5.QtGui import QPolygonF, QPen
+from PyQt5.QtGui import QPolygonF, QPen, QColor
 from editor.polygon_base import PolygonBase, COLOR
 from editor import polygon_base
 
@@ -44,3 +44,10 @@ class PolygonItem(PolygonBase):
             painter.drawPolyline(QPolygonF(self.points))
             if PolygonBase.close_polygon:
                 painter.drawLine(self.points[-1], self.points[0])
+            # easter
+            if len(self.points) == 58:
+                penLight = QPen(QColor(224, 224, 224))
+                penLight.setWidth(0)
+                painter.setPen(penLight)
+                for i in range(1, 28):
+                    painter.drawLine(self.points[i], self.points[-i-1])
